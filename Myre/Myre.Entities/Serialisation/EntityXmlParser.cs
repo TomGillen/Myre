@@ -96,8 +96,8 @@ namespace Myre.Entities.Serialisation
                 if (item.Name != null)
                     writer.WriteAttributeString("name", item.Name);
 
-                if (item.Settings != null)
-                    item.Settings.WriteTo(writer);
+                //if (item.Settings != null)
+                //    item.Settings.WriteTo(writer);
 
                 writer.WriteEndElement();
             }
@@ -221,8 +221,8 @@ namespace Myre.Entities.Serialisation
 
             reader.MoveToElement();
             var settings = reader.ReadInnerXml().Trim();
-            if (!string.IsNullOrEmpty(settings))
-                data.Settings = XElement.Parse(settings);
+            //if (!string.IsNullOrEmpty(settings))
+            //    data.Settings = XElement.Parse(settings);
 
             return data;
         }

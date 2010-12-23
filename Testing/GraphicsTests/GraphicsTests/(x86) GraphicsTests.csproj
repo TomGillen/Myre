@@ -73,6 +73,9 @@
     <Reference Include="mscorlib">
       <Private>False</Private>
     </Reference>
+    <Reference Include="Ninject">
+      <HintPath>..\..\..\Libraries\x86\Ninject.dll</HintPath>
+    </Reference>
     <Reference Include="System">
       <Private>False</Private>
     </Reference>
@@ -107,35 +110,35 @@
     <Content Include="GameThumbnail.png" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Ninject\Ninject\%28x86%29 Ninject.csproj">
-      <Project>{87F34AB0-7DD6-4BBB-89B9-ACD2F73D0D70}</Project>
-      <Name>%28x86%29 Ninject</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Myre.Debugging.UI\%28x86%29 Myre.Debugging.UI.csproj">
+    <ProjectReference Include="..\..\..\Myre\Myre.Debugging.UI\%28x86%29 Myre.Debugging.UI.csproj">
       <Project>{A753A526-F119-4913-AA45-252706E9C84B}</Project>
       <Name>%28x86%29 Myre.Debugging.UI</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Myre.Debugging\%28x86%29 Myre.Debugging.csproj">
+    <ProjectReference Include="..\..\..\Myre\Myre.Debugging\%28x86%29 Myre.Debugging.csproj">
       <Project>{F987DEC5-E12F-4566-A200-DE18D6044E21}</Project>
       <Name>%28x86%29 Myre.Debugging</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Myre.Entities\%28x86%29 Myre.Entities.csproj">
+    <ProjectReference Include="..\..\..\Myre\Myre.Entities\%28x86%29 Myre.Entities.csproj">
       <Project>{5CDABE8C-7C9C-4163-8C85-FEA731088239}</Project>
       <Name>%28x86%29 Myre.Entities</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Myre.Graphics\%28x86%29 Myre.Graphics.csproj">
+    <ProjectReference Include="..\..\..\Myre\Myre.Graphics\%28x86%29 Myre.Graphics.csproj">
       <Project>{FC3D8E34-3333-42FB-9B47-3A273B1B50D8}</Project>
       <Name>%28x86%29 Myre.Graphics</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Myre.StateManagement\%28x86%29 Myre.StateManagement.csproj">
+    <ProjectReference Include="..\..\..\Myre\Myre.Physics\%28x86%29 Myre.Physics.csproj">
+      <Project>{DF7B71E5-B8C9-4919-A15D-F1187556A909}</Project>
+      <Name>%28x86%29 Myre.Physics</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\Myre\Myre.StateManagement\%28x86%29 Myre.StateManagement.csproj">
       <Project>{630AEBBC-AF42-4700-A24F-F4B6FF8172F1}</Project>
       <Name>%28x86%29 Myre.StateManagement</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Myre.UI\%28x86%29 Myre.UI.csproj">
+    <ProjectReference Include="..\..\..\Myre\Myre.UI\%28x86%29 Myre.UI.csproj">
       <Project>{ADFDCC4A-8805-4BCA-9FBA-FB04920AFA33}</Project>
       <Name>%28x86%29 Myre.UI</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Myre\%28x86%29 Myre.csproj">
+    <ProjectReference Include="..\..\..\Myre\Myre\%28x86%29 Myre.csproj">
       <Project>{FDB5A9D8-9266-4F7B-BDE7-D4E720F5B45F}</Project>
       <Name>%28x86%29 Myre</Name>
     </ProjectReference>

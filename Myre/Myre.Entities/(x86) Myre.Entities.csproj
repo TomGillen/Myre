@@ -96,6 +96,7 @@
     <Compile Include="Property.cs" />
     <Compile Include="Scene.cs" />
     <Compile Include="Serialisation\EntityXmlParser.cs" />
+    <Compile Include="Serialisation\ProtobufNonGenericAdaptor.cs" />
     <Compile Include="Services\DrawingService.cs" />
     <Compile Include="Services\IProcess.cs" />
     <Compile Include="Services\IService.cs" />

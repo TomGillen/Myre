@@ -8,6 +8,9 @@ using Ninject.Parameters;
 using System.Xml.Linq;
 using Myre;
 using Myre.Extensions;
+using System.IO;
+using ProtoBuf;
+using Myre.Entities.Serialisation;
 
 namespace Myre.Entities
 {
@@ -69,7 +72,7 @@ namespace Myre.Entities
     {
         public Type Type;
         public string Name;
-        public XElement Settings;
+        public MemoryStream SerialisedValue;
     }
 
     /// <summary>
@@ -125,7 +128,7 @@ namespace Myre.Entities
         /// Adds all the properties and behaviours from the specified entity.
         /// </summary>
         /// <param name="entity">The entity.</param>
-        public void AddFrom(Entity entity)
+        public void AddFrom(Entity entity, bool serialisePropertyValues = true, bool serialiseBehaviourValues = true)
         {
             foreach (var item in entity.Behaviours)
             {
@@ -133,7 +136,7 @@ namespace Myre.Entities
                 {
                     Name = item.Name,
                     Type = item.GetType(),
-                    Settings = item.Settings
+                    SerialisedValue = serialiseBehaviourValues ? SerialiseBehaviour(item) : null
                 });
             }
 
@@ -143,7 +146,7 @@ namespace Myre.Entities
                 {
                     Name = item.Name,
                     DataType = item.Type,
-                    Data = item.Value,
+                    Data = serialisePropertyValues ? item.Value : null,
                     CopyBehaviour = item.CopyBehaviour
                 });
             }
@@ -169,9 +172,9 @@ namespace Myre.Entities
         /// <param name="type">The type.</param>
         /// <param name="name">The name.</param>
         /// <param name="settings">The settings.</param>
-        public void AddBehaviour(Type type, string name = null, XElement settings = null)
+        public void AddBehaviour(Type type, string name = null)
         {
-            AddBehaviour(new BehaviourData() { Type = type, Name = name, Settings = settings });
+            AddBehaviour(new BehaviourData() { Type = type, Name = name });
         }
 
         /// <summary>
@@ -180,10 +183,10 @@ namespace Myre.Entities
         /// <typeparam name="T"></typeparam>
         /// <param name="name">The name.</param>
         /// <param name="settings">The settings.</param>
-        public void AddBehaviour<T>(string name = null, XElement settings = null)
+        public void AddBehaviour<T>(string name = null)
             where T : Behaviour
         {
-            AddBehaviour(typeof(T), name, settings);
+            AddBehaviour(typeof(T), name);
         }
 
         /// <summary>
@@ -370,12 +373,22 @@ namespace Myre.Entities
         private Behaviour CreateBehaviourInstance(IKernel kernel, BehaviourData behaviour)
         {
             var name = new ConstructorArgument("name", behaviour.Name);
-            var settings = new ConstructorArgument("settings", behaviour.Settings);
-            var entity = new Parameter("entity", this, true);
-            var instance = kernel.Get(behaviour.Type, name, settings, entity) as Behaviour;
-            instance.Settings = behaviour.Settings;
+            var instance = kernel.Get(behaviour.Type, name) as Behaviour;
+
+            if (behaviour.SerialisedValue != null)
+            {
+                behaviour.SerialisedValue.Position = 0;
+                ProtobufNonGenericAdaptor.Merge(behaviour.SerialisedValue, instance, behaviour.Type);
+            }
 
             return instance;
+        }
+
+        private MemoryStream SerialiseBehaviour(Behaviour behaviour)
+        {
+            var stream = new MemoryStream();
+            ProtobufNonGenericAdaptor.Serialise(stream, behaviour, behaviour.GetType());
+            return stream;
         }
     }
 }
