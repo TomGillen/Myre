@@ -1,0 +1,32 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using Microsoft.Xna.Framework;
+
+namespace Myre.UI
+{
+    struct ControlArea
+    {
+        public int Top, Bottom, Left, Right;
+
+        public ControlArea(Rectangle area)
+            : this(area.X, area.Y, area.Width, area.Height)
+        {
+        }
+
+        public ControlArea(int x, int y, int width, int height)
+            : this()
+        {
+            Top = y;
+            Bottom = y + height;
+            Left = x;
+            Right = x + width;
+        }
+
+        public Rectangle ToRectangle()
+        {
+            return new Rectangle(Left, Top, Right - Left, Bottom - Top);
+        }
+    }
+}

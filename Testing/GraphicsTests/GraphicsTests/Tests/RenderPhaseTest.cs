@@ -1,0 +1,143 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using Ninject;
+using Myre.Graphics.Materials;
+using Microsoft.Xna.Framework.Content;
+using Myre.Graphics;
+using Myre.Collections;
+using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework;
+using System.Diagnostics;
+using System.Xml;
+using Myre.Entities;
+
+namespace GraphicsTests
+{
+    class ClearPhase
+        : RendererComponent
+    {
+        public Color Colour;
+
+        protected override void SpecifyResources(IList<Input> inputs, IList<RendererComponent.Resource> outputs, out RenderTargetInfo? outputTarget)
+        {
+            outputs.Add(new Resource() { Name = "scene", IsLeftSet = true });
+            outputTarget = new RenderTargetInfo();
+        }
+
+        protected override bool ValidateInput(RenderTargetInfo? previousRenderTarget)
+        {
+            return true;
+        }
+
+        public override RenderTarget2D Draw(Renderer renderer)
+        {
+            var resolution = renderer.Data.Get<Vector2>("resolution").Value;
+            var targetInfo = new RenderTargetInfo()
+            {
+                Width = (int)resolution.X, 
+                Height = (int)resolution.Y,
+                SurfaceFormat = SurfaceFormat.Color,
+                DepthFormat = DepthFormat.None, 
+                MultiSampleCount = 4
+            };
+
+            var target = RenderTargetManager.GetTarget(renderer.Device, targetInfo);
+            renderer.Device.SetRenderTarget(target);
+            renderer.Device.Clear(Colour);
+
+            renderer.SetResource("scene", target);
+            return target;
+        }
+    }
+
+    class RenderPhaseTest
+        : TestScreen
+    {
+        class Phase
+            : RendererComponent
+        {
+            private SpriteBatch batch;
+            public SpriteFont Font;
+
+            public Phase(GraphicsDevice device)
+            {
+                batch = new SpriteBatch(device);
+            }
+
+            protected override void SpecifyResources(IList<Input> inputs, IList<RendererComponent.Resource> outputs, out RenderTargetInfo? outputTarget)
+            {
+                outputs.Add(new Resource() { Name = "scene", IsLeftSet = true });
+                outputTarget = new RenderTargetInfo();
+            }
+
+            protected override bool ValidateInput(RenderTargetInfo? previousRenderTarget)
+            {
+                return true;
+            }
+
+            public override RenderTarget2D Draw(Renderer renderer)
+            {
+                var resolution = renderer.Data.Get<Vector2>("resolution").Value;
+                var targetInfo = new RenderTargetInfo() { Width = (int)resolution.X, Height = (int)resolution.Y };
+                var target = RenderTargetManager.GetTarget(renderer.Device, targetInfo);
+                renderer.Device.SetRenderTarget(target);
+
+                batch.Begin();
+                batch.DrawString(Font, "This is being drawn by a RenderPhase!", new Vector2(640, 360), Color.White);
+                batch.End();
+
+                renderer.SetResource("scene", target);
+                return target;
+            }
+        }
+
+
+        private IKernel kernel;
+        private ContentManager content;
+        private GraphicsDevice device;
+        private Scene scene;
+
+        public RenderPhaseTest(
+            IKernel kernel,
+            ContentManager content,
+            GraphicsDevice device)
+            : base("Render Phase", kernel)
+        {
+            this.kernel = kernel;
+            this.content = content;
+            this.device = device;
+        }
+
+        public override void OnShown()
+        {
+            scene = new Scene(kernel);
+            
+            var camera = new EntityDescription(kernel);
+            camera.AddProperty<Camera>("camera", null, PropertyCopyBehaviour.New);
+            camera.AddProperty<Viewport>("viewport", new Viewport() { Width = 1280, Height = 720 }, PropertyCopyBehaviour.None);
+            camera.AddBehaviour<View>();
+            scene.Add(camera.Create());
+
+            var plan = RenderPlan
+                .StartWith(kernel, new ClearPhase() { Colour = Color.Black })
+                .Then(new Phase(device) { Font = content.Load<SpriteFont>("Consolas") });
+            scene.GetService<Renderer>().Plan = plan;
+
+            base.OnShown();
+        }
+
+        public override void Update(GameTime gameTime)
+        {
+            scene.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
+            base.Update(gameTime);
+        }
+
+        public override void Draw(GameTime gameTime)
+        {
+            scene.Draw();
+            base.Draw(gameTime);
+        }
+    }
+}
