@@ -97,6 +97,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Libraries\Xbox 360\Ninject.dll</HintPath>
     </Reference>
+    <Reference Include="protobuf_net">
+      <HintPath>..\..\Libraries\Xbox 360\protobuf_net.dll</HintPath>
+    </Reference>
     <Reference Include="System">
       <Private>False</Private>
     </Reference>

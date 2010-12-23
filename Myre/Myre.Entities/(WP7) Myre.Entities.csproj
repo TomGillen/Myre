@@ -95,6 +95,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Libraries\Windows Phone\Ninject.dll</HintPath>
     </Reference>
+    <Reference Include="protobuf_net">
+      <HintPath>..\..\Libraries\Windows Phone\protobuf_net.dll</HintPath>
+    </Reference>
     <Reference Include="System">
       <Private>False</Private>
     </Reference>

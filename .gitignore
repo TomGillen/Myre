@@ -1,4 +1,5 @@
 
+*.suo
 /Documentation
 /Myre/Myre/obj
 /Myre/Myre/bin
