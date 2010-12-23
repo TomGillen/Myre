@@ -37,8 +37,8 @@ namespace Myre.Entities.Serialisation
 
     static class ProtobufNonGenericAdaptor
     {
-        private static Dictionary<Type, ISerialisationAdaptor> adaptors;
-        private static Type genericType;
+        private static Dictionary<Type, ISerialisationAdaptor> adaptors = new Dictionary<Type, ISerialisationAdaptor>();
+        private static Type genericType = Type.GetType("Myre.Entities.Serialisation.SerialisationAdaptor`1");
 
         public static void Serialise(Stream stream, object instance, Type type)
         {
