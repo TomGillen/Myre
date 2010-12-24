@@ -59,9 +59,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Shadow Include="Test References\Myre.Entities.accessor" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\..\Myre\Myre.Entities\%28x86%29 Myre.Entities.csproj">
       <Project>{5CDABE8C-7C9C-4163-8C85-FEA731088239}</Project>
       <Name>%28x86%29 Myre.Entities</Name>
@@ -70,6 +67,9 @@
       <Project>{FDB5A9D8-9266-4F7B-BDE7-D4E720F5B45F}</Project>
       <Name>%28x86%29 Myre</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Shadow Include="Test References\Myre.Entities1.accessor" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

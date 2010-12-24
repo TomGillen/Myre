@@ -38,22 +38,57 @@ namespace Myre.Entities
     /// <summary>
     /// A struct which contains data about an entity property.
     /// </summary>
-    public struct PropertyData
+    [ProtoContract]
+    public class PropertyData
     {
+        [ProtoMember(1)]
         public PropertyCopyBehaviour CopyBehaviour;
-        public Type DataType;
+
+        [ProtoMember(2)]
         public string Name;
-        public object Data;
+
+        [ProtoMember(3)]
+        public byte[] SerialisedValue;
+
+        [ProtoMember(4)]
+        public string DataTypeName;
+
+        public object Value;
+        public Type DataType;
+
+        public void Rehydrate()
+        {
+            // restore the data type or type name
+            if (DataType == null)
+                DataType = Type.GetType(DataTypeName);
+            else if (DataTypeName == null)
+                DataTypeName = DataType.AssemblyQualifiedName;
+
+            // restore value or serialised value
+            if (Value == null && SerialisedValue != null)
+            {
+                using (var stream = new MemoryStream(SerialisedValue))
+                    Value = ProtobufNonGenericAdaptor.Deserialise(stream, DataType);
+            }
+            else if (Value != null && SerialisedValue == null)
+            {
+                using (var stream = new MemoryStream())
+                {
+                    ProtobufNonGenericAdaptor.Serialise(stream, Value, DataType);
+                    SerialisedValue = stream.ToArray();
+                }
+            }
+        }
 
         public object CreateValue(IKernel kernel)
         {
             switch (CopyBehaviour)
             {
                 case PropertyCopyBehaviour.None:
-                    return Data;
+                    return Value;
 
                 case PropertyCopyBehaviour.Copy:
-                    var cloneable = Data as ICopyable;
+                    var cloneable = Value as ICopyable;
                     return cloneable.Copy();
 
                 case PropertyCopyBehaviour.New:
@@ -68,16 +103,40 @@ namespace Myre.Entities
     /// <summary>
     /// A struct which contains data about an entity behaviour.
     /// </summary>
-    public struct BehaviourData
+    [ProtoContract]
+    public class BehaviourData
     {
-        public Type Type;
+        [ProtoMember(1)]
         public string Name;
-        public MemoryStream SerialisedValue;
+
+        [ProtoMember(2)]
+        public byte[] SerialisedValue;
+
+        [ProtoMember(3)]
+        public string TypeName;
+
+        public Type Type;
+        
+        internal MemoryStream MemoryStream;
+
+        public void Rehydrate()
+        {
+            // restore the data type or type name
+            if (Type == null)
+                Type = Type.GetType(TypeName);
+            else if (TypeName == null)
+                TypeName = Type.AssemblyQualifiedName;
+
+            // restore memory stream
+            if (SerialisedValue != null && MemoryStream == null)
+                MemoryStream = new MemoryStream(SerialisedValue);
+        }
     }
 
     /// <summary>
     /// A class which describes the elements of an entity, and can be used to construct new entity instances.
     /// </summary>
+    [ProtoContract]
     public class EntityDescription
     {
         private static Dictionary<Type, Type> propertyTypes = new Dictionary<Type, Type>();
@@ -94,13 +153,33 @@ namespace Myre.Entities
         /// Gets a list of behaviours in this instance.
         /// </summary>
         /// <value>The behaviours.</value>
-        public List<BehaviourData> Behaviours { get { return behaviours; } }
+        [ProtoMember(1)]
+        public List<BehaviourData> Behaviours 
+        { 
+            get { return behaviours; }
+            set
+            {
+                Assert.ArgumentNotNull("value", value);
+                IncrementVersion();
+                behaviours = value;
+            }
+        }
         
         /// <summary>
         /// Gets a list of properties in this instance.
         /// </summary>
         /// <value>The properties.</value>
-        public List<PropertyData> Properties { get { return properties; } }
+        [ProtoMember(2)]
+        public List<PropertyData> Properties 
+        { 
+            get { return properties; }
+            set
+            {
+                Assert.ArgumentNotNull("value", value);
+                IncrementVersion();
+                properties = value;
+            }
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EntityDescription"/> class.
@@ -132,7 +211,7 @@ namespace Myre.Entities
         {
             foreach (var item in entity.Behaviours)
             {
-                behaviours.Add(new BehaviourData()
+                AddBehaviour(new BehaviourData()
                 {
                     Name = item.Name,
                     Type = item.GetType(),
@@ -142,16 +221,14 @@ namespace Myre.Entities
 
             foreach (var item in entity.Properties)
             {
-                properties.Add(new PropertyData()
+                AddProperty(new PropertyData()
                 {
                     Name = item.Name,
                     DataType = item.Type,
-                    Data = serialisePropertyValues ? item.Value : null,
+                    Value = serialisePropertyValues ? item.Value : null,
                     CopyBehaviour = item.CopyBehaviour
                 });
             }
-
-            IncrementVersion();
         }
 
         /// <summary>
@@ -162,6 +239,7 @@ namespace Myre.Entities
         {
             Assert.ArgumentNotNull("behaviour.Type", behaviour.Type);
 
+            behaviour.Rehydrate();
             behaviours.Add(behaviour);
             IncrementVersion();
         }
@@ -232,6 +310,7 @@ namespace Myre.Entities
             Assert.ArgumentNotNull("property.Name", property.Name);
             Assert.ArgumentNotNull("property.DataType", property.DataType);
 
+            property.Rehydrate();
             properties.Add(property);
             IncrementVersion();
         }
@@ -245,13 +324,16 @@ namespace Myre.Entities
         /// <param name="copyBehaviour">The copy behaviour.</param>
         public void AddProperty(Type dataType, string name, object initialValue = null, PropertyCopyBehaviour copyBehaviour = PropertyCopyBehaviour.None)
         {
-            AddProperty(new PropertyData()
+            var data = new PropertyData()
             {
                 Name = name,
                 DataType = dataType,
-                Data = initialValue,
-                CopyBehaviour = copyBehaviour
-            });
+                Value = initialValue,
+                CopyBehaviour = copyBehaviour,
+            };
+
+            data.Rehydrate();
+            properties.Add(data);
         }
 
         /// <summary>
@@ -356,6 +438,8 @@ namespace Myre.Entities
 
         private IProperty CreatePropertyInstance(IKernel kernel, PropertyData property)
         {
+            property.Rehydrate();
+
             Type type;
             if (!propertyTypes.TryGetValue(property.DataType, out type))
             {
@@ -372,23 +456,28 @@ namespace Myre.Entities
 
         private Behaviour CreateBehaviourInstance(IKernel kernel, BehaviourData behaviour)
         {
+            behaviour.Rehydrate();
+
             var name = new ConstructorArgument("name", behaviour.Name);
             var instance = kernel.Get(behaviour.Type, name) as Behaviour;
+            instance.Name = behaviour.Name;
 
             if (behaviour.SerialisedValue != null)
             {
-                behaviour.SerialisedValue.Position = 0;
-                ProtobufNonGenericAdaptor.Merge(behaviour.SerialisedValue, instance, behaviour.Type);
+                behaviour.MemoryStream.Position = 0;
+                ProtobufNonGenericAdaptor.Merge(behaviour.MemoryStream, instance, behaviour.Type);
             }
 
             return instance;
         }
 
-        private MemoryStream SerialiseBehaviour(Behaviour behaviour)
+        private byte[] SerialiseBehaviour(Behaviour behaviour)
         {
-            var stream = new MemoryStream();
-            ProtobufNonGenericAdaptor.Serialise(stream, behaviour, behaviour.GetType());
-            return stream;
+            using (var stream = new MemoryStream())
+            {
+                ProtobufNonGenericAdaptor.Serialise(stream, behaviour, behaviour.GetType());
+                return stream.ToArray();
+            }
         }
     }
 }

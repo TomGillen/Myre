@@ -10,8 +10,6 @@ using ProtoBuf;
 
 namespace Myre.Entities.Tests
 {
-    
-    
     /// <summary>
     ///This is a test class for EntityDescriptionTest and is intended
     ///to contain all EntityDescriptionTest Unit Tests
@@ -23,7 +21,7 @@ namespace Myre.Entities.Tests
         class BasicBehaviour
             : Behaviour
         {
-            [ProtoMember(1)]
+            [ProtoMember(2)]
             public string Foo = "hello world";
         }
 
@@ -81,7 +79,7 @@ namespace Myre.Entities.Tests
         /// </summary>
         [TestMethod]
         [DeploymentItem("Myre.Entities.dll")]
-        public void BehaviourProtobufSerialisation()
+        public void BehaviourProtobufferSerialisation()
         {
             var kernel = new StandardKernel();
             var description = new EntityDescription_Accessor(kernel);
@@ -98,6 +96,39 @@ namespace Myre.Entities.Tests
             var deserialised = description.CreateBehaviourInstance(kernel, behaviourData) as BasicBehaviour;
             UAssert.IsNotNull(deserialised);
             UAssert.AreEqual(deserialised.Foo, behaviour.Foo);
+        }
+
+        /// <summary>
+        /// Tests that an entity description can be serialised and deserialised to/from
+        /// the protobuffer protocol via protobuf-net.
+        /// </summary>
+        [TestMethod]
+        [DeploymentItem("Myre.Entities.dll")]        
+        public void EntityDescriptionProtobufferSerialisation()
+        {
+            var kernel = new StandardKernel();
+            
+            var original = kernel.Get<EntityDescription>();
+            original.AddProperty<int>("bar", 5);
+            original.AddBehaviour<BasicBehaviour>("behaviour1");
+
+            var originalEntity = original.Create();
+
+            byte[] buffer;
+            using (var stream = new MemoryStream())
+            {
+                Serializer.Serialize<EntityDescription>(stream, original);
+                buffer = stream.ToArray();
+            }
+
+            var deserialised = kernel.Get<EntityDescription>();
+            using (var stream = new MemoryStream(buffer))
+                Serializer.Merge<EntityDescription>(stream, deserialised);
+
+            var deserialisedEntity = deserialised.Create();
+
+            UAssert.AreEqual(originalEntity.GetProperty<int>("bar").Value, deserialisedEntity.GetProperty<int>("bar").Value);
+            UAssert.AreEqual(originalEntity.GetBehaviour<BasicBehaviour>("behaviour1").Foo, deserialisedEntity.GetBehaviour<BasicBehaviour>("behaviour1").Foo);
         }
     }
 }

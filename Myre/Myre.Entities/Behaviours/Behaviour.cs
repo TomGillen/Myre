@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
+using ProtoBuf;
 
 namespace Myre.Entities.Behaviours
 {
@@ -26,18 +27,12 @@ namespace Myre.Entities.Behaviours
         /// <summary>
         /// Gets the name of this behaviour.
         /// </summary>
-        public string Name { get; private set; }
+        public string Name { get; internal set; }
 
         /// <summary>
         /// Gets the owner of this behaviour.
         /// </summary>
         public Entity Owner { get; internal set; }
-
-        /// <summary>
-        /// Gets or sets the settings.
-        /// </summary>
-        /// <value>The settings.</value>
-        public XElement Settings { get; set; }
 
         /// <summary>
         /// Gets a value indicating if this behaviour has been initialised.

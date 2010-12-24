@@ -64,7 +64,7 @@ namespace Myre.Entities.Serialisation
 
                 //if (item.Serialise)
                 //{
-                    if (item.Data != null)
+                    if (item.Value != null)
                     {
                         //XmlSerializer serialiser = new XmlSerializer(item.DataType);
                         //serialiser.Serialize(writer, item.Data);//, emptyNamespaces);
@@ -136,7 +136,7 @@ namespace Myre.Entities.Serialisation
                 var property = ParsePropertyAttributes(reader);
                 var dataDefinition = reader.ReadInnerXml().Trim();
                 if (!string.IsNullOrEmpty(dataDefinition))
-                    property.Data = ParsePropertyValue(dataDefinition, property.DataType);
+                    property.Value = ParsePropertyValue(dataDefinition, property.DataType);
 
                 entity.AddProperty(property);
             }
