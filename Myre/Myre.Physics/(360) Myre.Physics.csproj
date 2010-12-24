@@ -62,7 +62,6 @@
     <Compile Include="Collisions\ContactTester.cs" />
     <Compile Include="Collisions\Geometry.cs" />
     <Compile Include="Collisions\Polygon.cs" />
-    <Compile Include="Collisions\Pool.cs" />
     <Compile Include="Collisions\Projection.cs" />
     <Compile Include="Collisions\SatResult.cs" />
     <Compile Include="Collisions\SatTester.cs" />

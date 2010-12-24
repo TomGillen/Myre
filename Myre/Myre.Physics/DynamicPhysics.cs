@@ -20,6 +20,7 @@ namespace Myre.Physics
         private Property<float> inertiaTensor;
         private Property<Vector2> linearVelocity;
         private Property<float> angularVelocity;
+        private Property<float> timeMultiplier;
 
         private Vector2 force;
         private float torque;
@@ -66,14 +67,29 @@ namespace Myre.Physics
             set { angularVelocity.Value = value; }
         }
 
+        public float TimeMultiplier
+        {
+            get { return timeMultiplier.Value; }
+            set { timeMultiplier.Value = value; }
+        }
+
+        public const String POSITION = "position";
+        public const String ROTATION = "rotation";
+        public const String MASS = "mass";
+        public const String INERTIA_TENSOR = "inertia_tensor";
+        public const String LINEAR_VELOCITY = "linear_velocity";
+        public const String ANGULAR_VELOCITY = "angular_velocity";
+        public const String TIME_MULTIPLIER = "time_multiplier";
+
         public override void Initialise(Entity.InitialisationContext context)
         {
-            this.position = context.GetOrCreateProperty<Vector2>("position");
-            this.rotation = context.GetOrCreateProperty<float>("rotation");
-            this.mass = context.GetOrCreateProperty<float>("mass");
-            this.inertiaTensor = context.GetOrCreateProperty<float>("inertia_tensor");
-            this.linearVelocity = context.GetOrCreateProperty<Vector2>("linear_velocity");
-            this.angularVelocity = context.GetOrCreateProperty<float>("angular_velocity");
+            this.position = context.GetOrCreateProperty<Vector2>(POSITION);
+            this.rotation = context.GetOrCreateProperty<float>(ROTATION);
+            this.mass = context.GetOrCreateProperty<float>(MASS);
+            this.inertiaTensor = context.GetOrCreateProperty<float>(INERTIA_TENSOR);
+            this.linearVelocity = context.GetOrCreateProperty<Vector2>(LINEAR_VELOCITY);
+            this.angularVelocity = context.GetOrCreateProperty<float>(ANGULAR_VELOCITY);
+            this.timeMultiplier = context.GetOrCreateProperty<float>(TIME_MULTIPLIER);
 
             base.Initialise(context);
         }
@@ -162,7 +178,7 @@ namespace Myre.Physics
             {
                 for (int i = 0; i < Behaviours.Count; i++)
                 {
-                    Integrate(Behaviours[i], time);
+                    Integrate(Behaviours[i], time * Behaviours[i].TimeMultiplier);
                 }
             }
 
