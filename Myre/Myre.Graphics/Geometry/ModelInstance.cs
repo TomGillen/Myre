@@ -111,7 +111,6 @@ namespace Myre.Graphics.Geometry
                 GraphicsDevice device,
                 [SceneService] Renderer renderer)
             {
-                renderer.Geometry.Add(this);
                 this.device = device;
                 this.meshInstancePool = new Pool<MeshInstance>();
                 this.instances = new Dictionary<Mesh, List<MeshInstance>>();

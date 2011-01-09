@@ -19,6 +19,16 @@ namespace Myre.Entities.Tests
     public class EntityDescriptionTest
     {
         [ProtoContract]
+        struct blah
+        {
+            //[ProtoMember(1)]
+            int a;
+
+            //[ProtoMember(2)]
+            int b;
+        }
+
+        [ProtoContract]
         class BasicBehaviour
             : Behaviour
         {
@@ -26,7 +36,7 @@ namespace Myre.Entities.Tests
             public string Foo = "hello world";
 
             [ProtoMember(3)]
-            public Vector2 Vector = new Vector2(5, 10);
+            public blah Blah;
         }
 
         private TestContext testContextInstance;
@@ -87,7 +97,6 @@ namespace Myre.Entities.Tests
         {
             var kernel = new StandardKernel();
             var description = new EntityDescription_Accessor(kernel);
-
             var behaviour = new BasicBehaviour();
             behaviour.Foo = "foo";
             var buffer = description.SerialiseBehaviour(behaviour);

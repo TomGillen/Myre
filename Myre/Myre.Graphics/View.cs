@@ -60,24 +60,9 @@ namespace Myre.Graphics
         public class Manager
             : BehaviourManager<View>
         {
-            private Renderer renderService;
-
-            public Manager(
-                [SceneService] Renderer renderer)
+            public IEnumerable<View> Views
             {
-                this.renderService = renderer;
-            }
-
-            public override void Add(View behaviour)
-            {
-                base.Add(behaviour);
-                renderService.Views.Add(behaviour);
-            }
-
-            public override bool Remove(View behaviour)
-            {
-                renderService.Views.Remove(behaviour);
-                return base.Remove(behaviour);
+                get { return Behaviours; }
             }
         }
     }

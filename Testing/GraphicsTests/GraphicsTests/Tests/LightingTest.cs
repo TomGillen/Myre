@@ -119,7 +119,7 @@ namespace GraphicsTests.Tests
             scene = kernel.Get<TestScene>();
 
             var plan = RenderPlan
-                .StartWith<GeometryBufferPhase>(kernel)
+                .StartWith<GeometryBufferComponent>(kernel)
                 .Then<LightingPhase>()
                 .Then<Phase>();
 

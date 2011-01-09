@@ -99,8 +99,6 @@ namespace Myre.Graphics.Lighting
 
                 skyboxEffect = content.Load<Effect>("Skybox");
                 model = content.Load<Model>("SkyboxModel");
-
-                renderer.Lights.Add(this);
             }
 
             public bool ModifiesStencil

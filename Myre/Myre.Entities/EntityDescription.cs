@@ -475,11 +475,15 @@ namespace Myre.Entities
 
         private byte[] SerialiseBehaviour(Behaviour behaviour)
         {
+#if PROTOBUFFERS
             using (var stream = new MemoryStream())
             {
                 ProtobufNonGenericAdaptor.Serialise(stream, behaviour, behaviour.GetType());
                 return stream.ToArray();
             }
+#else
+            return null;
+#endif
         }
     }
 }

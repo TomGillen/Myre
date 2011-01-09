@@ -91,8 +91,6 @@ namespace Myre.Graphics.Lighting
                 GraphicsDevice device,
                 [SceneService] Renderer renderer)
             {
-                renderer.Lights.Add(this);
-
                 var effect = content.Load<Effect>("DirectionalLight");
                 material = new Material(effect, null);
 
@@ -291,7 +289,7 @@ namespace Myre.Graphics.Lighting
                     shadowView.SetMetadata(renderer.Data);
                     //renderer.Device.Viewport = shadowView.Viewport;
 
-                    foreach (var item in renderer.Geometry)
+                    foreach (var item in renderer.Scene.FindManagers<IGeometryProvider>())
                         item.Draw("shadows", renderer.Data);
                 }
 
@@ -304,7 +302,7 @@ namespace Myre.Graphics.Lighting
 
             private float FindFurthestExtent(Renderer renderer, BoundingVolume boundingVolume, Vector3 axis)
             {
-                foreach (var item in renderer.Geometry)
+                foreach (var item in renderer.Scene.FindManagers<IGeometryProvider>())
                     item.Query(buffer, boundingVolume);
 
                 float extent = 0;

@@ -75,9 +75,7 @@ namespace Myre.Graphics.Lighting
                 ContentManager content,
                 GraphicsDevice device,
                 [SceneService] Renderer renderer)
-            {
-                renderer.Lights.Add(this);
-                
+            {                
                 lightingMaterial = new Material(content.Load<Effect>("AmbientLight"));
                 ssaoMaterial = new Material(content.Load<Effect>("SSAO"));
                 //ssaoMaterial.Parameters["Offsets"].SetValue(RandomVectors(16));

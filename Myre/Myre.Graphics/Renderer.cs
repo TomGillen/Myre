@@ -11,6 +11,7 @@ using Myre.Graphics.Lighting;
 using Microsoft.Xna.Framework.Content;
 using Myre.Graphics.Geometry;
 using Myre.Entities;
+using System.Collections.ObjectModel;
 
 namespace Myre.Graphics
 {
@@ -36,9 +37,7 @@ namespace Myre.Graphics
         private RenderPlan plan;
 
         private Scene scene;
-        private List<ILightProvider> lights;
-        private List<IGeometryProvider> geometry;
-        private List<View> views;
+        private IEnumerable<View> views;
 
         public GraphicsDevice Device
         {
@@ -60,21 +59,6 @@ namespace Myre.Graphics
             get { return settings; }
         }
 
-        public List<View> Views
-        {
-            get { return views; }
-        }
-
-        public List<IGeometryProvider> Geometry
-        {
-            get { return geometry; }
-        }
-
-        public List<ILightProvider> Lights
-        {
-            get { return lights; }
-        }
-
         public RenderPlan Plan
         {
             get { return plan; }
@@ -93,12 +77,13 @@ namespace Myre.Graphics
             this.settings = new RendererSettings(this);
             this.activeResources = new Dictionary<string, RenderTarget2D>();
             this.viewResults = new Queue<RenderTarget2D>();
-            this.views = new List<View>();
-            this.geometry = new List<IGeometryProvider>();
-            this.lights = new List<ILightProvider>();
             this.quad = new Quad(device);
             //this.colourCorrection = content.Load<Effect>("Gamma");
             this.spriteBatch = new SpriteBatch(device);
+
+            this.views = from manager in scene.FindManagers<View.Manager>()
+                         from view in manager.Views
+                         select view;
         }
 
         public override void Update(float elapsedTime)
@@ -114,9 +99,9 @@ namespace Myre.Graphics
             Statistic.Get("Graphics.Draws").Value = 0;
 #endif
 
-            for (int i = 0; i < views.Count; i++)
+            foreach (var view in views)
             {
-                views[i].SetMetadata(data);
+                view.SetMetadata(data);
                 var output = Plan.Execute(this);
 
                 activeResources.Clear();
@@ -128,10 +113,10 @@ namespace Myre.Graphics
 
             spriteBatch.Begin();
             //colourCorrection.Parameters["Resolution"].SetValue(data.Get<Vector2>("resolution").Value);
-            for (int i = 0; i < views.Count; i++)
+            foreach (var view in views)
             {
                 var output = viewResults.Dequeue();
-                var viewport = views[i].Viewport;
+                var viewport = view.Viewport;
 
                 //colourCorrection.Parameters["Texture"].SetValue(output);
                 //quad.SetPosition(viewport.Bounds);

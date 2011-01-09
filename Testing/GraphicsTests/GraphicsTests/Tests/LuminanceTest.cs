@@ -128,7 +128,7 @@ namespace GraphicsTests.Tests
 
             var toneMap = kernel.Get<ToneMapPhase>();
             var plan = RenderPlan
-                .StartWith<GeometryBufferPhase>(kernel)
+                .StartWith<GeometryBufferComponent>(kernel)
                 .Then<LightingPhase>()
                 .Then(toneMap)
                 .Then(new Phase(this, device, toneMap))

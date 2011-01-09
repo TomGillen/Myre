@@ -40,6 +40,11 @@ namespace Myre.Entities.Serialisation
         private static Dictionary<Type, ISerialisationAdaptor> adaptors = new Dictionary<Type, ISerialisationAdaptor>();
         private static Type genericType = Type.GetType("Myre.Entities.Serialisation.SerialisationAdaptor`1");
 
+        static ProtobufNonGenericAdaptor()
+        {
+            Serializer.GlobalOptions.InferTagFromName = true;
+        }
+
         public static void Serialise(Stream stream, object instance, Type type)
         {
             var adaptor = GetAdaptor(type);

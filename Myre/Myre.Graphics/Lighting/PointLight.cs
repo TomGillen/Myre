@@ -73,8 +73,6 @@ namespace Myre.Graphics.Lighting
                 GraphicsDevice device,
                 [SceneService] Renderer renderer)
             {
-                renderer.Lights.Add(this);
-
                 var effect = content.Load<Effect>("PointLight");
                 geometryLightingMaterial = new Material(effect.Clone(), "Geometry");
                 quadLightingMaterial = new Material(effect.Clone(), "Quad");

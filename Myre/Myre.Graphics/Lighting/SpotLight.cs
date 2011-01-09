@@ -132,9 +132,7 @@ namespace Myre.Graphics.Lighting
                 ContentManager content,
                 GraphicsDevice device,
                 [SceneService] Renderer renderer)
-            {
-                renderer.Lights.Add(this);
-
+            {            
                 var effect = content.Load<Effect>("SpotLight");
                 geometryLightingMaterial = new Material(effect.Clone(), "Geometry");
                 quadLightingMaterial = new Material(effect.Clone(), "Quad");
@@ -291,7 +289,7 @@ namespace Myre.Graphics.Lighting
                 shadowView.Viewport = new Viewport(0, 0, light.ShadowResolution, light.ShadowResolution);
                 shadowView.SetMetadata(renderer.Data);
 
-                foreach (var item in renderer.Geometry)
+                foreach (var item in renderer.Scene.FindManagers<IGeometryProvider>())
                     item.Draw("shadows", renderer.Data);
 
                 light.shadowMap = target;
