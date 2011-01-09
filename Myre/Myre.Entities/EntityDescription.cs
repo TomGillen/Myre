@@ -64,6 +64,7 @@ namespace Myre.Entities
             else if (DataTypeName == null)
                 DataTypeName = DataType.AssemblyQualifiedName;
 
+#if PROTOBUFFERS
             // restore value or serialised value
             if (Value == null && SerialisedValue != null)
             {
@@ -78,6 +79,7 @@ namespace Myre.Entities
                     SerialisedValue = stream.ToArray();
                 }
             }
+#endif
         }
 
         public object CreateValue(IKernel kernel)

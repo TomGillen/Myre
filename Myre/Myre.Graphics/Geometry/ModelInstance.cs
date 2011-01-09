@@ -235,14 +235,14 @@ namespace Myre.Graphics.Geometry
                 {
                     var instance = item as MeshInstance;
                     instance.UpdateBounds();
-                    if (volume.Contains(instance.Bounds) != ContainmentType.Disjoint)
+                    if (volume.Intersects(instance.Bounds))
                         instances.Add(item as MeshInstance);
                 }
 
                 foreach (var item in dynamicMeshInstances)
                 {
                     item.UpdateBounds();
-                    if (volume.Contains(item.Bounds) != ContainmentType.Disjoint)
+                    if (volume.Intersects(item.Bounds))
                         instances.Add(item);
                 }
             }

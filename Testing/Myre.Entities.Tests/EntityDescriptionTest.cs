@@ -7,6 +7,7 @@ using System.IO;
 using MyreAssert = Myre.Assert;
 using UAssert = Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 using ProtoBuf;
+using Microsoft.Xna.Framework;
 
 namespace Myre.Entities.Tests
 {
@@ -23,6 +24,9 @@ namespace Myre.Entities.Tests
         {
             [ProtoMember(2)]
             public string Foo = "hello world";
+
+            [ProtoMember(3)]
+            public Vector2 Vector = new Vector2(5, 10);
         }
 
         private TestContext testContextInstance;
@@ -85,6 +89,7 @@ namespace Myre.Entities.Tests
             var description = new EntityDescription_Accessor(kernel);
 
             var behaviour = new BasicBehaviour();
+            behaviour.Foo = "foo";
             var buffer = description.SerialiseBehaviour(behaviour);
 
             var behaviourData = new BehaviourData()

@@ -22,12 +22,17 @@ namespace Myre.Graphics.Geometry
 
         public void Add(BoundingFrustum frustum)
         {
-            Add(frustum.Near);
-            Add(frustum.Left);
-            Add(frustum.Right);
-            Add(frustum.Bottom);
-            Add(frustum.Far);
-            Add(frustum.Top);
+            Add(Flip(frustum.Near));
+            Add(Flip(frustum.Left));
+            Add(Flip(frustum.Right));
+            Add(Flip(frustum.Bottom));
+            Add(Flip(frustum.Far));
+            Add(Flip(frustum.Top));
+        }
+
+        private Plane Flip(Plane plane)
+        {
+            return new Plane(-plane.Normal, -plane.D);
         }
 
         public void Add(BoundingBox box)
@@ -46,9 +51,9 @@ namespace Myre.Graphics.Geometry
             {
                 var plane = this[i];
                 float distance = 0;
-                Vector3.Dot(ref plane.Normal, ref point, out distance);
+                plane.DotCoordinate(ref point, out distance);
 
-                if (distance < plane.D)
+                if (distance < 0)
                     return false;
             }
 
@@ -63,7 +68,7 @@ namespace Myre.Graphics.Geometry
                 float distance = 0;
                 Vector3.Dot(ref plane.Normal, ref sphere.Center, out distance);
 
-                if (distance - plane.D < sphere.Radius)
+                if (-plane.D - distance > sphere.Radius)
                     return false;
             }
 
@@ -98,8 +103,7 @@ namespace Myre.Graphics.Geometry
             {
                 var plane = this[i];
                 float distance = 0;
-                Vector3.Dot(ref plane.Normal, ref sphere.Center, out distance);
-                distance = distance - plane.D;
+                plane.DotCoordinate(ref sphere.Center, out distance);
 
                 if (distance < sphere.Radius)
                 {

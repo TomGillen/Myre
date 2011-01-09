@@ -6,9 +6,11 @@ using Microsoft.Xna.Framework;
 using Myre.Entities;
 using Myre.Collections;
 using Myre.Entities.Behaviours;
+using ProtoBuf;
 
 namespace Myre.Graphics
 {
+    [ProtoContract]
     public sealed class Camera
     {
         private Matrix view;
@@ -25,6 +27,7 @@ namespace Myre.Graphics
         private Vector3[] frustumCorners = new Vector3[8];
         private Vector3[] farFrustumCorners = new Vector3[4];
 
+        [ProtoMember(1)]
         public Matrix View
         {
             get { return view; }
@@ -38,6 +41,7 @@ namespace Myre.Graphics
             }
         }
 
+        [ProtoMember(2)]
         public Matrix Projection
         {
             get { return projection; }
@@ -56,6 +60,7 @@ namespace Myre.Graphics
             }
         }
 
+        [ProtoMember(3)]
         public float NearClip
         {
             get { return nearClip; }
@@ -69,6 +74,7 @@ namespace Myre.Graphics
             }
         }
 
+        [ProtoMember(4)]
         public float FarClip
         {
             get { return farClip; }
