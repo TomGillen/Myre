@@ -65,7 +65,7 @@ namespace Myre.Graphics.Lighting
         public Vector3 Direction
         {
             get { return direction.Value; }
-            set { direction.Value = value; }
+            set { direction.Value = Vector3.Normalize(value); }
         }
 
         public float Angle
@@ -386,7 +386,6 @@ namespace Myre.Graphics.Lighting
             {
                 if (material != null)
                 {
-                    light.Direction.Normalize();
                     Matrix view = metadata.Get<Matrix>("view").Value;
                     Vector3 position = light.Position;
                     Vector3 direction = light.Direction;
@@ -395,7 +394,14 @@ namespace Myre.Graphics.Lighting
                     float angle = (float)Math.Cos(light.Angle / 2);
 
                     if (light.Mask != null || light.ShadowResolution > 0)
-                        material.Parameters["ShadowProjection"].SetValue(metadata.Get<Matrix>("inverseview").Value * light.view * light.projection);
+                    {
+                        var inverseView = metadata.Get<Matrix>("inverseview").Value;
+                        var cameraToLightView = inverseView * light.view;
+                        var cameraToLightProjection = cameraToLightView * light.projection;
+                        material.Parameters["CameraViewToLightProjection"].SetValue(cameraToLightProjection);
+                        material.Parameters["CameraViewToLightView"].SetValue(cameraToLightView);
+                        material.Parameters["LightFarClip"].SetValue(light.range);
+                    }
 
                     material.Parameters["LightPosition"].SetValue(position);
                     material.Parameters["LightDirection"].SetValue(-direction);

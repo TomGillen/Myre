@@ -17,24 +17,24 @@ struct VertexShaderOutput
 
 void VertexShaderFunction(in float4 in_Position : POSITION0,
 						  out float4 out_PositionCS : POSITION0,
-						  out float out_Depth : TEXCOORD0)
+						  out float2 out_Depth : TEXCOORD0)
 {
     float4 viewPosition = mul(in_Position, WorldView);
 	float4 clipPosition = mul(viewPosition, Projection);
     
 	out_PositionCS = clipPosition;
 
-	out_Depth = length(viewPosition);
-	//out_Depth = clipPosition.zw;
+	//out_Depth = length(viewPosition);
+	out_Depth = clipPosition.zw;
 	//out_Depth = -viewPosition.z / FarClip;
 	//out_Depth = float2(0.5, 1);
 }
 
-void PixelShaderFunction(in float in_Depth : TEXCOORD0,
+void PixelShaderFunction(in float2 in_Depth : TEXCOORD0,
 						 out float4 out_Colour : COLOR0)
 {
-	//out_Colour = float4(in_Depth.x / in_Depth.y, 0, 0, 1);
-	out_Colour = float4(in_Depth, 0, 0, 1);
+	out_Colour = float4(in_Depth.x / in_Depth.y, 0, 0, 1);
+	//out_Colour = float4(in_Depth, 0, 0, 1);
 }
 
 technique Technique1

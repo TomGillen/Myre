@@ -2,7 +2,7 @@
 #include "GammaCorrection.fxh"
 #include "FullScreenQuad.fxh"
 
-#define BIAS 0.8
+#define BIAS 0.00008 //0.8
 
 float3 Colour;
 float3 LightPosition;
@@ -18,7 +18,9 @@ bool EnableShadows;
 float FarClip : FARCLIP;
 float4x4 WorldViewProjection : WORLDVIEWPROJECTION;
 float4x4 WorldView : WORLDVIEW;
-float4x4 ShadowProjection;
+float4x4 CameraViewToLightProjection;
+float4x4 CameraViewToLightView;
+float LightFarClip;
 
 texture Depth : GBUFFER_DEPTH;
 sampler depthSampler = sampler_state
@@ -172,7 +174,7 @@ float4 CalculateLighting(float2 texCoord, float3 viewPosition)
 		float4 projectedTexCoord;
 		if (EnableProjectiveTexturing || EnableShadows)
 		{
-			projectedTexCoord = mul(float4(viewPosition, 1), ShadowProjection);
+			projectedTexCoord = mul(float4(viewPosition, 1), CameraViewToLightProjection);
 			projectedTexCoord /= projectedTexCoord.w;
 			projectedTexCoord.x = (1 + projectedTexCoord.x) / 2;
 			projectedTexCoord.y = (1 - projectedTexCoord.y) / 2;
@@ -185,17 +187,19 @@ float4 CalculateLighting(float2 texCoord, float3 viewPosition)
 
 		if (EnableShadows)
 		{
-			//float4 lightProjectedPosition = mul(viewPosition, ShadowProjection);
+			//float4 lightProjectedPosition = mul(viewPosition, CameraViewToLightProjection);
 			//float depth = lightProjectedPosition.z / lightProjectedPosition.w;
-			float depth = length(viewPosition - LightPosition); //projectedTexCoord.z;
+			//float depth = length(viewPosition - LightPosition);
 			//float shadowDepth = tex2D(shadowSampler, projectedTexCoord.xy).x;
+			//float4 lightViewPosition = mul(viewPosition, CameraViewToLightView);
+			//float depth = -lightViewPosition.z / LightFarClip;
 
 			//light *= step(shadowDepth + 0.001, depth);
 			//light *= (depth - 0.01 <= shadowDepth);
 			//if (shadowDepth < depth)
 			//	light = 0;
 
-			light *= CalcShadowTermSoftPCF(depth, projectedTexCoord.xy, 3);
+			light *= CalcShadowTermSoftPCF(projectedTexCoord.z, projectedTexCoord.xy, 9);
 		}
 		
 		return float4((NdL * diffuse * light) + ((specularIntensity * pow(RdV, specularPower)) * light), 1);

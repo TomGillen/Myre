@@ -2,10 +2,18 @@
 #include "GammaCorrection.fxh"
 #include "FullScreenQuad.fxh"
 
+#define BIAS 0.8
+
 float3 Direction : LIGHTDIRECTION;
 float3 Colour : LIGHTCOLOUR;
 float3 CameraPosition : CAMERAPOSITION;
 bool EnableShadows;
+float2 ShadowMapSize;
+
+float FarClip : FARCLIP;
+float4x4 WorldViewProjection : WORLDVIEWPROJECTION;
+float4x4 WorldView : WORLDVIEW;
+float4x4 ShadowProjection;
 
 texture Depth : GBUFFER_DEPTH;
 sampler depthSampler = sampler_state
@@ -51,6 +59,46 @@ sampler shadowSampler = sampler_state
 	AddressV = Clamp;
 };
 
+// Calculates the shadow term using PCF with edge tap smoothing
+float CalcShadowTermSoftPCF(float fLightDepth, float2 vTexCoord, int iSqrtSamples)
+{
+    float fShadowTerm = 0.0f;  
+        
+    float fRadius = (iSqrtSamples - 1.0f) / 2;        
+    for (float y = -fRadius; y <= fRadius; y++)
+    {
+        for (float x = -fRadius; x <= fRadius; x++)
+        {
+            float2 vOffset = 0;
+            vOffset = float2(x, y);                
+            vOffset /= ShadowMapSize;
+            float2 vSamplePoint = vTexCoord + vOffset;            
+            float fDepth = tex2D(shadowSampler, vSamplePoint).x;
+            float fSample = (fLightDepth <= fDepth + BIAS);
+            
+            // Edge tap smoothing
+            float xWeight = 1;
+            float yWeight = 1;
+            
+            if (x == -fRadius)
+                xWeight = 1 - frac(vTexCoord.x * ShadowMapSize.x);
+            else if (x == fRadius)
+                xWeight = frac(vTexCoord.x * ShadowMapSize.x);
+                
+            if (y == -fRadius)
+                yWeight = 1 - frac(vTexCoord.y * ShadowMapSize.y);
+            else if (y == fRadius)
+                yWeight = frac(vTexCoord.y * ShadowMapSize.y);
+                
+            fShadowTerm += fSample * xWeight * yWeight;
+        }                                            
+    }        
+    
+    fShadowTerm /= (iSqrtSamples * iSqrtSamples );
+    
+    return fShadowTerm;
+}
+
 void PixelShaderFunction(in float2 in_TexCoord : TEXCOORD0,
 						 in float3 in_FrustumRay : TEXCOORD1,
 						 out float4 out_Colour : COLOR0)
@@ -73,7 +121,20 @@ void PixelShaderFunction(in float2 in_TexCoord : TEXCOORD0,
 	float NdL = max(dot(normal, L), 0);
 	float RdV = max(dot(R, V), 0);
 
-	out_Colour = float4((NdL * diffuse * Colour) + ((specularIntensity * pow(RdV, specularPower)) * Colour), 1);
+	float3 light = Colour;
+	if (EnableShadows)
+	{	
+		float4 projectedTexCoord;
+		projectedTexCoord = mul(float4(viewPosition, 1), ShadowProjection);
+		projectedTexCoord /= projectedTexCoord.w;
+		projectedTexCoord.x = (1 + projectedTexCoord.x) / 2;
+		projectedTexCoord.y = (1 - projectedTexCoord.y) / 2;
+
+		float depth = 0;//length(viewPosition - LightPosition);
+		light *= CalcShadowTermSoftPCF(depth, projectedTexCoord.xy, 3);
+	}
+
+	out_Colour = float4((NdL * diffuse * light) + ((specularIntensity * pow(RdV, specularPower)) * light), 1);
 }
 
 technique Technique1

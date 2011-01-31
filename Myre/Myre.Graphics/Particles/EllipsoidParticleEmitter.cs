@@ -98,6 +98,8 @@ namespace Myre.Graphics.Particles
 
             System.Transform = transform;
 
+            // adapted from particle 3D sample on creators.xna.com
+
             var emitterVelocity = (position.Value - previousPosition) / dt;
             var baseParticleVelocity = Velocity + emitterVelocity * VelocityBleedThrough;
 
