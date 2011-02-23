@@ -107,6 +107,7 @@ namespace Myre.Graphics.Lighting
             settings.Add("ssao_detailradius", "SSAO sample radius", 2.3f);
             settings.Add("ssao_detailintensity", "SSAO intensity", 15f);
             settings.Add("ssao_detailscale", "Scales distance between occluders and occludee.", 1.5f);
+            settings.Add("ssao_blur", "The amount to blur SSAO.", 1f);
 
             settings.Add("debuglights", "Shows light debug information", false);
 
