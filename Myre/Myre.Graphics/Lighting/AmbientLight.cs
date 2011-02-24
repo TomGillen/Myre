@@ -81,7 +81,7 @@ namespace Myre.Graphics.Lighting
                 lightingMaterial = new Material(content.Load<Effect>("AmbientLight"));
                 ssaoMaterial = new Material(content.Load<Effect>("SSAO"));
                 //ssaoMaterial.Parameters["Offsets"].SetValue(RandomVectors(16));
-                ssaoMaterial.Parameters["Random"].SetValue(RandomTexture(device));//content.Load<Texture2D>("randomnormals"));
+                ssaoMaterial.Parameters["Random"].SetValue(content.Load<Texture2D>("randomnormals"));//RandomTexture(device)
                 gaussian = new Gaussian(device, content);
 
                 quad = new Quad(device);
@@ -177,6 +177,7 @@ namespace Myre.Graphics.Lighting
 
                 var unblured = RenderTargetManager.GetTarget(renderer.Device, (int)ssaoRes.X, (int)ssaoRes.Y);
                 renderer.Device.SetRenderTarget(unblured);
+                renderer.Device.Clear(Color.Transparent);
                 renderer.Device.BlendState = BlendState.Opaque;
                 resolution.Value = ssaoRes;
                 quad.Draw(ssaoMaterial, renderer.Data);
