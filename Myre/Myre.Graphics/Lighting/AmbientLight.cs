@@ -132,6 +132,8 @@ namespace Myre.Graphics.Lighting
             {
                 if (renderer.Data.Get<bool>("ssao_enabled").Value)
                     DrawSsao(renderer);
+                else
+                    ssao = null;
 
                 return true;
             }
@@ -156,12 +158,6 @@ namespace Myre.Graphics.Lighting
 
                     quad.Draw(lightingMaterial, metadata);
                 }
-
-                if (ssao != null)
-                {
-                    RenderTargetManager.RecycleTarget(ssao);
-                    ssao = null;
-                }
             }
 
             public void DrawDebug(Renderer renderer)
@@ -181,13 +177,23 @@ namespace Myre.Graphics.Lighting
 
                 var unblured = RenderTargetManager.GetTarget(renderer.Device, (int)ssaoRes.X, (int)ssaoRes.Y);
                 renderer.Device.SetRenderTarget(unblured);
+                renderer.Device.BlendState = BlendState.Opaque;
                 resolution.Value = ssaoRes;
                 quad.Draw(ssaoMaterial, renderer.Data);
 
-                var blured = RenderTargetManager.GetTarget(renderer.Device, (int)ssaoRes.X, (int)ssaoRes.Y);
-                gaussian.Blur(unblured, blured, renderer.Data.Get<float>("ssao_blur").Value);
-                ssao = blured;
-                resolution.Value = fullRes;
+                var blurSigma = renderer.Data.Get<float>("ssao_blur").Value;
+                if (blurSigma != 0)
+                {
+                    var blured = RenderTargetManager.GetTarget(renderer.Device, (int)ssaoRes.X, (int)ssaoRes.Y);
+                    gaussian.Blur(unblured, blured, blurSigma);
+                    ssao = blured;
+                    resolution.Value = fullRes;
+                    RenderTargetManager.RecycleTarget(unblured);
+                }
+                else
+                    ssao = unblured;
+
+                renderer.SetResource("ssao", ssao);
             }
         }
     }

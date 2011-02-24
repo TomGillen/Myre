@@ -34,6 +34,8 @@ namespace Myre.Graphics.Lighting
                     }
             });
 
+            outputs.Add(new Resource() { Name = "ssao" });
+
             outputTarget = new RenderTargetInfo()
             {
                 SurfaceFormat = SurfaceFormat.HdrBlendable,

@@ -1,17 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using Myre.Entities.Services;
-using Microsoft.Xna.Framework.Graphics;
-using Myre.Collections;
 using Microsoft.Xna.Framework;
-using Myre.Debugging.Statistics;
-using Myre.Graphics.Lighting;
 using Microsoft.Xna.Framework.Content;
-using Myre.Graphics.Geometry;
+using Microsoft.Xna.Framework.Graphics;
+using Myre.Debugging.Statistics;
 using Myre.Entities;
-using System.Collections.ObjectModel;
+using Myre.Entities.Services;
+using Myre.Extensions;
 
 namespace Myre.Graphics
 {
@@ -27,7 +22,7 @@ namespace Myre.Graphics
         private Dictionary<string, RenderTarget2D> activeResources;
         private RendererMetadata data;
         private RendererSettings settings;
-        private Queue<RenderTarget2D> viewResults;
+        private Queue<Texture2D> viewResults;
 
         private GraphicsDevice device;
         private Quad quad;
@@ -76,7 +71,7 @@ namespace Myre.Graphics
             this.data = new RendererMetadata();
             this.settings = new RendererSettings(this);
             this.activeResources = new Dictionary<string, RenderTarget2D>();
-            this.viewResults = new Queue<RenderTarget2D>();
+            this.viewResults = new Queue<Texture2D>();
             this.quad = new Quad(device);
             //this.colourCorrection = content.Load<Effect>("Gamma");
             this.spriteBatch = new SpriteBatch(device);
@@ -111,7 +106,7 @@ namespace Myre.Graphics
 
             device.SetRenderTarget(null);
 
-            spriteBatch.Begin();
+            spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
             //colourCorrection.Parameters["Resolution"].SetValue(data.Get<Vector2>("resolution").Value);
             foreach (var view in views)
             {
@@ -121,9 +116,16 @@ namespace Myre.Graphics
                 //colourCorrection.Parameters["Texture"].SetValue(output);
                 //quad.SetPosition(viewport.Bounds);
                 //quad.Draw(colourCorrection);
+
+                if (output.Format.IsFloatingPoint())
+                    device.SamplerStates[0] = SamplerState.PointClamp;
+                else
+                    device.SamplerStates[0] = SamplerState.LinearClamp;
+
                 spriteBatch.Draw(output, viewport.Bounds, Color.White);
 
-                RenderTargetManager.RecycleTarget(output);
+                if (output is RenderTarget2D)
+                    RenderTargetManager.RecycleTarget(output as RenderTarget2D);
             }
             spriteBatch.End();
 

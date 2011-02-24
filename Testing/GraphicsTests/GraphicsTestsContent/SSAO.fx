@@ -83,7 +83,8 @@ float3 GetNormal(in float2 uv)
 
 float2 GetRandom(in float2 uv)
 {
-	return normalize(tex2D(randomSampler, Resolution * uv / 250).xy * 2.0f - 1.0f);
+	//return normalize(tex2D(randomSampler, /*Resolution * uv / 250*/ uv).xy * 2.0f - 1.0f);
+	return float2(1, 0);
 }
 
 
@@ -129,13 +130,13 @@ PS_OUTPUT main(PS_INPUT i)
 	for (int j = 0; j < iterations; ++j)
 	{
 		float2 coord1 = reflect(vec[j],rand);//*rad;
-		//float2 coord2 = float2(coord1.x*0.707 - coord1.y*0.707,
-		//			coord1.x*0.707 + coord1.y*0.707);
+		float2 coord2 = float2(coord1.x*0.707 - coord1.y*0.707,
+					coord1.x*0.707 + coord1.y*0.707);
 
 		ao += DoAmbientOcclusion(i.uv, coord1 * radius, p, n);
-		//ao += DoAmbientOcclusion(i.uv, coord2 * radius, p, n);
+		ao += DoAmbientOcclusion(i.uv, coord2 * radius, p, n);
 
-		detailAO += DoAmbientOcclusionDetail(i.uv, coord1 * detailRadius, p, n);
+		//detailAO += DoAmbientOcclusionDetail(i.uv, coord1 * detailRadius, p, n);
 		//detailAO += DoAmbientOcclusionDetail(i.uv, coord2 * detailRadius, p, n);
 	}
 
@@ -172,7 +173,7 @@ float4x4 Projection : PROJECTION;
 float FarClip : FARCLIP;
 float3 Offsets[8];
 
-texture Depth : GBUFFER_DEPTH_DOWNSAMPLE;
+texture Depth : GBUFFER_DEPTH;//_DOWNSAMPLE;
 sampler depthSampler = sampler_state
 {
 	Texture = (Depth);
