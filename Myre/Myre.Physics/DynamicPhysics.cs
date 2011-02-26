@@ -81,17 +81,17 @@ namespace Myre.Physics
         public const String ANGULAR_VELOCITY = "angular_velocity";
         public const String TIME_MULTIPLIER = "time_multiplier";
 
-        public override void Initialise(Entity.InitialisationContext context)
+        public override void CreateProperties(Entity.InitialisationContext context)
         {
-            this.position = context.GetOrCreateProperty<Vector2>(POSITION);
-            this.rotation = context.GetOrCreateProperty<float>(ROTATION);
-            this.mass = context.GetOrCreateProperty<float>(MASS);
-            this.inertiaTensor = context.GetOrCreateProperty<float>(INERTIA_TENSOR);
-            this.linearVelocity = context.GetOrCreateProperty<Vector2>(LINEAR_VELOCITY);
-            this.angularVelocity = context.GetOrCreateProperty<float>(ANGULAR_VELOCITY);
-            this.timeMultiplier = context.GetOrCreateProperty<float>(TIME_MULTIPLIER);
+            this.position = context.CreateProperty<Vector2>(POSITION);
+            this.rotation = context.CreateProperty<float>(ROTATION);
+            this.mass = context.CreateProperty<float>(MASS);
+            this.inertiaTensor = context.CreateProperty<float>(INERTIA_TENSOR);
+            this.linearVelocity = context.CreateProperty<Vector2>(LINEAR_VELOCITY);
+            this.angularVelocity = context.CreateProperty<float>(ANGULAR_VELOCITY);
+            this.timeMultiplier = context.CreateProperty<float>(TIME_MULTIPLIER);
 
-            base.Initialise(context);
+            base.CreateProperties(context);
         }
 
         public Vector2 GetVelocityAtOffset(Vector2 worldOffset)

@@ -69,20 +69,37 @@ namespace Myre.Entities.Behaviours
         /// and to query properties and behaviours.
         /// </param>
         /// <remarks>
-        /// Initialise/Shutdown may be called multiple times, as the instance is recycled.
-        /// Here the behaviour should do any setup needed to put the behaviour into its' initial state, and register to any services.
+        /// Initialise/Shutdown/CreateProperties may be called multiple times, as the instance is recycled.
+        /// Here the behaviour should do any setup needed to put the behaviour into its' initial state, including getting optional properties from the entity which may have been created by other behaviours, and register to any services.
         /// Initialise is called before the behaviour is added to the manager.
         /// </remarks>
-        public virtual void Initialise(Entity.InitialisationContext context)
+        public virtual void Initialise()
         {
             this.IsReady = true;
+        }
+
+        /// <summary>
+        /// Initialises this instance.
+        /// </summary>
+        /// <param name="context">
+        /// Initialisation context. This object can be used to publish properties to the owning entity,
+        /// and to query properties and behaviours.
+        /// </param>
+        /// <remarks>
+        /// Initialise/Shutdown/CreateProperties may be called multiple times, as the instance is recycled.
+        /// Here the behaviour should create any properties required by this behaviour to function.
+        /// Create properties is called before Initialise.
+        /// </remarks>
+        public virtual void CreateProperties(Entity.InitialisationContext context)
+        {
+
         }
 
         /// <summary>
         /// Shuts down this instance.
         /// </summary>
         /// <remarks>
-        /// Initialise/Shutdown may be called multiple times, as the instance is recycled.
+        /// Initialise/Shutdown/CreateProperties may be called multiple times, as the instance is recycled.
         /// Shutdown is called after the behaviour has been removed from the manager.
         /// </remarks>
         public virtual void Shutdown()

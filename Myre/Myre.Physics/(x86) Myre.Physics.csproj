@@ -80,6 +80,11 @@
     <Compile Include="Collisions\Contact.cs" />
     <Compile Include="Collisions\ContactTester.cs" />
     <Compile Include="Collisions\Geometry.cs" />
+    <Compile Include="Dynamics\Constraints\Damping.cs" />
+    <Compile Include="Dynamics\Constraints\PositionConstraint.cs" />
+    <Compile Include="Dynamics\Integrators\Euler.cs" />
+    <Compile Include="Dynamics\Integrators\Verlet.cs" />
+    <Compile Include="Dynamics\InverseMassCalculator.cs" />
     <Compile Include="PhysicsManager.cs" />
     <Compile Include="Collisions\Polygon.cs" />
     <Compile Include="Collisions\Projection.cs" />
@@ -99,6 +104,7 @@
       <Name>%28x86%29 Myre</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\XNA Game Studio\Microsoft.Xna.GameStudio.targets" />
   <!--

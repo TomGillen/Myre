@@ -38,12 +38,13 @@ namespace Myre.Graphics.Lighting
             set { up.Value = value; }
         }
 
-        public override void Initialise(Entity.InitialisationContext context)
+        public override void CreateProperties(Entity.InitialisationContext context)
         {
-            this.skyColour = context.GetOrCreateProperty<Vector3>("sky_colour");
-            this.groundColour = context.GetOrCreateProperty<Vector3>("ground_colour");
-            this.up = context.GetOrCreateProperty<Vector3>("up");
-            base.Initialise(context);
+            this.skyColour = context.CreateProperty<Vector3>("sky_colour");
+            this.groundColour = context.CreateProperty<Vector3>("ground_colour");
+            this.up = context.CreateProperty<Vector3>("up");
+
+            base.CreateProperties(context);
         }
 
         /*
@@ -113,14 +114,14 @@ namespace Myre.Graphics.Lighting
                 var longitude = 0.0;
                 var z = 1 - dz / 2;
                 for (int i = 0; i < samples; i++)
-			    {
+                {
                     var r = Math.Sqrt(1 - z * z);
-			        vectors[i] = new Vector3((float)(Math.Cos(longitude) * r),
+                    vectors[i] = new Vector3((float)(Math.Cos(longitude) * r),
                                              (float)(Math.Sin(longitude) * r),
                                              (float)z);
                     z -= dz;
                     longitude += dlong;
-			    }
+                }
 
                 return vectors;
             }

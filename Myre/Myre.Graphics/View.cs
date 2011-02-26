@@ -28,11 +28,12 @@ namespace Myre.Graphics
             set { viewport.Value = value; }
         }
 
-        public override void Initialise(Entity.InitialisationContext context)
+        public override void CreateProperties(Entity.InitialisationContext context)
         {
-            this.camera = context.GetOrCreateProperty<Camera>("camera");
-            this.viewport = context.GetOrCreateProperty<Viewport>("viewport");
-            base.Initialise(context);
+            this.camera = context.CreateProperty<Camera>("camera");
+            this.viewport = context.CreateProperty<Viewport>("viewport");
+
+            base.CreateProperties(context);
         }
 
         /*
