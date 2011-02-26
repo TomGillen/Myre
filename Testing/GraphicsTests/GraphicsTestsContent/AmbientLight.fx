@@ -50,6 +50,8 @@ sampler ssaoSampler = sampler_state
 
 float3 ReadSsao(float2 texCoord)
 {
+	//return tex2D(ssaoSampler, texCoord).x;
+    
 	const float2 vec[3] = {
 		float2(1,1),
 		float2(1,0),

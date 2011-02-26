@@ -128,6 +128,12 @@ namespace Myre.Graphics
         public static void RecycleTarget(RenderTarget2D target)
         {
             var info = RenderTargetInfo.FromRenderTarget(target);
+
+#if DEBUG
+            if (GetPool(info).Contains(target))
+                throw new InvalidOperationException("Render target has already been freed.");
+#endif
+
             GetPool(info).Push(target);
 
 #if PROFILE

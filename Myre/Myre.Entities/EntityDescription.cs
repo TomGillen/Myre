@@ -100,6 +100,20 @@ namespace Myre.Entities
                     return null;
             }
         }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is PropertyData)
+                return Equals(obj as PropertyData);
+            
+            return base.Equals(obj);
+        }
+
+        public bool Equals(PropertyData data)
+        {
+            return this.Name == data.Name
+                && this.DataTypeName == data.DataTypeName;
+        }
     }
 
     /// <summary>
@@ -132,6 +146,20 @@ namespace Myre.Entities
             // restore memory stream
             if (SerialisedValue != null && MemoryStream == null)
                 MemoryStream = new MemoryStream(SerialisedValue);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is BehaviourData)
+                return Equals(obj as BehaviourData);
+
+            return base.Equals(obj);
+        }
+
+        public bool Equals(BehaviourData data)
+        {
+            return this.Name == data.Name
+                && this.TypeName == data.TypeName;
         }
     }
 
@@ -234,39 +262,61 @@ namespace Myre.Entities
         }
 
         /// <summary>
-        /// Adds the behaviour.
+        /// Adds all the properties and behaviours from the specified entity description.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        public void AddFrom(EntityDescription description)
+        {
+            foreach (var item in description.Behaviours)
+                AddBehaviour(item);
+
+            foreach (var item in description.Properties)
+                AddProperty(item);
+        }
+
+        /// <summary>
+        /// Adds the behaviour, provided that such a behaviour does not already exist.
         /// </summary>
         /// <param name="behaviour">The behaviour.</param>
-        public void AddBehaviour(BehaviourData behaviour)
+        /// <returns><c>true</c> if the behaviour was added; else <c>false</c>.</returns>
+        public bool AddBehaviour(BehaviourData behaviour)
         {
             Assert.ArgumentNotNull("behaviour.Type", behaviour.Type);
 
             behaviour.Rehydrate();
+
+            if (behaviours.Contains(behaviour))
+                return false;
+
             behaviours.Add(behaviour);
             IncrementVersion();
+
+            return true;
         }
 
         /// <summary>
-        /// Adds the behaviour.
+        /// Adds the behaviour, provided that such a behaviour does not already exist.
         /// </summary>
         /// <param name="type">The type.</param>
         /// <param name="name">The name.</param>
         /// <param name="settings">The settings.</param>
-        public void AddBehaviour(Type type, string name = null)
+        /// <returns><c>true</c> if the behaviour was added; else <c>false</c>.</returns>
+        public bool AddBehaviour(Type type, string name = null)
         {
-            AddBehaviour(new BehaviourData() { Type = type, Name = name });
+            return AddBehaviour(new BehaviourData() { Type = type, Name = name });
         }
 
         /// <summary>
-        /// Adds the behaviour.
+        /// Adds the behaviour, provided that such a behaviour does not already exist.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="name">The name.</param>
         /// <param name="settings">The settings.</param>
-        public void AddBehaviour<T>(string name = null)
+        /// <returns><c>true</c> if the behaviour was added; else <c>false</c>.</returns>
+        public bool AddBehaviour<T>(string name = null)
             where T : Behaviour
         {
-            AddBehaviour(typeof(T), name);
+            return AddBehaviour(typeof(T), name);
         }
 
         /// <summary>
@@ -304,27 +354,35 @@ namespace Myre.Entities
         }
 
         /// <summary>
-        /// Adds the property.
+        /// Adds the property, provided that such a property does not already exist.
         /// </summary>
         /// <param name="property">The property.</param>
-        public void AddProperty(PropertyData property)
+        /// <returns><c>true</c> if the behaviour was added; else <c>false</c>.</returns>
+        public bool AddProperty(PropertyData property)
         {
             Assert.ArgumentNotNull("property.Name", property.Name);
             Assert.ArgumentNotNull("property.DataType", property.DataType);
 
             property.Rehydrate();
+
+            if (properties.Contains(property))
+                return false;
+
             properties.Add(property);
             IncrementVersion();
+
+            return true;
         }
 
         /// <summary>
-        /// Adds the property.
+        /// Adds the property, provided that such a behaviour does not already exist.
         /// </summary>
         /// <param name="dataType">Type of the data.</param>
         /// <param name="name">The name.</param>
         /// <param name="initialValue">The initial value.</param>
         /// <param name="copyBehaviour">The copy behaviour.</param>
-        public void AddProperty(Type dataType, string name, object initialValue = null, PropertyCopyBehaviour copyBehaviour = PropertyCopyBehaviour.None)
+        /// <returns><c>true</c> if the behaviour was added; else <c>false</c>.</returns>
+        public bool AddProperty(Type dataType, string name, object initialValue = null, PropertyCopyBehaviour copyBehaviour = PropertyCopyBehaviour.None)
         {
             var data = new PropertyData()
             {
@@ -334,20 +392,20 @@ namespace Myre.Entities
                 CopyBehaviour = copyBehaviour,
             };
 
-            data.Rehydrate();
-            properties.Add(data);
+            return AddProperty(data);
         }
 
         /// <summary>
-        /// Adds the property.
+        /// Adds the property, provided that such a behaviour does not already exist.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="name">The name.</param>
         /// <param name="initialValue">The initial value.</param>
         /// <param name="copyBehaviour">The copy behaviour.</param>
-        public void AddProperty<T>(string name, T initialValue = default(T), PropertyCopyBehaviour copyBehaviour = PropertyCopyBehaviour.None)
+        /// <returns><c>true</c> if the behaviour was added; else <c>false</c>.</returns>
+        public bool AddProperty<T>(string name, T initialValue = default(T), PropertyCopyBehaviour copyBehaviour = PropertyCopyBehaviour.None)
         {
-            AddProperty(typeof(T), name, initialValue, copyBehaviour);
+            return AddProperty(typeof(T), name, initialValue, copyBehaviour);
         }
 
         /// <summary>

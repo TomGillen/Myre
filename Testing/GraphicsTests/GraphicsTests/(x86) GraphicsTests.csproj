@@ -104,6 +104,7 @@
     <Compile Include="Tests\ParticlesTest.cs" />
     <Compile Include="Tests\RenderPhaseDependancyTest.cs" />
     <Compile Include="Tests\RenderPhaseTest.cs" />
+    <Compile Include="Tests\SsaoTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Game.ico" />

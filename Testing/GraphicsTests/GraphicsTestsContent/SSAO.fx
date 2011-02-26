@@ -52,9 +52,9 @@ float SampleRadius : SSAO_RADIUS;
 float Intensity : SSAO_INTENSITY;
 float Scale : SSAO_SCALE;
 
-float DetailSampleRadius : SSAO_DETAILRADIUS = 2.3;
-float DetailIntensity : SSAO_DETAILINTENSITY = 15;
-float DetailScale : SSAO_DETAILSCALE = 1.5;
+//float DetailSampleRadius : SSAO_DETAILRADIUS = 2.3;
+//float DetailIntensity : SSAO_DETAILINTENSITY = 15;
+//float DetailScale : SSAO_DETAILSCALE = 1.5;
 
 
 struct PS_INPUT
@@ -83,7 +83,7 @@ float3 GetNormal(in float2 uv)
 
 float2 GetRandom(in float2 uv)
 {
-	return normalize(tex2D(randomSampler, Resolution * uv / 250).xy * 2.0f - 1.0f);
+	return normalize(tex2D(randomSampler, Resolution * uv / 64).xy * 2.0f - 1.0f);
 }
 
 
@@ -109,11 +109,9 @@ PS_OUTPUT main(PS_INPUT i)
 	PS_OUTPUT o = (PS_OUTPUT)0;
  
 	o.color.rgb = 1.0f;
-	const float2 vec[8] = {
+	const float2 vec[4] = {
 		float2(1,0),float2(-1,0),
-		float2(0,1),float2(0,-1),
-		float2(1, 1), float2(-1, -1),
-		float2(1, -1), float2(-1, 1)
+		float2(0,1),float2(0,-1)
 	};
 
 	float3 p = GetPosition(i.uv);
@@ -125,21 +123,20 @@ PS_OUTPUT main(PS_INPUT i)
 
 	float ao = 0.0f;
 	float detailAO = 0.0f;
-	int iterations = 8;
+	int iterations = 4;
+	[loop]
 	for (int j = 0; j < iterations; ++j)
 	{
-		float2 coord1 = reflect(vec[j],rand);//*rad;
-		//float2 coord2 = float2(coord1.x*0.707 - coord1.y*0.707,
-		//			coord1.x*0.707 + coord1.y*0.707);
-
-		ao += DoAmbientOcclusion(i.uv, coord1 * radius, p, n);
-		//ao += DoAmbientOcclusion(i.uv, coord2 * radius, p, n);
-
-		detailAO += DoAmbientOcclusionDetail(i.uv, coord1 * detailRadius, p, n);
-		//detailAO += DoAmbientOcclusionDetail(i.uv, coord2 * detailRadius, p, n);
+		float2 coord1 = reflect(vec[j], rand) * radius;
+		float2 coord2 = float2(coord1.x*0.707 - coord1.y*0.707, coord1.x*0.707 + coord1.y*0.707);
+		ao += DoAmbientOcclusion(i.uv,coord1*0.25, p, n);
+		ao += DoAmbientOcclusion(i.uv,coord2*0.5, p, n);
+		ao += DoAmbientOcclusion(i.uv,coord1*0.75, p, n);
+		ao += DoAmbientOcclusion(i.uv,coord2, p, n); 
 	}
 
-	o.color.rgb = 1 - max(ao, detailAO) / 8;
+	ao /= (float)iterations * 4.0;
+	o.color.rgb = 1 - ao;
 	return o;
 }
 
@@ -172,7 +169,7 @@ float4x4 Projection : PROJECTION;
 float FarClip : FARCLIP;
 float3 Offsets[8];
 
-texture Depth : GBUFFER_DEPTH_DOWNSAMPLE;
+texture Depth : GBUFFER_DEPTH;//_DOWNSAMPLE;
 sampler depthSampler = sampler_state
 {
 	Texture = (Depth);

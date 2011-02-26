@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Content;
 using Myre.Graphics.Materials;
 using Ninject;
+using Myre.Graphics.PostProcessing;
 
 namespace Myre.Graphics.Lighting
 {
@@ -64,6 +65,7 @@ namespace Myre.Graphics.Lighting
             private Material lightingMaterial;
             private Material ssaoMaterial;
             private RenderTarget2D ssao;
+            private Gaussian gaussian;
 
             private Quad quad;
 
@@ -80,7 +82,8 @@ namespace Myre.Graphics.Lighting
                 lightingMaterial = new Material(content.Load<Effect>("AmbientLight"));
                 ssaoMaterial = new Material(content.Load<Effect>("SSAO"));
                 //ssaoMaterial.Parameters["Offsets"].SetValue(RandomVectors(16));
-                ssaoMaterial.Parameters["Random"].SetValue(RandomTexture(device));//content.Load<Texture2D>("randomnormals"));
+                ssaoMaterial.Parameters["Random"].SetValue(content.Load<Texture2D>("randomnormals"));//RandomTexture(device)
+                gaussian = new Gaussian(device, content);
 
                 quad = new Quad(device);
             }
@@ -130,6 +133,8 @@ namespace Myre.Graphics.Lighting
             {
                 if (renderer.Data.Get<bool>("ssao_enabled").Value)
                     DrawSsao(renderer);
+                else
+                    ssao = null;
 
                 return true;
             }
@@ -154,12 +159,6 @@ namespace Myre.Graphics.Lighting
 
                     quad.Draw(lightingMaterial, metadata);
                 }
-
-                if (ssao != null)
-                {
-                    RenderTargetManager.RecycleTarget(ssao);
-                    ssao = null;
-                }
             }
 
             public void DrawDebug(Renderer renderer)
@@ -177,11 +176,26 @@ namespace Myre.Graphics.Lighting
                 else
                     ssaoRes = fullRes;
 
-                ssao = RenderTargetManager.GetTarget(renderer.Device, (int)ssaoRes.X, (int)ssaoRes.Y);
-                renderer.Device.SetRenderTarget(ssao);
+                var unblured = RenderTargetManager.GetTarget(renderer.Device, (int)ssaoRes.X, (int)ssaoRes.Y);
+                renderer.Device.SetRenderTarget(unblured);
+                renderer.Device.Clear(Color.Transparent);
+                renderer.Device.BlendState = BlendState.Opaque;
                 resolution.Value = ssaoRes;
                 quad.Draw(ssaoMaterial, renderer.Data);
-                resolution.Value = fullRes;
+
+                var blurSigma = renderer.Data.Get<float>("ssao_blur").Value;
+                if (blurSigma != 0)
+                {
+                    var blured = RenderTargetManager.GetTarget(renderer.Device, (int)ssaoRes.X, (int)ssaoRes.Y);
+                    gaussian.Blur(unblured, blured, blurSigma);
+                    ssao = blured;
+                    resolution.Value = fullRes;
+                    RenderTargetManager.RecycleTarget(unblured);
+                }
+                else
+                    ssao = unblured;
+
+                renderer.SetResource("ssao", ssao);
             }
         }
     }

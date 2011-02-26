@@ -23,6 +23,7 @@ namespace Myre.Graphics
         private Dictionary<string, int> resourcesLastUsed;
         private List<ResourceFreePoint> freePoints;
         private RenderTargetInfo? output;
+        private string finishWith;
 
         internal RenderPlan(IKernel kernel, RenderPlan previous, RendererComponent component)
         {
@@ -91,7 +92,14 @@ namespace Myre.Graphics
             return Then(component);
         }
 
-        public RenderTarget2D Execute(Renderer renderer)
+        public RenderPlan FinishWith(string resourceName)
+        {
+            resourcesLastUsed[resourceName] = components.Count;
+            finishWith = resourceName;
+            return this;
+        }
+
+        public Texture2D Execute(Renderer renderer)
         {
             if (freePoints == null)
                 Initialise();
@@ -128,6 +136,12 @@ namespace Myre.Graphics
 
                     resourceIndex++;
                 }
+            }
+
+            if (finishWith != null)
+            {
+                activeResource.Finalise(renderer);
+                return renderer.Data.Get<Texture2D>(finishWith).Value;
             }
 
             return activeTarget;
