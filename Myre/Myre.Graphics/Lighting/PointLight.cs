@@ -35,6 +35,14 @@ namespace Myre.Graphics.Lighting
             set { position.Value = value; }
         }
 
+        public override void Initialise(Entity.InitialisationContext context)
+        {
+            colour = context.GetOrCreateProperty<Vector3>("colour");
+            position = context.GetOrCreateProperty<Vector3>("position");
+
+            base.Initialise(context);
+        }
+
         /*
         [Inject, Name("colour")]
         public Property<Vector3> Colour { get; set; }

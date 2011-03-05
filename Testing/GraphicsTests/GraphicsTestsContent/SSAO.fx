@@ -4,13 +4,13 @@
 #include "FullScreenQuad.fxh"
 #include "EncodeNormals.fxh"
 
-texture Depth : GBUFFER_DEPTH_DOWNSAMPLE;
+texture Depth : GBUFFER_DEPTH;
 sampler depthSampler = sampler_state
 {
 	Texture = (Depth);
-	MinFilter = Linear;
-	MipFilter = Linear;
-	MagFilter = Linear;
+	MinFilter = Point;
+	MipFilter = Point;
+	MagFilter = Point;
 	AddressU = Clamp;
 	AddressV = Clamp;
 };
@@ -51,21 +51,12 @@ sampler lightingSampler = sampler_state
 float SampleRadius : SSAO_RADIUS;
 float Intensity : SSAO_INTENSITY;
 float Scale : SSAO_SCALE;
+float FarClip : FARCLIP;
+float RadiosityIntensity : SSAO_RADIOSITYINTENSITY = 0.5f;
 
 //float DetailSampleRadius : SSAO_DETAILRADIUS = 2.3;
 //float DetailIntensity : SSAO_DETAILINTENSITY = 15;
 //float DetailScale : SSAO_DETAILSCALE = 1.5;
-
-
-struct PS_INPUT
-{
-	float2 uv : TEXCOORD0;
-};
-
-struct PS_OUTPUT
-{
-	float4 color : COLOR0;
-};
 
 float3 GetPosition(in float2 uv)
 {
@@ -73,7 +64,7 @@ float3 GetPosition(in float2 uv)
 	float x = lerp(frustumCorner.x, -frustumCorner.x, uv.x);
 	float y = lerp(frustumCorner.y, -frustumCorner.y, uv.y);
 
-	return tex2D(depthSampler, uv).r * float3(x, y, frustumCorner.z);
+	return tex2Dlod(depthSampler, float4(uv, 0, 0)).r * float3(x, y, frustumCorner.z);
 }
 
 float3 GetNormal(in float2 uv)
@@ -86,70 +77,110 @@ float2 GetRandom(in float2 uv)
 	return normalize(tex2D(randomSampler, Resolution * uv / 64).xy * 2.0f - 1.0f);
 }
 
-
-float DoAmbientOcclusion(in float2 tcoord, in float2 uv, in float3 p, in float3 cnorm)
+float SampleAmbientOcclusion(in float2 texCoord, in float3 position, in float3 normal)
 {
-	float2 coord = tcoord + uv;
-	float3 diff = GetPosition(coord) - p;
+	float3 diff = GetPosition(texCoord) - position;
 	const float3 v = normalize(diff);
 	const float  d = length(diff) * Scale;
-	return max(0.0, dot(cnorm,v)) * (1.0/(1.0+d)) * Intensity;
+	return max(0.0, dot(normal,v)) * (1.0/(1.0+d)) * Intensity;
 }
 
-float DoAmbientOcclusionDetail(in float2 tcoord, in float2 uv, in float3 p, in float3 cnorm)
+float4 SampleRadiosity(in float2 texCoord, in float3 position, in float3 normal)
 {
-	float3 diff = GetPosition(tcoord + uv) - p;
+	float3 diff = GetPosition(texCoord) - position;
 	const float3 v = normalize(diff);
-	const float  d = length(diff) * DetailScale;
-	return max(0.0, dot(cnorm,v)) * (1.0/(1.0+d)) * DetailIntensity;
+	const float  d = length(diff) * Scale;
+
+	float3 colour = tex2Dlod(lightingSampler, float4(texCoord, 0, 0)).rgb * RadiosityIntensity;
+	float ao = max(0.0, dot(normal, v)) * (1.0 / (1.0+d)) * Intensity;
+	return float4(colour * ao, ao);
 }
 
-PS_OUTPUT main(PS_INPUT i)
+float4 SsaoPS(in float2 in_TexCoord : TEXCOORD0) : COLOR0
 {
-	PS_OUTPUT o = (PS_OUTPUT)0;
- 
-	o.color.rgb = 1.0f;
-	const float2 vec[4] = {
+	const float2 vec[8] = {
 		float2(1,0),float2(-1,0),
-		float2(0,1),float2(0,-1)
+		float2(0,1),float2(0,-1),
+		float2(0.707,0),float2(-0.707,0),
+		float2(0,.707),float2(0,-0.707)
 	};
 
-	float3 p = GetPosition(i.uv);
-	float3 n = GetNormal(i.uv);
-	float2 rand = GetRandom(i.uv);
+	float3 p = GetPosition(in_TexCoord);
+	float3 n = GetNormal(in_TexCoord);
+	float2 rand = GetRandom(in_TexCoord);
 
-	float radius = SampleRadius / p.z;
-	float detailRadius = DetailSampleRadius / p.z;
+	float z = -p.z;
+	float radius = SampleRadius / z;
 
 	float ao = 0.0f;
-	float detailAO = 0.0f;
-	int iterations = 4;
-	[loop]
+	int iterations = lerp(4.0, 2.0, z / FarClip); 
+	//[loop]
 	for (int j = 0; j < iterations; ++j)
 	{
 		float2 coord1 = reflect(vec[j], rand) * radius;
 		float2 coord2 = float2(coord1.x*0.707 - coord1.y*0.707, coord1.x*0.707 + coord1.y*0.707);
-		ao += DoAmbientOcclusion(i.uv,coord1*0.25, p, n);
-		ao += DoAmbientOcclusion(i.uv,coord2*0.5, p, n);
-		ao += DoAmbientOcclusion(i.uv,coord1*0.75, p, n);
-		ao += DoAmbientOcclusion(i.uv,coord2, p, n); 
+		ao += SampleAmbientOcclusion(in_TexCoord + coord1*0.25, p, n);
+		ao += SampleAmbientOcclusion(in_TexCoord + coord2*0.50, p, n);
+		ao += SampleAmbientOcclusion(in_TexCoord + coord1*0.75, p, n);
+		ao += SampleAmbientOcclusion(in_TexCoord + coord2,      p, n); 
+	}
+
+	ao /= (float)(iterations * 4.0);
+	ao = 1 - ao;
+
+	return float4(0, 0, 0, ao);
+}
+
+float4 SsgiPS(in float2 in_TexCoord : TEXCOORD0) : COLOR0
+{
+	const float2 vec[8] = {
+		float2(1,0),float2(-1,0),
+		float2(0,1),float2(0,-1),
+		float2(0.707,0),float2(-0.707,0),
+		float2(0,.707),float2(0,-0.707)
+	};
+
+	float3 p = GetPosition(in_TexCoord);
+	float3 n = GetNormal(in_TexCoord);
+	float2 rand = GetRandom(in_TexCoord);
+
+	float radius = SampleRadius / p.z;
+
+	float4 ao = 0.0f;
+	int iterations = 4;//lerp(4.0, 2.0, p.z / FarClip); 
+	//[loop]
+	for (int j = 0; j < iterations; ++j)
+	{
+		float2 coord1 = reflect(vec[j], rand) * radius;
+		float2 coord2 = float2(coord1.x*0.707 - coord1.y*0.707, coord1.x*0.707 + coord1.y*0.707);
+		ao += SampleAmbientOcclusion(in_TexCoord + coord1*0.25, p, n);
+		ao += SampleAmbientOcclusion(in_TexCoord + coord2*0.50, p, n);
+		ao += SampleRadiosity(in_TexCoord + coord1*0.75, p, n);
+		ao += SampleRadiosity(in_TexCoord + coord2,      p, n); 
 	}
 
 	ao /= (float)iterations * 4.0;
-	o.color.rgb = 1 - ao;
-	return o;
+
+	return float4(ao.rgb, 1 - ao.a);
 }
 
-technique Technique1
+technique SSAO
 {
 	Pass pass1
 	{
 		VertexShader = compile vs_3_0 FullScreenQuadVS();
-		PixelShader = compile ps_3_0 main();
+		PixelShader = compile ps_3_0 SsaoPS();
 	}
 }
 
-
+technique SSGI
+{
+	Pass pass1
+	{
+		VertexShader = compile vs_3_0 FullScreenQuadVS();
+		PixelShader = compile ps_3_0 SsgiPS();
+	}
+}
 
 
 

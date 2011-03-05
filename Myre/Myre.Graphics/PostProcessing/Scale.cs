@@ -36,7 +36,7 @@ namespace Myre.Graphics.PostProcessing
             {
                 resolution *= ScaleFactor;
 
-                output = RenderTargetManager.GetTarget(device, (int)resolution.X, (int)resolution.Y, source.Format);
+                output = RenderTargetManager.GetTarget(device, (int)resolution.X, (int)resolution.Y, source.Format, name:"scaled");
                 Draw(input, output);
 
                 if (input != source)

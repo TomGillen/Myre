@@ -38,12 +38,13 @@ namespace GraphicsTests.Tests
         {
             scene = kernel.Get<TestScene>();
 
-            var plan = RenderPlan
-                .StartWith<GeometryBufferComponent>(kernel)
+            var renderer = scene.Scene.GetService<Renderer>();
+            renderer.StartPlan()
+                .Then<GeometryBufferComponent>()
+                .Then<Ssao>()
                 .Then<LightingPhase>()
-                .FinishWith("ssao");
-
-            scene.Scene.GetService<Renderer>().Plan = plan;
+                .Show("ssao")
+                .Apply();
 
             base.OnShown();
         }

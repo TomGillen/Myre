@@ -88,6 +88,9 @@
       <Name>Ground</Name>
       <Importer>XImporter</Importer>
       <Processor>MyreModelProcessor</Processor>
+      <ProcessorParameters_DiffuseTexture>ground_diffuse.jpg</ProcessorParameters_DiffuseTexture>
+      <ProcessorParameters_NormalTexture>ground_normal.jpg</ProcessorParameters_NormalTexture>
+      <ProcessorParameters_SpecularTexture>ground_specular.jpg</ProcessorParameters_SpecularTexture>
     </Compile>
     <Compile Include="Models\lizard.fbx">
       <Name>lizard</Name>

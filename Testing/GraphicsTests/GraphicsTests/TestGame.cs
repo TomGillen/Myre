@@ -46,8 +46,8 @@ namespace GraphicsTests
         {
             graphics = new GraphicsDeviceManager(this);
             graphics.PreparingDeviceSettings += new EventHandler<PreparingDeviceSettingsEventArgs>(graphics_PreparingDeviceSettings);
-            graphics.PreferredBackBufferWidth = 1280;
-            graphics.PreferredBackBufferHeight = 720;
+            graphics.PreferredBackBufferWidth = 1920; //1280;
+            graphics.PreferredBackBufferHeight = 1080;// 720;
             graphics.SynchronizeWithVerticalRetrace = false;
             graphics.IsFullScreen = false;
 

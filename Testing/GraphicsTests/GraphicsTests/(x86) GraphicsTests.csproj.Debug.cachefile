@@ -21,7 +21,6 @@ Content\SpotLight.xnb
 Content\ParticleSystem.xnb
 Content\Consolas.xnb
 Content\Red.xnb
-Content\Models\Ground.xnb
 Content\sphere.xnb
 Content\SkyboxModel.xnb
 Content\Models\lizard.xnb
@@ -88,3 +87,6 @@ Content\FBX\3CEA2131\Sponza.fbm\lion_ddn_0.xnb
 Content\Models\sponza_floor_a_diff_0.xnb
 Content\engine_diff_tex_0.xnb
 Content\turret_alt_diff_tex_0.xnb
+Content\Models\Ground.xnb
+Content\Models\ground_normal_0.xnb
+Content\Models\ground_specular_0.xnb

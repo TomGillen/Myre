@@ -260,7 +260,7 @@ namespace Myre.Graphics.Lighting
 
             private void DrawShadowMap(Renderer renderer, SpotLight light)
             {
-                var target = RenderTargetManager.GetTarget(renderer.Device, light.ShadowResolution, light.ShadowResolution, SurfaceFormat.Single, DepthFormat.Depth24Stencil8);
+                var target = RenderTargetManager.GetTarget(renderer.Device, light.ShadowResolution, light.ShadowResolution, SurfaceFormat.Single, DepthFormat.Depth24Stencil8, name:"spot light shadow map");
                 renderer.Device.SetRenderTarget(target);
                 renderer.Device.Clear(Color.Black);
 

@@ -111,6 +111,7 @@
     <Compile Include="Lighting\PointLight.cs" />
     <Compile Include="Lighting\Skybox.cs" />
     <Compile Include="Lighting\SpotLight.cs" />
+    <Compile Include="Lighting\Ssao.cs" />
     <Compile Include="Lighting\SunLight.cs" />
     <Compile Include="Lighting\ILightProvider.cs" />
     <Compile Include="Lighting\LightingPhase.cs" />

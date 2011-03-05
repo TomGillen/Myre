@@ -73,13 +73,13 @@ namespace GraphicsTests
             //skyboxEntity.AddBehaviour<Skybox>();
             //scene.Add(skyboxEntity.Create());
 
-            var sunEntity = kernel.Get<EntityDescription>();
-            sunEntity.AddProperty<Vector3>("direction", Vector3.Normalize(new Vector3(0, -1, 0)));
-            sunEntity.AddProperty<Vector3>("colour", new Vector3(1f));
-            sunEntity.AddProperty<int>("shadow_resolution", 1024);
-            sunEntity.AddBehaviour<SunLight>();
-            sun = sunEntity.Create();
-            scene.Add(sun);
+            //var sunEntity = kernel.Get<EntityDescription>();
+            //sunEntity.AddProperty<Vector3>("direction", Vector3.Normalize(new Vector3(0, -1, 0)));
+            //sunEntity.AddProperty<Vector3>("colour", new Vector3(1f));
+            //sunEntity.AddProperty<int>("shadow_resolution", 1024);
+            //sunEntity.AddBehaviour<SunLight>();
+            //sun = sunEntity.Create();
+            //scene.Add(sun);
 
             //var sun2 = sunEntity.Create();
             //sun2.GetProperty<Vector3>("direction").Value = Vector3.Normalize(new Vector3(1, -1, 0));
@@ -94,7 +94,7 @@ namespace GraphicsTests
 
             lights = new List<PointLight>();
             var rng = new Random();
-            for (int i = 0; i < 0; i++)
+            for (int i = 0; i < 8; i++)
             {
                 var entity = pointLight.Create();
                 scene.Add(entity);
@@ -104,20 +104,20 @@ namespace GraphicsTests
                 lights.Add(light);
             }
 
-            var spotLight = kernel.Get<EntityDescription>();
-            spotLight.AddProperty<Vector3>("position", new Vector3(0, 50, 50));
-            spotLight.AddProperty<Vector3>("colour", new Vector3(500));
-            spotLight.AddProperty<Vector3>("direction", new Vector3(0, -1, -1));
-            spotLight.AddProperty<float>("angle", MathHelper.PiOver4);
-            spotLight.AddProperty<Texture2D>("mask", null);//content.Load<Texture2D>("Chrysanthemum"));
-            spotLight.AddProperty<int>("shadow_resolution", 1024);
-            spotLight.AddBehaviour<SpotLight>();
-            var spotLightEntity = spotLight.Create();
-            this.spotLight = spotLightEntity.GetBehaviour<SpotLight>();
-            scene.Add(spotLightEntity);
+            //var spotLight = kernel.Get<EntityDescription>();
+            //spotLight.AddProperty<Vector3>("position", new Vector3(0, 50, 50));
+            //spotLight.AddProperty<Vector3>("colour", new Vector3(500));
+            //spotLight.AddProperty<Vector3>("direction", new Vector3(0, -1, -1));
+            //spotLight.AddProperty<float>("angle", MathHelper.PiOver4);
+            //spotLight.AddProperty<Texture2D>("mask", null);//content.Load<Texture2D>("Chrysanthemum"));
+            //spotLight.AddProperty<int>("shadow_resolution", 1024);
+            //spotLight.AddBehaviour<SpotLight>();
+            //var spotLightEntity = spotLight.Create();
+            //this.spotLight = spotLightEntity.GetBehaviour<SpotLight>();
+            //scene.Add(spotLightEntity);
 
             var ambientLight = kernel.Get<EntityDescription>();
-            ambientLight.AddProperty<Vector3>("sky_colour", new Vector3(0.5f));
+            ambientLight.AddProperty<Vector3>("sky_colour", new Vector3(0.8f));
             ambientLight.AddProperty<Vector3>("ground_colour", new Vector3(0.2f, 0.2f, 0.3f));
             ambientLight.AddProperty<Vector3>("up", Vector3.Up);
             ambientLight.AddBehaviour<AmbientLight>();
@@ -160,7 +160,7 @@ namespace GraphicsTests
             var sponza = content.Load<ModelData>(@"Sponza");
             var sponzaEntity = kernel.Get<EntityDescription>();
             sponzaEntity.AddProperty<ModelData>("model", sponza);
-            sponzaEntity.AddProperty<Matrix>("transform", Matrix.Identity * Matrix.CreateScale(5));
+            sponzaEntity.AddProperty<Matrix>("transform", Matrix.Identity * Matrix.CreateScale(1));
             sponzaEntity.AddProperty<bool>("is_static", true);
             sponzaEntity.AddBehaviour<ModelInstance>();
             scene.Add(sponzaEntity.Create());
@@ -280,11 +280,11 @@ namespace GraphicsTests
                     (float)Math.Sin(-totalTime + offset) * 100);
             }
 
-            spotLight.Position = new Vector3(
-                (float)Math.Cos(-totalTime + 5) * 50,
-                100,
-                (float)Math.Sin(-totalTime + 5) * 50);
-            spotLight.Direction = Vector3.Normalize(-spotLight.Position);
+            //spotLight.Position = new Vector3(
+            //    (float)Math.Cos(-totalTime + 5) * 50,
+            //    100,
+            //    (float)Math.Sin(-totalTime + 5) * 50);
+            //spotLight.Direction = Vector3.Normalize(-spotLight.Position);
 
             scene.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
         }

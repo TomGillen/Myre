@@ -22,15 +22,13 @@ namespace Myre.Extensions
         {
             switch (format)
             {
-                case SurfaceFormat.Color:
-                case SurfaceFormat.Rgba1010102:
-                    return false;
                 case SurfaceFormat.HalfSingle:
                 case SurfaceFormat.HalfVector2:
                 case SurfaceFormat.HalfVector4:
                 case SurfaceFormat.Single:
                 case SurfaceFormat.Vector2:
                 case SurfaceFormat.Vector4:
+                case SurfaceFormat.HdrBlendable:
                     return true;
                 default:
                     return false;

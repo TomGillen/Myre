@@ -35,20 +35,32 @@ namespace GraphicsTests.Tests
                 test.UI.Root.Gestures.Bind((g, t, d) => { drawScene = !drawScene; }, new KeyPressed(Keys.Space));
             }
 
-            protected override void SpecifyResources(IList<Input> inputs, IList<RendererComponent.Resource> outputs, out RenderTargetInfo? outputTarget)
+            //protected override void SpecifyResources(IList<Input> inputs, IList<RendererComponent.Resource> outputs, out RenderTargetInfo? outputTarget)
+            //{
+            //    inputs.Add(new Input() { Name = "tonemapped" });
+            //    inputs.Add(new Input() { Name = "luminancemap" });
+            //    outputs.Add(new Resource() { Name = "scene", IsLeftSet = true });
+            //    outputTarget = new RenderTargetInfo() { SurfaceFormat = SurfaceFormat.Rgba64, DepthFormat = DepthFormat.Depth24Stencil8 };
+            //}
+
+            //protected override bool ValidateInput(RenderTargetInfo? previousRenderTarget)
+            //{
+            //    return true;
+            //}
+
+            public override void Initialise(Renderer renderer, ResourceContext context)
             {
-                inputs.Add(new Input() { Name = "tonemapped" });
-                inputs.Add(new Input() { Name = "luminancemap" });
-                outputs.Add(new Resource() { Name = "scene", IsLeftSet = true });
-                outputTarget = new RenderTargetInfo() { SurfaceFormat = SurfaceFormat.Rgba64, DepthFormat = DepthFormat.Depth24Stencil8 };
+                // define inputs
+                context.DefineInput("tonemapped");
+                context.DefineInput("luminancemap");
+
+                // define outputs
+                context.DefineOutput("scene", surfaceFormat: SurfaceFormat.Rgba64, depthFormat: DepthFormat.Depth24Stencil8);
+                
+                base.Initialise(renderer, context);
             }
 
-            protected override bool ValidateInput(RenderTargetInfo? previousRenderTarget)
-            {
-                return true;
-            }
-
-            public override RenderTarget2D Draw(Renderer renderer)
+            public override void Draw(Renderer renderer)
             {
                 var metadata = renderer.Data;
                 var resolution = renderer.Data.Get<Vector2>("resolution").Value;
@@ -85,8 +97,7 @@ namespace GraphicsTests.Tests
 
                 batch.End();
 
-                renderer.SetResource("scene", target);
-                return target;
+                Output("scene", target);
             }
         }
 
@@ -127,15 +138,16 @@ namespace GraphicsTests.Tests
             //scene.Scene.Add(light);
 
             var toneMap = kernel.Get<ToneMapPhase>();
-            var plan = RenderPlan
-                .StartWith<GeometryBufferComponent>(kernel)
+            var renderer = scene.Scene.GetService<Renderer>();
+            renderer.StartPlan()
+                .Then<GeometryBufferComponent>()
+                //.Then<Ssao>()
                 .Then<LightingPhase>()
                 .Then(toneMap)
                 .Then(new Phase(this, device, toneMap))
                 //.Then<RestoreDepthPhase>()
-                .Then<ParticlePhase>();
-
-            scene.Scene.GetService<Renderer>().Plan = plan;
+                .Then<ParticlePhase>()
+                .Apply();
 
             base.OnShown();
         }

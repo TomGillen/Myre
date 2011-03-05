@@ -7,6 +7,7 @@ using Myre.Debugging.Statistics;
 using Myre.Entities;
 using Myre.Entities.Services;
 using Myre.Extensions;
+using Ninject;
 
 namespace Myre.Graphics
 {
@@ -19,11 +20,11 @@ namespace Myre.Graphics
             public RenderTarget2D Target;
         }
 
-        private Dictionary<string, RenderTarget2D> activeResources;
         private RendererMetadata data;
         private RendererSettings settings;
-        private Queue<Texture2D> viewResults;
+        private Queue<RenderPlan.Output> viewResults;
 
+        private IKernel kernel;
         private GraphicsDevice device;
         private Quad quad;
         //private Effect colourCorrection;
@@ -57,21 +58,17 @@ namespace Myre.Graphics
         public RenderPlan Plan
         {
             get { return plan; }
-            set
-            {
-                plan = value;
-                //plan.Apply();
-            }
+            set { plan = value; }
         }
 
-        public Renderer(GraphicsDevice device, ContentManager content, Scene scene)
+        public Renderer(IKernel kernel, GraphicsDevice device, ContentManager content, Scene scene)
         {
+            this.kernel = kernel;
             this.device = device;
             this.scene = scene;
             this.data = new RendererMetadata();
             this.settings = new RendererSettings(this);
-            this.activeResources = new Dictionary<string, RenderTarget2D>();
-            this.viewResults = new Queue<Texture2D>();
+            this.viewResults = new Queue<RenderPlan.Output>();
             this.quad = new Quad(device);
             //this.colourCorrection = content.Load<Effect>("Gamma");
             this.spriteBatch = new SpriteBatch(device);
@@ -99,8 +96,6 @@ namespace Myre.Graphics
                 view.SetMetadata(data);
                 var output = Plan.Execute(this);
 
-                activeResources.Clear();
-
                 viewResults.Enqueue(output);
             }
 
@@ -117,41 +112,22 @@ namespace Myre.Graphics
                 //quad.SetPosition(viewport.Bounds);
                 //quad.Draw(colourCorrection);
 
-                if (output.Format.IsFloatingPoint())
+                if (output.Image.Format.IsFloatingPoint())
                     device.SamplerStates[0] = SamplerState.PointClamp;
                 else
                     device.SamplerStates[0] = SamplerState.LinearClamp;
 
-                spriteBatch.Draw(output, viewport.Bounds, Color.White);
-
-                if (output is RenderTarget2D)
-                    RenderTargetManager.RecycleTarget(output as RenderTarget2D);
+                spriteBatch.Draw(output.Image, viewport.Bounds, Color.White);
+                output.Finalise();
             }
             spriteBatch.End();
 
             base.Draw();
         }
 
-        public void SetResource(string name, RenderTarget2D target)
+        public RenderPlan StartPlan()
         {
-            activeResources[name] = target;
-            data.Set<Texture2D>(name, target);
-        }
-
-        internal RenderTarget2D GetResource(string name)
-        {
-            return activeResources[name];
-        }
-
-        public void FreeResource(string name)
-        {
-            RenderTarget2D target;
-            if (activeResources.TryGetValue(name, out target))
-            {
-                RenderTargetManager.RecycleTarget(target);
-                data.Set<Texture2D>(name, null);
-                activeResources.Remove(name);
-            }
+            return new RenderPlan(kernel, this);
         }
     }
 }

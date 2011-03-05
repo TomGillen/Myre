@@ -38,7 +38,7 @@ namespace Myre.Graphics.PostProcessing
 
             effect.Parameters["Resolution"].SetValue(new Vector2(width, height));
 
-            var intermediate = RenderTargetManager.GetTarget(device, width, height, destination.Format);
+            var intermediate = RenderTargetManager.GetTarget(device, width, height, destination.Format, name:"gaussian intermediate");
             device.SetRenderTarget(intermediate);
 
             effect.Parameters["Texture"].SetValue(source);

@@ -15,25 +15,6 @@ namespace Myre.Graphics
     public class GeometryBufferComponent
         : RendererComponent
     {
-        protected override void SpecifyResources(IList<Input> inputs, IList<RendererComponent.Resource> outputs, out RenderTargetInfo? output)
-        {
-            outputs.Add(new Resource() { Name = "gbuffer_depth" });
-            outputs.Add(new Resource() { Name = "gbuffer_normals" });
-            outputs.Add(new Resource() { Name = "gbuffer_diffuse" });
-            outputs.Add(new Resource() { Name = "gbuffer_depth_downsample", IsLeftSet = true });
-
-            output = new RenderTargetInfo()
-            {
-                SurfaceFormat = SurfaceFormat.Rg32,
-                DepthFormat = DepthFormat.Depth24Stencil8
-            };
-        }
-
-        protected internal override bool ValidateInput(RenderTargetInfo? previousRenderTarget)
-        {
-            return true;
-        }
-
         private Resample scale;
         private Material clear;
         private Quad quad;
@@ -45,7 +26,18 @@ namespace Myre.Graphics
             quad = new Quad(device);
         }
 
-        public override RenderTarget2D Draw(Renderer renderer)
+        public override void Initialise(Renderer renderer, ResourceContext context)
+        {
+            // define outputs
+            context.DefineOutput("gbuffer_depth", isLeftSet: false, surfaceFormat: SurfaceFormat.Single, depthFormat: DepthFormat.Depth24Stencil8);
+            context.DefineOutput("gbuffer_normals", isLeftSet: false, surfaceFormat: SurfaceFormat.Rgba1010102);
+            context.DefineOutput("gbuffer_diffuse", isLeftSet: false, surfaceFormat: SurfaceFormat.Color);
+            context.DefineOutput("gbuffer_depth_downsample", isLeftSet: true, surfaceFormat: SurfaceFormat.Single);
+
+            base.Initialise(renderer, context);
+        }
+
+        public override void Draw(Renderer renderer)
         {
             var metadata = renderer.Data;
             var device = renderer.Device;
@@ -54,37 +46,42 @@ namespace Myre.Graphics
             var width = (int)resolution.X;
             var height = (int)resolution.Y;
 
-            var depth = RenderTargetManager.GetTarget(device, width, height, SurfaceFormat.Single, DepthFormat.Depth24Stencil8);
-            var normals = RenderTargetManager.GetTarget(device, width, height, SurfaceFormat.Rgba1010102);
-            var diffuse = RenderTargetManager.GetTarget(device, width, height, SurfaceFormat.Color);
+            var depth = RenderTargetManager.GetTarget(device, width, height, SurfaceFormat.Single, DepthFormat.Depth24Stencil8, name:"depth");
+            var normals = RenderTargetManager.GetTarget(device, width, height, SurfaceFormat.Rgba1010102, name:"normals");
+            var diffuse = RenderTargetManager.GetTarget(device, width, height, SurfaceFormat.Color, name:"diffuse");
 
             device.SetRenderTargets(depth, normals, diffuse);
-
-            renderer.SetResource("gbuffer_depth", depth);
-            renderer.SetResource("gbuffer_normals", normals);
-            renderer.SetResource("gbuffer_diffuse", diffuse);
-
-            renderer.Device.BlendState = BlendState.Opaque;
-
-            renderer.Device.Clear(Color.Black);
+            device.BlendState = BlendState.Opaque;
+            device.Clear(Color.Black);
 
             device.DepthStencilState = DepthStencilState.None;
             quad.Draw(clear, metadata);
             device.DepthStencilState = DepthStencilState.Default;
 
+            var blend = new BlendState();
+            blend.ColorBlendFunction = BlendFunction.Add;
+            blend.ColorSourceBlend = Blend.One;
+            blend.ColorDestinationBlend = Blend.Zero;
+            blend.AlphaBlendFunction = BlendFunction.Add;
+            blend.AlphaSourceBlend = Blend.One;
+            blend.AlphaDestinationBlend = Blend.Zero;
+            device.BlendState = blend;
+
             foreach (var geometryProvider in renderer.Scene.FindManagers<IGeometryProvider>())
                 geometryProvider.Draw("gbuffer", metadata);
 
-            return DownsampleDepth(renderer, depth);
+            Output("gbuffer_depth", depth);
+            Output("gbuffer_normals", normals);
+            Output("gbuffer_diffuse", diffuse);
+
+            DownsampleDepth(renderer, depth);
         }
 
-        private RenderTarget2D DownsampleDepth(Renderer renderer, RenderTarget2D depth)
+        private void DownsampleDepth(Renderer renderer, RenderTarget2D depth)
         {
-            var downsampled = RenderTargetManager.GetTarget(renderer.Device, depth.Width / 2, depth.Height / 2, SurfaceFormat.Rg32);
+            var downsampled = RenderTargetManager.GetTarget(renderer.Device, depth.Width / 2, depth.Height / 2, SurfaceFormat.Single, name:"downsample depth");
             scale.Scale(depth, downsampled);
-            renderer.SetResource("gbuffer_depth_downsample", downsampled);
-
-            return downsampled;
+            Output("gbuffer_depth_downsample", downsampled);
         }
     }
 }

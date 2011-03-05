@@ -27,23 +27,37 @@ namespace GraphicsTests.Tests
                 batch = new SpriteBatch(device);
             }
 
-            protected override void SpecifyResources(IList<Input> inputs, IList<RendererComponent.Resource> outputs, out RenderTargetInfo? outputTarget)
-            {
-                inputs.Add(new Input() { Name = "gbuffer_depth" });
-                inputs.Add(new Input() { Name = "gbuffer_depth_downsample" });
-                inputs.Add(new Input() { Name = "gbuffer_normals" });
-                inputs.Add(new Input() { Name = "gbuffer_diffuse" });
-                outputs.Add(new Resource() { Name = "scene", IsLeftSet = true });
+            //protected override void SpecifyResources(IList<Input> inputs, IList<RendererComponent.Resource> outputs, out RenderTargetInfo? outputTarget)
+            //{
+            //    inputs.Add(new Input() { Name = "gbuffer_depth" });
+            //    inputs.Add(new Input() { Name = "gbuffer_depth_downsample" });
+            //    inputs.Add(new Input() { Name = "gbuffer_normals" });
+            //    inputs.Add(new Input() { Name = "gbuffer_diffuse" });
+            //    outputs.Add(new Resource() { Name = "scene", IsLeftSet = true });
 
-                outputTarget = new RenderTargetInfo();
+            //    outputTarget = new RenderTargetInfo();
+            //}
+
+            //protected override bool ValidateInput(RenderTargetInfo? previousRenderTarget)
+            //{
+            //    return true;
+            //}
+
+            public override void Initialise(Renderer renderer, ResourceContext context)
+            {
+                // define inputs
+                context.DefineInput("gbuffer_depth");
+                context.DefineInput("gbuffer_depth_downsample");
+                context.DefineInput("gbuffer_normals");
+                context.DefineInput("gbuffer_diffuse");
+
+                // define outputs
+                context.DefineOutput("scene");
+                
+                base.Initialise(renderer, context);
             }
 
-            protected override bool ValidateInput(RenderTargetInfo? previousRenderTarget)
-            {
-                return true;
-            }
-
-            public override RenderTarget2D Draw(Renderer renderer)
+            public override void Draw(Renderer renderer)
             {
                 var metadata = renderer.Data;
                 var resolution = renderer.Data.Get<Vector2>("resolution").Value;
@@ -73,8 +87,7 @@ namespace GraphicsTests.Tests
                 batch.Draw(diffuse, new Rectangle(0, halfHeight, halfWidth, halfHeight), Color.White);
                 batch.End();
 
-                renderer.SetResource("scene", target);
-                return target;
+                Output("scene", target);
             }
 
             private void Save(Texture2D texture, string name)
@@ -105,11 +118,11 @@ namespace GraphicsTests.Tests
         {
             scene = kernel.Get<TestScene>();
 
-            var plan = RenderPlan
-                .StartWith<GeometryBufferComponent>(kernel)
-                .Then<Phase>();
-
-            scene.Scene.GetService<Renderer>().Plan = plan;
+            var renderer = scene.Scene.GetService<Renderer>();
+            renderer.StartPlan()
+                .Then<GeometryBufferComponent>()
+                .Then<Phase>()
+                .Apply();
 
             base.OnShown();
         }
