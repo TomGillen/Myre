@@ -141,7 +141,7 @@ namespace GraphicsTests.Tests
             var renderer = scene.Scene.GetService<Renderer>();
             renderer.StartPlan()
                 .Then<GeometryBufferComponent>()
-                //.Then<Ssao>()
+                .Then<Ssao>()
                 .Then<LightingPhase>()
                 .Then(toneMap)
                 .Then(new Phase(this, device, toneMap))

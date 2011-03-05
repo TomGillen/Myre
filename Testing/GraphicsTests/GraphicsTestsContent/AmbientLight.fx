@@ -50,8 +50,20 @@ sampler ssaoSampler = sampler_state
 
 float4 ReadSsao(float2 texCoord)
 {
-	return tex2D(ssaoSampler, texCoord);
+	//return tex2D(ssaoSampler, texCoord);
     
+	float4 ao = 0;
+	for (int i = 0; i < 4; i++)
+	{
+		for (int j = 0; j < 4; j++)
+		{
+			float2 coord = texCoord + float2(i / Resolution.x, j / Resolution.y);
+			ao += tex2D(ssaoSampler, coord);
+		}
+	}
+
+	return ao / 16;
+	
 	/*
 	const float2 vec[3] = {
 		float2(1,1),
@@ -59,10 +71,10 @@ float4 ReadSsao(float2 texCoord)
 		float2(0,1),
 	};
 	  
-	float4 ao = tex2D(ssaoSampler, texCoord).x;
+	float4 ao = tex2D(ssaoSampler, texCoord);
 	for (int k=0;k<3;k++){
 		float2 tcoord = texCoord + float2(vec[k].x / Resolution.x, vec[k].y / Resolution.y);
-		ao += tex2D(ssaoSampler, tcoord).rgb;
+		ao += tex2D(ssaoSampler, tcoord);
 	}
 
 	return ao / 4;

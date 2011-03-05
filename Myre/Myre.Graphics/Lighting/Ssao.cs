@@ -21,9 +21,51 @@ namespace Myre.Graphics.Lighting
         public Ssao(GraphicsDevice device, ContentManager content)
         {
             this.ssaoMaterial = new Material(content.Load<Effect>("SSAO"));
-            this.ssaoMaterial.Parameters["Random"].SetValue(content.Load<Texture2D>("randomnormals"));
+            this.ssaoMaterial.Parameters["Random"].SetValue(GenerateRandomNormals(device, 4, 4));//content.Load<Texture2D>("randomnormals"));
+            this.ssaoMaterial.Parameters["RandomResolution"].SetValue(4);
+            this.ssaoMaterial.Parameters["Samples"].SetValue(GenerateRandomSamplePositions(16));
             this.gaussian = new Gaussian(device, content);
             this.quad = new Quad(device);
+        }
+
+        private Texture2D GenerateRandomNormals(GraphicsDevice device, int width, int height)
+        {
+            Random rand = new Random();
+
+            Color[] colours = new Color[width * height];
+            for (int i = 0; i < colours.Length; i++)
+            {
+                var vector = new Vector2(
+                    (float)rand.NextDouble() * 2 - 1,
+                    (float)rand.NextDouble() * 2 - 1);
+
+                Vector2.Normalize(ref vector, out vector);
+
+                colours[i] = new Color(vector.X, vector.Y, 0);
+            }
+
+            var texture = new Texture2D(device, width, height);
+            texture.SetData(colours);
+
+            return texture;
+        }
+
+        private Vector2[] GenerateRandomSamplePositions(int numSamples)
+        {
+            Random rand = new Random();
+            Vector2[] samples = new Vector2[numSamples];
+
+            for (int i = 0; i < numSamples; i++)
+            {
+                var angle = rand.NextDouble();
+                var vector = new Vector2((float)Math.Sin(angle), (float)Math.Cos(angle));
+
+                var length = i / (float)numSamples;
+                length = MathHelper.Lerp(0.1f, 1.0f, length * length);
+                samples[i] = vector * length;
+            }
+
+            return samples;
         }
 
         public override void Initialise(Renderer renderer, ResourceContext context)
