@@ -141,12 +141,14 @@ namespace GraphicsTests.Tests
             var renderer = scene.Scene.GetService<Renderer>();
             renderer.StartPlan()
                 .Then<GeometryBufferComponent>()
+                //.Then<EdgeDetectComponent>()
                 .Then<Ssao>()
-                .Then<LightingPhase>()
+                .Then<LightingComponent>()
                 .Then(toneMap)
                 .Then(new Phase(this, device, toneMap))
                 //.Then<RestoreDepthPhase>()
-                .Then<ParticlePhase>()
+                .Then<ParticleComponent>()
+                //.Then<AntiAliasComponent>()
                 .Apply();
 
             base.OnShown();

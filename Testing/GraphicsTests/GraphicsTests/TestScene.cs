@@ -100,7 +100,7 @@ namespace GraphicsTests
                 scene.Add(entity);
 
                 var light = entity.GetBehaviour<PointLight>();
-                light.Colour = Vector3.Normalize(new Vector3(0.1f + (float)rng.NextDouble(), 0.1f + (float)rng.NextDouble(), 0.1f + (float)rng.NextDouble())) * 5;
+                light.Colour = Vector3.Normalize(new Vector3(0.1f + (float)rng.NextDouble(), 0.1f + (float)rng.NextDouble(), 0.1f + (float)rng.NextDouble())) * 10;
                 lights.Add(light);
             }
 

@@ -12,22 +12,24 @@ using Myre.Graphics.Geometry;
 using System.IO;
 using Myre.Graphics.Lighting;
 using Microsoft.Xna.Framework.Input;
+using Myre.UI.Gestures;
+using Myre.Graphics.Particles;
 
 namespace GraphicsTests.Tests
 {
-    class SsaoTest
-    : TestScreen
+    class AntiAliasTest
+        : TestScreen
     {
         private IKernel kernel;
         private ContentManager content;
         private GraphicsDevice device;
         private TestScene scene;
 
-        public SsaoTest(
+        public AntiAliasTest(
             IKernel kernel,
             ContentManager content,
             GraphicsDevice device)
-            : base("SSAO", kernel)
+            : base("Anti-Alias Test", kernel)
         {
             this.kernel = kernel;
             this.content = content;
@@ -38,13 +40,16 @@ namespace GraphicsTests.Tests
         {
             scene = kernel.Get<TestScene>();
 
+            var toneMap = kernel.Get<ToneMapPhase>();
             var renderer = scene.Scene.GetService<Renderer>();
             renderer.StartPlan()
                 .Then<GeometryBufferComponent>()
                 .Then<EdgeDetectComponent>()
                 .Then<Ssao>()
                 .Then<LightingComponent>()
-                .Show("ssao")
+                .Then(toneMap)
+                .Then<AntiAliasComponent>()
+                .Show("antialiased")
                 .Apply();
 
             base.OnShown();

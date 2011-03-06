@@ -79,6 +79,21 @@
       <Importer>EffectImporter</Importer>
       <Processor>EffectProcessor</Processor>
     </Compile>
+    <Compile Include="EdgeDetect.fx">
+      <Name>EdgeDetect</Name>
+      <Importer>EffectImporter</Importer>
+      <Processor>EffectProcessor</Processor>
+    </Compile>
+    <Compile Include="EdgeBlur.fx">
+      <Name>EdgeBlur</Name>
+      <Importer>EffectImporter</Importer>
+      <Processor>EffectProcessor</Processor>
+    </Compile>
+    <Compile Include="BlurSSAO.fx">
+      <Name>BlurSSAO</Name>
+      <Importer>EffectImporter</Importer>
+      <Processor>EffectProcessor</Processor>
+    </Compile>
     <None Include="EncodeNormals.fxh">
       <Name>EncodeNormals</Name>
       <Importer>EffectImporter</Importer>

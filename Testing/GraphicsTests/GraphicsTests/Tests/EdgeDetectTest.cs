@@ -15,7 +15,7 @@ using Microsoft.Xna.Framework.Input;
 
 namespace GraphicsTests.Tests
 {
-    class SsaoTest
+    class EdgeDetectTest
     : TestScreen
     {
         private IKernel kernel;
@@ -23,11 +23,11 @@ namespace GraphicsTests.Tests
         private GraphicsDevice device;
         private TestScene scene;
 
-        public SsaoTest(
+        public EdgeDetectTest(
             IKernel kernel,
             ContentManager content,
             GraphicsDevice device)
-            : base("SSAO", kernel)
+            : base("Edge Detect", kernel)
         {
             this.kernel = kernel;
             this.content = content;
@@ -42,9 +42,7 @@ namespace GraphicsTests.Tests
             renderer.StartPlan()
                 .Then<GeometryBufferComponent>()
                 .Then<EdgeDetectComponent>()
-                .Then<Ssao>()
-                .Then<LightingComponent>()
-                .Show("ssao")
+                .Show("edges")
                 .Apply();
 
             base.OnShown();

@@ -94,6 +94,8 @@
   <ItemGroup>
     <Compile Include="Camera.cs" />
     <Compile Include="CreateTargetComponent.cs" />
+    <Compile Include="AntiAliasComponent.cs" />
+    <Compile Include="EdgeDetectComponent.cs" />
     <Compile Include="GeometryBufferComponent.cs" />
     <Compile Include="Geometry\BoundingVolume.cs" />
     <Compile Include="Geometry\IBoxIntersectTester.cs" />
@@ -114,7 +116,7 @@
     <Compile Include="Lighting\Ssao.cs" />
     <Compile Include="Lighting\SunLight.cs" />
     <Compile Include="Lighting\ILightProvider.cs" />
-    <Compile Include="Lighting\LightingPhase.cs" />
+    <Compile Include="Lighting\LightingComponent.cs" />
     <Compile Include="Lighting\ToneMapPhase.cs" />
     <Compile Include="Materials\Material.cs" />
     <Compile Include="Materials\MaterialParameter.cs" />

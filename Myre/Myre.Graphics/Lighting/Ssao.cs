@@ -14,6 +14,7 @@ namespace Myre.Graphics.Lighting
         : RendererComponent
     {
         private Material ssaoMaterial;
+        private Material ssaoBlurMaterial;
         private RenderTarget2D ssao;
         private Gaussian gaussian;
         private Quad quad;
@@ -21,6 +22,7 @@ namespace Myre.Graphics.Lighting
         public Ssao(GraphicsDevice device, ContentManager content)
         {
             this.ssaoMaterial = new Material(content.Load<Effect>("SSAO"));
+            this.ssaoBlurMaterial = new Material(content.Load<Effect>("BlurSSAO"));
             this.ssaoMaterial.Parameters["Random"].SetValue(GenerateRandomNormals(device, 4, 4));//content.Load<Texture2D>("randomnormals"));
             this.ssaoMaterial.Parameters["RandomResolution"].SetValue(4);
             this.ssaoMaterial.Parameters["Samples"].SetValue(GenerateRandomSamplePositions(16));
@@ -88,6 +90,9 @@ namespace Myre.Graphics.Lighting
             context.DefineInput("gbuffer_normals");
             context.DefineInput("gbuffer_diffuse");
 
+            if (context.AvailableResources.Any(r => r.Name == "edges"))
+                context.DefineInput("edges");
+
             // define outputs
             context.DefineOutput("ssao");
 
@@ -109,16 +114,12 @@ namespace Myre.Graphics.Lighting
             renderer.Device.BlendState = BlendState.Opaque;
             quad.Draw(ssaoMaterial, renderer.Data);
 
-            //var blurSigma = renderer.Data.Get<float>("ssao_blur").Value;
-            //if (blurSigma != 0)
-            //{
-            //    var blured = RenderTargetManager.GetTarget(renderer.Device, (int)resolution.X, (int)resolution.Y, name: "ssao blurred");//, SurfaceFormat.HalfVector4);
-            //    gaussian.Blur(unblured, blured, blurSigma);
-            //    ssao = blured;
-            //    RenderTargetManager.RecycleTarget(unblured);
-            //}
-            //else
-                ssao = unblured;
+            ssao = RenderTargetManager.GetTarget(renderer.Device, (int)resolution.X, (int)resolution.Y, SurfaceFormat.HalfVector4, name: "ssao");
+            renderer.Device.SetRenderTarget(ssao);
+            renderer.Device.Clear(Color.Transparent);
+            ssaoBlurMaterial.Parameters["SSAO"].SetValue(unblured);
+            quad.Draw(ssaoBlurMaterial, renderer.Data);
+            RenderTargetManager.RecycleTarget(unblured);
 
             Output("ssao", ssao);
         }

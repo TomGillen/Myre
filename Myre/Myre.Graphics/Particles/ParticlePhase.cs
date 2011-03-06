@@ -9,13 +9,13 @@ using Microsoft.Xna.Framework;
 
 namespace Myre.Graphics.Particles
 {
-    public class ParticlePhase
+    public class ParticleComponent
         : RendererComponent
     {
         //private Model tank;
         private ReadOnlyCollection<ParticleEmitter.Manager> managers;
 
-        public ParticlePhase(ContentManager content)
+        public ParticleComponent(ContentManager content)
         {
             //tank = content.Load<Model>("tank");
         }

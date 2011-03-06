@@ -116,7 +116,7 @@ namespace Myre.Graphics.Lighting
                 var device = renderer.Device;
 
                 var previousDepthState = device.DepthStencilState;
-                device.DepthStencilState = LightingPhase.CullGeometry;
+                device.DepthStencilState = LightingComponent.CullGeometry;
                 //device.DepthStencilState = DepthStencilState.None;
 
                 var previousRasterState = device.RasterizerState;

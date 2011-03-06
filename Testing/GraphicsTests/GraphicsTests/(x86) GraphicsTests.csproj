@@ -96,6 +96,8 @@
     <Compile Include="TestGame.cs" />
     <Compile Include="TestScene.cs" />
     <Compile Include="TestScreen.cs" />
+    <Compile Include="Tests\AntiAliasTest.cs" />
+    <Compile Include="Tests\EdgeDetectTest.cs" />
     <Compile Include="Tests\GBufferTest.cs" />
     <Compile Include="Tests\LightingTest.cs" />
     <Compile Include="Tests\LuminanceTest.cs" />

@@ -90,3 +90,6 @@ Content\turret_alt_diff_tex_0.xnb
 Content\Models\Ground.xnb
 Content\Models\ground_normal_0.xnb
 Content\Models\ground_specular_0.xnb
+Content\EdgeDetect.xnb
+Content\EdgeBlur.xnb
+Content\BlurSSAO.xnb

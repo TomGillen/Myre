@@ -11,7 +11,7 @@ using Myre.Extensions;
 
 namespace Myre.Graphics.Lighting
 {
-    public class LightingPhase
+    public class LightingComponent
        : RendererComponent
     {
         //protected override void SpecifyResources(IList<Input> inputs, IList<RendererComponent.Resource> outputs, out RenderTargetInfo? outputTarget)
@@ -74,7 +74,7 @@ namespace Myre.Graphics.Lighting
             StencilFunction = CompareFunction.NotEqual
         };
 
-        public LightingPhase(
+        public LightingComponent(
             GraphicsDevice device,
             ContentManager content)
         {
