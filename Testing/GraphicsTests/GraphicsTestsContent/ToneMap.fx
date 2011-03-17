@@ -32,7 +32,7 @@ sampler bloomSampler = sampler_state
 
 float4 ToneMapPS(in float2 in_TexCoord : TEXCOORD0) : COLOR0
 {
-	float averageLuminance = tex2D(luminanceSampler, float2(0.5, 0.5)).x; //exp(tex2Dlod(luminanceSampler, float4(in_TexCoord, 0, 11)).x);
+	float averageLuminance = tex2D(luminanceSampler, float2(0.5, 0.5)).x; //exp2(tex2Dlod(luminanceSampler, float4(in_TexCoord, 0, 11)).x);
 	float3 colour = tex2D(textureSampler, in_TexCoord).rgb;
 	colour = CalcExposedColor(colour, averageLuminance, 0);
 	colour = ToneMapFilmicALU(colour);
@@ -40,7 +40,7 @@ float4 ToneMapPS(in float2 in_TexCoord : TEXCOORD0) : COLOR0
 	float3 bloom = tex2D(bloomSampler, in_TexCoord).rgb;
 	colour += bloom * BloomMagnitude;
 
-	return float4(LinearToGamma(colour), 1);
+	return float4(colour, 1);//LinearToGamma(colour), 1);
 }
 
 technique Technique1

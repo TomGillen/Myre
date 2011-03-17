@@ -36,6 +36,7 @@ namespace Myre.Graphics.Lighting
 
         Quad quad;
         Material calculateLuminance;
+        Material readLuminance;
         Material adaptLuminance;
         Material toneMap;
         Effect bloom;
@@ -48,7 +49,7 @@ namespace Myre.Graphics.Lighting
 
         public RenderTarget2D AdaptedLuminance
         {
-            get { return adaptedLuminance[previous]; }
+            get { return adaptedLuminance[current]; }
         }
 
         public ToneMapPhase(
@@ -59,6 +60,7 @@ namespace Myre.Graphics.Lighting
             var effect = content.Load<Effect>("CalculateLuminance");
             calculateLuminance = new Material(effect.Clone(), "ExtractLuminance");
             adaptLuminance = new Material(effect.Clone(), "AdaptLuminance");
+            readLuminance = new Material(effect.Clone(), "ReadLuminance");
             toneMap = new Material(content.Load<Effect>("ToneMap"), null);
             bloom = content.Load<Effect>("Bloom");
             gaussian = new Gaussian(device, content);
@@ -77,16 +79,18 @@ namespace Myre.Graphics.Lighting
         {
             // define settings
             var settings = renderer.Settings;
-            settings.Add("hdr_adaptionrate", "The rate at which the cameras' exposure adapts to changes in the scene luminance.", 3f);
-            settings.Add("hdr_bloomthreshold", "The under-exposure applied during bloom thresholding.", 1f);
-            settings.Add("hdr_bloommagnitude", "The overall brightness of the bloom effect.", 0.5f);
+            settings.Add("hdr_adaptionrate", "The rate at which the cameras' exposure adapts to changes in the scene luminance.", 1f);
+            settings.Add("hdr_bloomthreshold", "The under-exposure applied during bloom thresholding.", 6f);
+            settings.Add("hdr_bloommagnitude", "The overall brightness of the bloom effect.", 3f);
             settings.Add("hdr_bloomblurammount", "The ammount to blur the bloom target.", 2.2f);
+            settings.Add("hdr_minexposure", "The minimum exposure the camera can adapt to.", -1f);
+            settings.Add("hdr_maxexposure", "The maximum exposure the camera can adapt to.", 1.1f);
 
             // define inputs
             context.DefineInput("lightbuffer");
 
             // define outputs
-            context.DefineOutput("luminancemap", isLeftSet: false, width: 1024, height: 1024, surfaceFormat: SurfaceFormat.Single);
+            //context.DefineOutput("luminancemap", isLeftSet: false, width: 1024, height: 1024, surfaceFormat: SurfaceFormat.Single);
             context.DefineOutput("luminance", isLeftSet: false, width: 1, height: 1, surfaceFormat: SurfaceFormat.Single);
             context.DefineOutput("bloom", isLeftSet: false, surfaceFormat: SurfaceFormat.Rgba64);
             context.DefineOutput("tonemapped", isLeftSet: true);
@@ -114,43 +118,27 @@ namespace Myre.Graphics.Lighting
             current = tmp;
 
             // calculate luminance map
-            var luminanceMap = RenderTargetManager.GetTarget(device, 1024, 1024, SurfaceFormat.Single, mipMap: false, name:"luminance map");
+            var luminanceMap = RenderTargetManager.GetTarget(device, 1024, 1024, SurfaceFormat.Single, mipMap: true, name:"luminance map");
             device.SetRenderTarget(luminanceMap);
             device.BlendState = BlendState.Opaque;
             device.Clear(Color.Transparent);
             calculateLuminance.Parameters["Texture"].SetValue(lightBuffer);
             quad.Draw(calculateLuminance, renderer.Data);
-            Output("luminancemap", luminanceMap);
+            Output("luminance", luminanceMap);
 
-            luminanceMap = DownsampleLuminance(renderer, luminanceMap);
+            // read bottom mipmap to find average luminance
+            var averageLuminance = RenderTargetManager.GetTarget(device, 1, 1, SurfaceFormat.Single, name: "average luminance");
+            device.SetRenderTarget(averageLuminance);
+            readLuminance.Parameters["Texture"].SetValue(luminanceMap);
+            quad.Draw(readLuminance, renderer.Data);
 
             // adapt towards the current luminance
             device.SetRenderTarget(adaptedLuminance[current]);
-            adaptLuminance.Parameters["Texture"].SetValue(luminanceMap);
-            adaptLuminance.Parameters["PreviousLuminance"].SetValue(adaptedLuminance[previous]);
-            var oldResolution = resolution.Value;
-            resolution.Value = Vector2.One;
+            adaptLuminance.Parameters["Texture"].SetValue(averageLuminance);
+            adaptLuminance.Parameters["PreviousAdaption"].SetValue(adaptedLuminance[previous]);
             quad.Draw(adaptLuminance, renderer.Data);
 
-            resolution.Value = oldResolution;
-
-            // retrieve the previous frames luminance
-            adaptedLuminance[previous].GetData<float>(
-               adaptedLuminance[previous].LevelCount - 1,
-               new Rectangle(0, 0, 1, 1),
-               textureData,
-               0,
-               1);
-            renderer.Data.Set<float>("adaptedluminance", textureData[0]);
-        }
-
-        private RenderTarget2D DownsampleLuminance(Renderer renderer, RenderTarget2D luminanceMap)
-        {
-            var downsampled = RenderTargetManager.GetTarget(renderer.Device, 1, 1, luminanceMap.Format, name:"downsample luminance map");
-            scale.Scale(luminanceMap, downsampled);
-            Output("luminance", downsampled);
-
-            return downsampled;
+            RenderTargetManager.RecycleTarget(averageLuminance);
         }
 
         private void Bloom(Renderer renderer, Box<Vector2> resolution, GraphicsDevice device, Texture2D lightBuffer)
@@ -164,6 +152,8 @@ namespace Myre.Graphics.Lighting
             device.SetRenderTarget(thresholded);
             bloom.Parameters["Resolution"].SetValue(halfResolution);
             bloom.Parameters["Threshold"].SetValue(renderer.Data.Get<float>("hdr_bloomthreshold").Value);
+            bloom.Parameters["MinExposure"].SetValue(renderer.Data.Get<float>("hdr_minexposure").Value);
+            bloom.Parameters["MaxExposure"].SetValue(renderer.Data.Get<float>("hdr_maxexposure").Value);
             bloom.Parameters["Texture"].SetValue(lightBuffer);
             bloom.Parameters["Luminance"].SetValue(adaptedLuminance[current]);
             bloom.CurrentTechnique = bloom.Techniques["ThresholdDownsample2X"];
@@ -201,6 +191,8 @@ namespace Myre.Graphics.Lighting
             device.SetRenderTarget(toneMapped);
             toneMap.Parameters["Texture"].SetValue(lightBuffer);
             toneMap.Parameters["Luminance"].SetValue(adaptedLuminance[current]);
+            toneMap.Parameters["MinExposure"].SetValue(renderer.Data.Get<float>("hdr_minexposure").Value);
+            toneMap.Parameters["MaxExposure"].SetValue(renderer.Data.Get<float>("hdr_maxexposure").Value);
             quad.Draw(toneMap, renderer.Data);
             Output("tonemapped", toneMapped);
         }

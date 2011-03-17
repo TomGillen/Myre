@@ -105,7 +105,7 @@ namespace GraphicsTests
             }
 
             var spotLight = kernel.Get<EntityDescription>();
-            spotLight.AddProperty<Vector3>("position", new Vector3(180, 250, 0));
+            spotLight.AddProperty<Vector3>("position", new Vector3(-180, 250, 0));
             spotLight.AddProperty<Vector3>("colour", new Vector3(700));
             spotLight.AddProperty<Vector3>("direction", new Vector3(0, -1, 0));
             spotLight.AddProperty<float>("angle", MathHelper.PiOver2);
@@ -117,8 +117,8 @@ namespace GraphicsTests
             scene.Add(spotLightEntity);
 
             var ambientLight = kernel.Get<EntityDescription>();
-            ambientLight.AddProperty<Vector3>("sky_colour", new Vector3(0.4f));
-            ambientLight.AddProperty<Vector3>("ground_colour", new Vector3(0.1f, 0.1f, 0.15f));
+            ambientLight.AddProperty<Vector3>("sky_colour", new Vector3(0.04f));
+            ambientLight.AddProperty<Vector3>("ground_colour", new Vector3(0.02f, 0.02f, 0.03f));
             ambientLight.AddProperty<Vector3>("up", Vector3.Up);
             ambientLight.AddBehaviour<AmbientLight>();
             scene.Add(ambientLight.Create());
@@ -134,25 +134,25 @@ namespace GraphicsTests
             var lizard = content.Load<ModelData>(@"Models\lizard");
             var lizardEntity = kernel.Get<EntityDescription>();
             lizardEntity.AddProperty<ModelData>("model", lizard);
-            lizardEntity.AddProperty<Matrix>("transform", Matrix.CreateScale(50 / 700f) * Matrix.CreateTranslation(-30, 0, 0));
+            lizardEntity.AddProperty<Matrix>("transform", Matrix.CreateScale(50 / 700f) * Matrix.CreateTranslation(150, 0, 0));
             lizardEntity.AddProperty<bool>("is_static", true);
             lizardEntity.AddBehaviour<ModelInstance>();
             scene.Add(lizardEntity.Create());
 
-            var ship1 = content.Load<ModelData>(@"Models\Ship1");
-            var ship1Entity = kernel.Get<EntityDescription>();
-            ship1Entity.AddProperty<ModelData>("model", ship1);
-            ship1Entity.AddProperty<Matrix>("transform", Matrix.CreateTranslation(30, 0, 0));
-            ship1Entity.AddProperty<bool>("is_static", true);
-            ship1Entity.AddBehaviour<ModelInstance>();
-            scene.Add(ship1Entity.Create());
+            //var ship1 = content.Load<ModelData>(@"Models\Ship1");
+            //var ship1Entity = kernel.Get<EntityDescription>();
+            //ship1Entity.AddProperty<ModelData>("model", ship1);
+            //ship1Entity.AddProperty<Matrix>("transform", Matrix.CreateTranslation(30, 0, 0));
+            //ship1Entity.AddProperty<bool>("is_static", true);
+            //ship1Entity.AddBehaviour<ModelInstance>();
+            //scene.Add(ship1Entity.Create());
 
             var hebe = content.Load<ModelData>(@"Models\Hebe2");
             var hebeEntity = kernel.Get<EntityDescription>();
             hebeEntity.AddProperty<ModelData>("model", hebe);
             hebeEntity.AddProperty<Matrix>("transform", Matrix.CreateScale(25 / hebe.Meshes[0].BoundingSphere.Radius)
                                                         * Matrix.CreateRotationY(MathHelper.PiOver2)
-                                                        * Matrix.CreateTranslation(0, 20, 0));
+                                                        * Matrix.CreateTranslation(-150, 20, 0));
             hebeEntity.AddProperty<bool>("is_static", true);
             hebeEntity.AddBehaviour<ModelInstance>();
             scene.Add(hebeEntity.Create());

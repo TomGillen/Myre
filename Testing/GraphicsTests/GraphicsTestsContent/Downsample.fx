@@ -34,6 +34,7 @@ float4 BilinearSample(float2 texCoord)
 	float2 texelPos = SourceResolution * texCoord; 
 	float2 alpha = frac(texelPos); 
 	float texelSize = 1.0 / SourceResolution;
+	texCoord -= texelSize * alpha;
  
 	float4 sourcevals[4]; 
 	sourcevals[0] = tex2D(pointSampler, texCoord); 
