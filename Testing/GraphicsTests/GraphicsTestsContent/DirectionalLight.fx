@@ -1,19 +1,23 @@
 #include "EncodeNormals.fxh"
 #include "GammaCorrection.fxh"
 #include "FullScreenQuad.fxh"
+#include "Shadows.fxh"
 
-#define BIAS 0.8
+//#define BIAS 0.005
 
 float3 Direction : LIGHTDIRECTION;
 float3 Colour : LIGHTCOLOUR;
 float3 CameraPosition : CAMERAPOSITION;
 bool EnableShadows;
-float2 ShadowMapSize;
+//float2 ShadowMapSize;
 
 float FarClip : FARCLIP;
+float4 LightNearPlane;
+float LightFarClip;
 float4x4 WorldViewProjection : WORLDVIEWPROJECTION;
 float4x4 WorldView : WORLDVIEW;
 float4x4 ShadowProjection;
+float4x4 CameraViewToLightView;
 
 texture Depth : GBUFFER_DEPTH;
 sampler depthSampler = sampler_state
@@ -48,6 +52,7 @@ sampler diffuseSampler = sampler_state
 	AddressV = Clamp;
 };
 
+/*
 texture ShadowMap;
 sampler shadowSampler = sampler_state
 {
@@ -98,6 +103,7 @@ float CalcShadowTermSoftPCF(float fLightDepth, float2 vTexCoord, int iSqrtSample
     
     return fShadowTerm;
 }
+*/
 
 void PixelShaderFunction(in float2 in_TexCoord : TEXCOORD0,
 						 in float3 in_FrustumRay : TEXCOORD1,
@@ -130,11 +136,11 @@ void PixelShaderFunction(in float2 in_TexCoord : TEXCOORD0,
 		projectedTexCoord.x = (1 + projectedTexCoord.x) / 2;
 		projectedTexCoord.y = (1 - projectedTexCoord.y) / 2;
 
-		float depth = 0;//length(viewPosition - LightPosition);
-		light *= CalcShadowTermSoftPCF(depth, projectedTexCoord.xy, 3);
+		float depth = (dot(viewPosition, LightNearPlane.xyz) + LightNearPlane.w) / LightFarClip;
+		light *= CalculateShadow(depth, projectedTexCoord.xy, 3, LightFarClip);
 	}
 
-	out_Colour = float4((NdL * diffuse * light) + ((specularIntensity * pow(RdV, specularPower)) * light), 1);
+	out_Colour = float4(NdL * light * (diffuse + specularIntensity * pow(RdV, specularPower)), 1);
 }
 
 technique Technique1

@@ -217,11 +217,6 @@
       <Importer>EffectImporter</Importer>
       <Processor>EffectProcessor</Processor>
     </Compile>
-    <Compile Include="Sponza.fbx">
-      <Name>Sponza</Name>
-      <Importer>FbxImporter</Importer>
-      <Processor>MyreModelProcessor</Processor>
-    </Compile>
     <Compile Include="Models\Hebe2.FBX">
       <Name>Hebe2</Name>
       <Importer>FbxImporter</Importer>
@@ -242,6 +237,16 @@
       <Name>tank</Name>
       <Importer>FbxImporter</Importer>
       <Processor>ModelProcessor</Processor>
+    </Compile>
+    <None Include="Shadows.fxh">
+      <Name>Shadows</Name>
+      <Importer>EffectImporter</Importer>
+      <Processor>EffectProcessor</Processor>
+    </None>
+    <Compile Include="Sponza.fbx">
+      <Name>Sponza</Name>
+      <Importer>FbxImporter</Importer>
+      <Processor>MyreModelProcessor</Processor>
     </Compile>
     <None Include="ToneMapFunctions.fxh">
       <Name>ToneMapFunctions</Name>

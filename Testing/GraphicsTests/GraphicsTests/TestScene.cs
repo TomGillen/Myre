@@ -56,7 +56,7 @@ namespace GraphicsTests
             
             camera = new Camera();
             camera.NearClip = 1;
-            camera.FarClip = 3000;
+            camera.FarClip = 700;
             camera.View = Matrix.CreateLookAt(cameraPosition, new Vector3(0, 50, 0), Vector3.Up);
             camera.Projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(60), 16f / 9f, camera.NearClip, camera.FarClip);
 
@@ -74,9 +74,9 @@ namespace GraphicsTests
             //scene.Add(skyboxEntity.Create());
 
             //var sunEntity = kernel.Get<EntityDescription>();
-            //sunEntity.AddProperty<Vector3>("direction", Vector3.Normalize(new Vector3(0, -1, 0)));
-            //sunEntity.AddProperty<Vector3>("colour", new Vector3(1f));
-            //sunEntity.AddProperty<int>("shadow_resolution", 1024);
+            //sunEntity.AddProperty<Vector3>("direction", Vector3.Normalize(new Vector3(-.2f, -1f, .3f)));
+            //sunEntity.AddProperty<Vector3>("colour", new Vector3(5f));
+            //sunEntity.AddProperty<int>("shadow_resolution", 4096);
             //sunEntity.AddBehaviour<SunLight>();
             //sun = sunEntity.Create();
             //scene.Add(sun);
@@ -94,7 +94,7 @@ namespace GraphicsTests
 
             lights = new List<PointLight>();
             var rng = new Random();
-            for (int i = 0; i < 8; i++)
+            for (int i = 0; i < 0; i++)
             {
                 var entity = pointLight.Create();
                 scene.Add(entity);
@@ -104,21 +104,21 @@ namespace GraphicsTests
                 lights.Add(light);
             }
 
-            //var spotLight = kernel.Get<EntityDescription>();
-            //spotLight.AddProperty<Vector3>("position", new Vector3(0, 50, 50));
-            //spotLight.AddProperty<Vector3>("colour", new Vector3(500));
-            //spotLight.AddProperty<Vector3>("direction", new Vector3(0, -1, -1));
-            //spotLight.AddProperty<float>("angle", MathHelper.PiOver4);
-            //spotLight.AddProperty<Texture2D>("mask", null);//content.Load<Texture2D>("Chrysanthemum"));
-            //spotLight.AddProperty<int>("shadow_resolution", 1024);
-            //spotLight.AddBehaviour<SpotLight>();
-            //var spotLightEntity = spotLight.Create();
-            //this.spotLight = spotLightEntity.GetBehaviour<SpotLight>();
-            //scene.Add(spotLightEntity);
+            var spotLight = kernel.Get<EntityDescription>();
+            spotLight.AddProperty<Vector3>("position", new Vector3(180, 250, 0));
+            spotLight.AddProperty<Vector3>("colour", new Vector3(700));
+            spotLight.AddProperty<Vector3>("direction", new Vector3(0, -1, 0));
+            spotLight.AddProperty<float>("angle", MathHelper.PiOver2);
+            spotLight.AddProperty<Texture2D>("mask", null);//content.Load<Texture2D>("Chrysanthemum"));
+            spotLight.AddProperty<int>("shadow_resolution", 1024);
+            spotLight.AddBehaviour<SpotLight>();
+            var spotLightEntity = spotLight.Create();
+            this.spotLight = spotLightEntity.GetBehaviour<SpotLight>();
+            scene.Add(spotLightEntity);
 
             var ambientLight = kernel.Get<EntityDescription>();
-            ambientLight.AddProperty<Vector3>("sky_colour", new Vector3(0.8f));
-            ambientLight.AddProperty<Vector3>("ground_colour", new Vector3(0.2f, 0.2f, 0.3f));
+            ambientLight.AddProperty<Vector3>("sky_colour", new Vector3(0.4f));
+            ambientLight.AddProperty<Vector3>("ground_colour", new Vector3(0.1f, 0.1f, 0.15f));
             ambientLight.AddProperty<Vector3>("up", Vector3.Up);
             ambientLight.AddBehaviour<AmbientLight>();
             scene.Add(ambientLight.Create());

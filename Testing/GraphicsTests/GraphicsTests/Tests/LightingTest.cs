@@ -138,6 +138,7 @@ namespace GraphicsTests.Tests
                 .Then<Ssao>()
                 .Then<LightingComponent>()
                 .Then<Phase>()
+                //.Show("shadowmap")
                 .Apply();
 
             base.OnShown();

@@ -96,7 +96,28 @@ float4 SampleRadiosity(in float2 texCoord, in float3 position, in float3 normal)
 	return float4(colour * ao, ao);
 }
 
-float4 SsaoPS(in float2 in_TexCoord : TEXCOORD0) : COLOR0
+float4 HighQualitySsaoPS(in float2 in_TexCoord : TEXCOORD0) : COLOR0
+{
+	float3 p = GetPosition(in_TexCoord);
+	float3 n = GetNormal(in_TexCoord);
+	float2 rand = GetRandom(in_TexCoord);
+
+	float z = -p.z;
+	float radius = SampleRadius / z;
+
+	float ao = 0.0f;
+	for (int i = 0; i < NUM_SAMPLES; i++)
+	{
+		float2 offset = reflect(Samples[i], rand) * radius;
+		ao += SampleAmbientOcclusion(in_TexCoord + offset, p, n);
+	}
+
+	ao /= NUM_SAMPLES;
+	ao = 1 - ao;
+	return float4(0, 0, 0, ao);
+}
+
+float4 LowQualitySsaoPS(in float2 in_TexCoord : TEXCOORD0) : COLOR0
 {
 	const float2 vec[8] = {
 		float2(1,0),float2(-1,0),
@@ -105,6 +126,8 @@ float4 SsaoPS(in float2 in_TexCoord : TEXCOORD0) : COLOR0
 		float2(0,.707),float2(0,-0.707)
 	};
 
+	in_TexCoord -= float2(3,2) / Resolution;
+
 	float3 p = GetPosition(in_TexCoord);
 	float3 n = GetNormal(in_TexCoord);
 	float2 rand = GetRandom(in_TexCoord);
@@ -112,7 +135,6 @@ float4 SsaoPS(in float2 in_TexCoord : TEXCOORD0) : COLOR0
 	float z = -p.z;
 	float radius = SampleRadius / z;
 
-	
 	float ao = 0.0f;
 	int iterations = lerp(4.0, 2.0, z / FarClip); 
 	//[loop]
@@ -127,19 +149,6 @@ float4 SsaoPS(in float2 in_TexCoord : TEXCOORD0) : COLOR0
 	}
 
 	ao /= (float)(iterations * 4.0);
-	
-	// removes some banding, but is much slower for some reason
-	/*
-	float ao = 0.0f;
-	for (int i = 0; i < NUM_SAMPLES; i++)
-	{
-		float2 offset = reflect(Samples[i], rand) * radius;
-		ao += SampleAmbientOcclusion(in_TexCoord + offset, p, n);
-	}
-
-	ao /= NUM_SAMPLES;
-	*/
-
 	ao = 1 - ao;
 
 	return float4(0, 0, 0, ao);
@@ -178,12 +187,21 @@ float4 SsgiPS(in float2 in_TexCoord : TEXCOORD0) : COLOR0
 	return float4(ao.rgb, 1 - ao.a);
 }
 
-technique SSAO
+technique HQ_SSAO
 {
 	Pass pass1
 	{
 		VertexShader = compile vs_3_0 FullScreenQuadVS();
-		PixelShader = compile ps_3_0 SsaoPS();
+		PixelShader = compile ps_3_0 HighQualitySsaoPS();
+	}
+}
+
+technique LQ_SSAO
+{
+	Pass pass1
+	{
+		VertexShader = compile vs_3_0 FullScreenQuadVS();
+		PixelShader = compile ps_3_0 LowQualitySsaoPS();
 	}
 }
 

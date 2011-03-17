@@ -101,6 +101,8 @@ namespace Myre.Graphics.Lighting
         public class Manager
             : BehaviourManager<SpotLight>, ILightProvider
         {
+            public static RenderTarget2D shadowmap;
+
             private Material geometryLightingMaterial;
             private Material quadLightingMaterial;
             private Material nothingMaterial;
@@ -226,6 +228,8 @@ namespace Myre.Graphics.Lighting
 
                 foreach (var light in Behaviours)
                 {
+                    light.Direction = Vector3.Normalize(light.Direction);
+
                     var luminance = Math.Max(light.Colour.X, Math.Max(light.Colour.Y, light.Colour.Z));
                     light.range = (float)Math.Sqrt(luminance * falloffFactor / threshold);
 
@@ -290,12 +294,14 @@ namespace Myre.Graphics.Lighting
                 shadowView.SetMetadata(renderer.Data);
 
                 foreach (var item in renderer.Scene.FindManagers<IGeometryProvider>())
-                    item.Draw("shadows", renderer.Data);
+                    item.Draw("shadows_viewlength", renderer.Data);
 
                 light.shadowMap = target;
                 resolution.Value = previousResolution;
                 previousView.SetMetadata(renderer.Data);
                 view.Value = previousView;
+
+                shadowmap = target;
             }
 
             public void Draw(Renderer renderer)
@@ -396,10 +402,8 @@ namespace Myre.Graphics.Lighting
                     if (light.Mask != null || light.ShadowResolution > 0)
                     {
                         var inverseView = metadata.Get<Matrix>("inverseview").Value;
-                        var cameraToLightView = inverseView * light.view;
-                        var cameraToLightProjection = cameraToLightView * light.projection;
+                        var cameraToLightProjection = inverseView * light.view * light.projection;
                         material.Parameters["CameraViewToLightProjection"].SetValue(cameraToLightProjection);
-                        material.Parameters["CameraViewToLightView"].SetValue(cameraToLightView);
                         material.Parameters["LightFarClip"].SetValue(light.range);
                     }
 
@@ -413,6 +417,12 @@ namespace Myre.Graphics.Lighting
                     material.Parameters["EnableShadows"].SetValue(light.ShadowResolution > 0);
                     material.Parameters["ShadowMapSize"].SetValue(new Vector2(light.ShadowResolution, light.ShadowResolution));
                     material.Parameters["ShadowMap"].SetValue(light.shadowMap);
+                    material.Parameters["LightFarClip"].SetValue(light.range);
+
+                    var nearPlane = new Plane(light.Direction, Vector3.Dot(light.Direction, light.Position));
+                    nearPlane.Normalize();
+                    nearPlane = Plane.Transform(nearPlane, view);
+                    material.Parameters["LightNearPlane"].SetValue(new Vector4(nearPlane.Normal, nearPlane.D));
                 }
 
                 var world = Matrix.CreateScale(light.range / geometry.Meshes[0].BoundingSphere.Radius)
