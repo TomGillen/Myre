@@ -98,7 +98,7 @@ namespace GraphicsTests.Tests
 
         public override void Update(Microsoft.Xna.Framework.GameTime gameTime)
         {
-            camera.View = Matrix.CreateLookAt(new Vector3((float)Math.Sin(gameTime.TotalGameTime.TotalSeconds) * 300, 25, (float)Math.Cos(gameTime.TotalGameTime.TotalSeconds) * 300), new Vector3(0, 25, 0), Vector3.Up);
+            camera.View = Matrix.CreateLookAt(new Vector3((float)Math.Sin(gameTime.TotalGameTime.TotalSeconds) * 300, 0, (float)Math.Cos(gameTime.TotalGameTime.TotalSeconds) * 300), new Vector3(0, 0, 0), Vector3.Up);
             scene.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
             base.Update(gameTime);
         }

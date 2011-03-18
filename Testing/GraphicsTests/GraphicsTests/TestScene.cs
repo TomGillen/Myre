@@ -171,44 +171,11 @@ namespace GraphicsTests
             var console = kernel.Get<CommandConsole>();
             renderer.Settings.BindCommandEngine(console.Engine);
 
+            var fire1 = Fire.Create(kernel, content, new Vector3(123.5f, 32f, -55f));
+            var fire2 = Fire.Create(kernel, content, new Vector3(123.5f, 32f, 35f));
 
-
-            //var particleEntityDesc = kernel.Get<EntityDescription>();
-            //particleEntityDesc.AddProperty("position", Vector3.Zero);
-            //particleEntityDesc.AddBehaviour<EllipsoidParticleEmitter>();
-            //var particleEntity = particleEntityDesc.Create();
-            //var emitter = particleEntity.GetBehaviour<EllipsoidParticleEmitter>();
-            //scene.Add(particleEntity);
-
-            //var white = new Texture2D(device, 1, 1);
-            //white.SetData(new Color[] { Color.White });
-
-            //emitter.BlendState = BlendState.Additive;
-            //emitter.Type = ParticleType.Soft;
-            //emitter.Enabled = true;
-            //emitter.EndLinearVelocity = 0.25f;
-            //emitter.EndScale = 0.75f;
-            //emitter.Gravity = Vector3.Zero;//new Vector3(0, 15, 0);
-            //emitter.Lifetime = 4f;
-            //emitter.Texture = content.Load<Texture2D>("fire");
-            //emitter.EmitPerSecond = 500;
-            //emitter.Capacity = (int)(emitter.Lifetime * emitter.EmitPerSecond + 1);
-            //emitter.HorizontalVelocityVariance = 10;// 20;
-            //emitter.LifetimeVariance = 0f;
-            //emitter.MaxAngularVelocity = MathHelper.Pi / 4;
-            //emitter.MaxEndColour = Color.Blue; //Color.White;
-            //emitter.MaxStartColour = Color.White;
-            //emitter.MaxStartSize = 40;
-            //emitter.MinAngularVelocity = -MathHelper.Pi / 4;
-            //emitter.MinEndColour = Color.White;
-            //emitter.MinStartColour = Color.Red;
-            //emitter.MinStartSize = 30;
-            //emitter.Transform = Matrix.Identity;
-            //emitter.Velocity = Vector3.Zero;//new Vector3(0, 1, 0);
-            //emitter.VelocityBleedThrough = 0;
-            //emitter.VerticalVelocityVariance = 10;// 20f;
-            //emitter.Ellipsoid = new Vector3(10, 100, 100);
-            //emitter.MinEmitDistance = 75;
+            scene.Add(fire1);
+            scene.Add(fire2);
         }
 
         public void Update(GameTime gameTime)
@@ -242,6 +209,8 @@ namespace GraphicsTests
                     cameraPosition -= right * time * 50f;
                 if (keyboard.IsKeyDown(Keys.D))
                     cameraPosition += right * time * 50f;
+
+                System.Diagnostics.Debug.WriteLine(cameraPosition);
 
                 camera.View = Matrix.Invert(rotation * Matrix.CreateTranslation(cameraPosition));
 
