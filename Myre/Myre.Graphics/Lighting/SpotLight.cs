@@ -86,17 +86,17 @@ namespace Myre.Graphics.Lighting
             set { shadowResolution.Value = value; }
         }
 
-        public override void Initialise(Entity.InitialisationContext context)
+        public override void CreateProperties(Entity.InitialisationContext context)
         {
-            this.colour = context.GetOrCreateProperty<Vector3>("colour");
-            this.position = context.GetOrCreateProperty<Vector3>("position");
-            this.direction = context.GetOrCreateProperty<Vector3>("direction");
-            this.angle = context.GetOrCreateProperty<float>("angle");
-            this.mask = context.GetOrCreateProperty<Texture2D>("mask");
-            this.shadowResolution = context.GetOrCreateProperty<int>("shadow_resolution");
-            base.Initialise(context);
-        }
+            this.colour = context.CreateProperty<Vector3>("colour");
+            this.position = context.CreateProperty<Vector3>("position");
+            this.direction = context.CreateProperty<Vector3>("direction");
+            this.angle = context.CreateProperty<float>("angle");
+            this.mask = context.CreateProperty<Texture2D>("mask");
+            this.shadowResolution = context.CreateProperty<int>("shadow_resolution");
 
+            base.CreateProperties(context);
+        }
 
         public class Manager
             : BehaviourManager<SpotLight>, ILightProvider

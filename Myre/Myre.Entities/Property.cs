@@ -26,13 +26,25 @@ namespace Myre.Entities
     public sealed class Property<T>
         : IProperty
     {
-        private event PropertyChangedDelegate propertyChanged;
-
         public string Name { get; private set; }
 
-        public T Value { get; set; }
+        private T value;
+        public T Value
+        {
+            get
+            {
+                return value;
+            }
+            set
+            {
+                this.value = value;
+                OnValueChanged();
+            }
+        }
 
         public PropertyCopyBehaviour CopyBehaviour { get; private set; }
+
+        private event PropertyChangedDelegate propertyChanged;
 
         public event PropertyChangedDelegate<T> PropertyChanged;
 
@@ -67,6 +79,11 @@ namespace Myre.Entities
 
             if (propertyChanged != null)
                 propertyChanged(this);
+        }
+
+        public override string ToString()
+        {
+            return Value.ToString();
         }
     }
 

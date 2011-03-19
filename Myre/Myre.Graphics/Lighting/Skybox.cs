@@ -38,12 +38,13 @@ namespace Myre.Graphics.Lighting
             set { gammaCorrect.Value = value; }
         }
 
-        public override void Initialise(Entity.InitialisationContext context)
+        public override void CreateProperties(Entity.InitialisationContext context)
         {
-            this.texture = context.GetOrCreateProperty<TextureCube>("texture");
-            this.brightness = context.GetOrCreateProperty<float>("brightness");
-            this.gammaCorrect = context.GetOrCreateProperty<bool>("gamma_correct");
-            base.Initialise(context);
+            this.texture = context.CreateProperty<TextureCube>("texture");
+            this.brightness = context.CreateProperty<float>("brightness");
+            this.gammaCorrect = context.CreateProperty<bool>("gamma_correct");
+
+            base.CreateProperties(context);
         }
 
         /*

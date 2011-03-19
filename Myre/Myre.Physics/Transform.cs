@@ -41,17 +41,20 @@ namespace Myre.Physics
             set { inverseTransform.Value = value; }
         }
 
-        public override void Initialise(Entity.InitialisationContext context)
+        public override void CreateProperties(Entity.InitialisationContext context)
         {
-            this.position = context.GetOrCreateProperty<Vector2>("position");
-            this.rotation = context.GetOrCreateProperty<float>("rotation");
-            this.transform = context.GetOrCreateProperty<Matrix>("transform_matrix");
-            this.inverseTransform = context.GetOrCreateProperty<Matrix>("inverse_transform_matrix");
+            this.position = context.CreateProperty<Vector2>("position");
+            this.rotation = context.CreateProperty<float>("rotation");
+            this.transform = context.CreateProperty<Matrix>("transform_matrix");
+            this.inverseTransform = context.CreateProperty<Matrix>("inverse_transform_matrix");
 
+            base.CreateProperties(context);
+        }
+
+        public override void Initialise()
+        {
             position.PropertyChanged += _ => CalculateTransform();
             rotation.PropertyChanged += _ => CalculateTransform();
-
-            base.Initialise(context);
         }
 
         public Vector2 ToWorldCoordinates(Vector2 point)

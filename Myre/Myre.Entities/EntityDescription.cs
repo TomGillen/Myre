@@ -434,10 +434,16 @@ namespace Myre.Entities
         /// <returns></returns>
         public Entity Create()
         {
-            if (pool.Count > 0)
-                return InitialisePooledEntity();
+            Entity e;
 
-            return new Entity(CreateProperties(), CreateBehaviours(), new EntityVersion(this, Version));
+            if (pool.Count > 0)
+                e = InitialisePooledEntity();
+            else
+                e = new Entity(CreateProperties(), CreateBehaviours(), new EntityVersion(this, Version));
+
+            e.CreateProperties();
+
+            return e;
         }
 
         /// <summary>

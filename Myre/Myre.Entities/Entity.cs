@@ -43,7 +43,7 @@ namespace Myre.Entities
                 this.entity = entity;
             }
 
-            public Property<T> GetOrCreateProperty<T>(string name, T defaultValue = default(T), PropertyCopyBehaviour copyBehaviour = PropertyCopyBehaviour.None)
+            public Property<T> CreateProperty<T>(string name, T defaultValue = default(T), PropertyCopyBehaviour copyBehaviour = PropertyCopyBehaviour.None)
             {
                 CheckFrozen();
 
@@ -149,8 +149,6 @@ namespace Myre.Entities
 
             // create initialisation context
             this.initialisationContext = new InitialisationContext(this);
-
-            Initialise();
         }
 
         /*
@@ -215,18 +213,28 @@ namespace Myre.Entities
             IsDisposed = true;
         }
 
+        internal void CreateProperties()
+        {
+            initialisationContext.frozen = false;
+
+            foreach (var item in Behaviours)
+            {
+                item.CreateProperties(initialisationContext);
+            }
+
+            initialisationContext.frozen = true;
+        }
+
         /// <summary>
         /// Initialises this instance.
         /// </summary>
         internal void Initialise()
         {
-            initialisationContext.frozen = false;
             foreach (var item in Behaviours)
             {
                 if (!item.IsReady)
-                    item.Initialise(initialisationContext);
+                    item.Initialise();
             }
-            initialisationContext.frozen = true;
         }
 
         /// <summary>

@@ -38,12 +38,13 @@ namespace Myre.Graphics.Geometry
             set { isStatic.Value = value; }
         }
 
-        public override void Initialise(Entity.InitialisationContext context)
+        public override void CreateProperties(Entity.InitialisationContext context)
         {
-            this.model = context.GetOrCreateProperty<ModelData>("model");
-            this.transform = context.GetOrCreateProperty<Matrix>("transform");
-            this.isStatic = context.GetOrCreateProperty<bool>("is_static");
-            base.Initialise(context);
+            this.model = context.CreateProperty<ModelData>("model");
+            this.transform = context.CreateProperty<Matrix>("transform");
+            this.isStatic = context.CreateProperty<bool>("is_static");
+
+            base.CreateProperties(context);
         }
 
         /*

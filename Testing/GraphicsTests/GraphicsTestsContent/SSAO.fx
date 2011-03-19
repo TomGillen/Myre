@@ -176,15 +176,15 @@ float4 SsgiPS(in float2 in_TexCoord : TEXCOORD0) : COLOR0
 	{
 		float2 coord1 = reflect(vec[j], rand) * radius;
 		float2 coord2 = float2(coord1.x*0.707 - coord1.y*0.707, coord1.x*0.707 + coord1.y*0.707);
-		ao += SampleAmbientOcclusion(in_TexCoord + coord1*0.25, p, n);
-		ao += SampleAmbientOcclusion(in_TexCoord + coord2*0.50, p, n);
+		ao += SampleRadiosity(in_TexCoord + coord1*0.25, p, n);
+		ao += SampleRadiosity(in_TexCoord + coord2*0.50, p, n);
 		ao += SampleRadiosity(in_TexCoord + coord1*0.75, p, n);
-		ao += SampleRadiosity(in_TexCoord + coord2,      p, n); 
+		ao += SampleRadiosity(in_TexCoord + coord2*1.00, p, n); 
 	}
 
 	ao /= (float)iterations * 4.0;
 
-	return float4(ao.rgb, 1 - ao.a);
+	return float4(ao.rgb * RadiosityIntensity, 1 - ao.a);
 }
 
 technique HQ_SSAO

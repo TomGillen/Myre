@@ -39,12 +39,13 @@ namespace Myre.Graphics.Lighting
             set { up.Value = value; }
         }
 
-        public override void Initialise(Entity.InitialisationContext context)
+        public override void CreateProperties(Entity.InitialisationContext context)
         {
-            this.skyColour = context.GetOrCreateProperty<Vector3>("sky_colour");
-            this.groundColour = context.GetOrCreateProperty<Vector3>("ground_colour");
-            this.up = context.GetOrCreateProperty<Vector3>("up");
-            base.Initialise(context);
+            this.skyColour = context.CreateProperty<Vector3>("sky_colour");
+            this.groundColour = context.CreateProperty<Vector3>("ground_colour");
+            this.up = context.CreateProperty<Vector3>("up");
+
+            base.CreateProperties(context);
         }
 
         public class Manager
