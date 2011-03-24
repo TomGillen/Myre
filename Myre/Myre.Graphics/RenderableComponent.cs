@@ -15,31 +15,22 @@ namespace Myre.Graphics
     {
         private ReadOnlyCollection<IRenderable> renderables;
 
-        public override void Initialise(Renderer renderer)
+        public override void Initialise(Renderer renderer, ResourceContext context)
         {
+            foreach (var resource in context.SetRenderTargets)
+            {
+                context.DefineInput(resource.Name);
+                context.DefineOutput(resource);
+            }
+
             renderables = renderer.Scene.FindManagers<IRenderable>();
-            base.Initialise(renderer);
+            base.Initialise(renderer, context);
         }
 
-        protected override void SpecifyResources(IList<Input> inputs, IList<RendererComponent.Resource> outputs, out RenderTargetInfo? output)
-        {
-            output = null;
-        }
-
-        protected internal override bool ValidateInput(RenderTargetInfo? previousRenderTarget)
-        {
-            if (previousRenderTarget == null)
-                return false;
-
-            return true;
-        }
-
-        public override RenderTarget2D Draw(Renderer renderer)
+        public override void Draw(Renderer renderer)
         {
             foreach (var item in renderables)
                 item.Draw(renderer);
-
-            return null;
         }
     }
 }

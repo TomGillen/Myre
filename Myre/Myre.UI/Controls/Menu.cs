@@ -29,16 +29,17 @@ namespace Myre.UI.Controls
 
         private int SelectedOptionIndex
         {
-            get
-            {
-                for (int i = 0; i < Children.Count; i++)
-                {
-                    if (Children[i] is Button && Children[i].IsFocused)
-                        return i;
-                }
+            get;
+            set;
+            //{
+            //    for (int i = 0; i < Children.Count; i++)
+            //    {
+            //        if (Children[i] is Button && Children[i].IsFocused)
+            //            return i;
+            //    }
 
-                return 0;
-            }
+            //    return 0;
+            //}
         }
 
         /// <summary>
@@ -183,6 +184,7 @@ namespace Myre.UI.Controls
 
         private void ChangeSelection(int i)
         {
+            SelectedOptionIndex = i;
             SelectedOption = Children[i] as Button;
             UserInterface.Actors.AllFocus(Children[i]);
             OnSelectedChanged();

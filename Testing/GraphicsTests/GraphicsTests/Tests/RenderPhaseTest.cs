@@ -20,18 +20,29 @@ namespace GraphicsTests
     {
         public Color Colour;
 
-        protected override void SpecifyResources(IList<Input> inputs, IList<RendererComponent.Resource> outputs, out RenderTargetInfo? outputTarget)
+        //protected override void SpecifyResources(IList<Input> inputs, IList<RendererComponent.Resource> outputs, out RenderTargetInfo? outputTarget)
+        //{
+        //    outputs.Add(new Resource() { Name = "scene", IsLeftSet = true });
+        //    outputTarget = new RenderTargetInfo();
+        //}
+
+        //protected override bool ValidateInput(RenderTargetInfo? previousRenderTarget)
+        //{
+        //    return true;
+        //}
+
+        public override void Initialise(Renderer renderer, ResourceContext context)
         {
-            outputs.Add(new Resource() { Name = "scene", IsLeftSet = true });
-            outputTarget = new RenderTargetInfo();
+            // define input
+            context.DefineInput("scene");
+
+            // define output
+            context.DefineOutput("scene");
+
+            base.Initialise(renderer, context);
         }
 
-        protected override bool ValidateInput(RenderTargetInfo? previousRenderTarget)
-        {
-            return true;
-        }
-
-        public override RenderTarget2D Draw(Renderer renderer)
+        public override void Draw(Renderer renderer)
         {
             var resolution = renderer.Data.Get<Vector2>("resolution").Value;
             var targetInfo = new RenderTargetInfo()
@@ -47,8 +58,7 @@ namespace GraphicsTests
             renderer.Device.SetRenderTarget(target);
             renderer.Device.Clear(Colour);
 
-            renderer.SetResource("scene", target);
-            return target;
+            Output("scene", target);
         }
     }
 
@@ -66,18 +76,26 @@ namespace GraphicsTests
                 batch = new SpriteBatch(device);
             }
 
-            protected override void SpecifyResources(IList<Input> inputs, IList<RendererComponent.Resource> outputs, out RenderTargetInfo? outputTarget)
+            //protected override void SpecifyResources(IList<Input> inputs, IList<RendererComponent.Resource> outputs, out RenderTargetInfo? outputTarget)
+            //{
+            //    outputs.Add(new Resource() { Name = "scene", IsLeftSet = true });
+            //    outputTarget = new RenderTargetInfo();
+            //}
+
+            //protected override bool ValidateInput(RenderTargetInfo? previousRenderTarget)
+            //{
+            //    return true;
+            //}
+
+            public override void Initialise(Renderer renderer, ResourceContext context)
             {
-                outputs.Add(new Resource() { Name = "scene", IsLeftSet = true });
-                outputTarget = new RenderTargetInfo();
+                // define output
+                context.DefineOutput("scene");
+
+                base.Initialise(renderer, context);
             }
 
-            protected override bool ValidateInput(RenderTargetInfo? previousRenderTarget)
-            {
-                return true;
-            }
-
-            public override RenderTarget2D Draw(Renderer renderer)
+            public override void Draw(Renderer renderer)
             {
                 var resolution = renderer.Data.Get<Vector2>("resolution").Value;
                 var targetInfo = new RenderTargetInfo() { Width = (int)resolution.X, Height = (int)resolution.Y };
@@ -88,8 +106,7 @@ namespace GraphicsTests
                 batch.DrawString(Font, "This is being drawn by a RenderPhase!", new Vector2(640, 360), Color.White);
                 batch.End();
 
-                renderer.SetResource("scene", target);
-                return target;
+                Output("scene", target);
             }
         }
 
@@ -120,10 +137,11 @@ namespace GraphicsTests
             camera.AddBehaviour<View>();
             scene.Add(camera.Create());
 
-            var plan = RenderPlan
-                .StartWith(kernel, new ClearPhase() { Colour = Color.Black })
-                .Then(new Phase(device) { Font = content.Load<SpriteFont>("Consolas") });
-            scene.GetService<Renderer>().Plan = plan;
+            var renderer = scene.GetService<Renderer>();
+            renderer.StartPlan()
+                .Then(new ClearPhase() { Colour = Color.Black })
+                .Then(new Phase(device) { Font = content.Load<SpriteFont>("Consolas") })
+                .Apply();
 
             base.OnShown();
         }

@@ -37,7 +37,9 @@ namespace Myre.Graphics.Pipeline
             foreach (var item in input.OpaqueData)
                 material.OpaqueData.Add(item.Key, item.Value);
 
-            output.Material = context.Convert<MaterialContent, MaterialContent>(material, "MaterialProcessor");
+            var processorParameters = new OpaqueDataDictionary();
+            processorParameters.Add("PremultiplyTextureAlpha", false);
+            output.Material = context.Convert<MaterialContent, MaterialContent>(material, "MaterialProcessor", processorParameters);
 
             return output;
         }

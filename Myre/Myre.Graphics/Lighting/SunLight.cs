@@ -10,6 +10,7 @@ using Microsoft.Xna.Framework.Content;
 using Myre.Graphics.Materials;
 using Ninject;
 using Myre.Graphics.Geometry;
+using Myre.Debugging;
 
 namespace Myre.Graphics.Lighting
 {
@@ -27,6 +28,7 @@ namespace Myre.Graphics.Lighting
         private Matrix view;
         private Matrix projection;
         private float farClip;
+        private Vector4 nearPlane;
 
         public Vector3 Colour
         {
@@ -69,6 +71,9 @@ namespace Myre.Graphics.Lighting
         public class Manager
             : BehaviourManager<SunLight>, ILightProvider
         {
+
+            public static RenderTarget2D shadowmap;
+
             private Material material;
             private Quad quad;
             private List<ICullable> visibilityResults;
@@ -115,6 +120,8 @@ namespace Myre.Graphics.Lighting
                 shadowCameraEntity.AddBehaviour<View>();
                 shadowView = shadowCameraEntity.Create().GetBehaviour<View>();
                 shadowView.Camera = new Camera();
+
+                DebugShapeRenderer.Initialize(device);
             }
 
             //public void Draw(Renderer renderer)
@@ -323,6 +330,18 @@ namespace Myre.Graphics.Lighting
 
             public void DrawDebug(Renderer renderer)
             {
+                foreach (var light in Behaviours)
+                {
+                    if (light.ShadowResolution > 0)
+                    {
+                        var bounds = new BoundingFrustum(light.view * light.projection);
+                        DebugShapeRenderer.AddBoundingFrustum(bounds, new Color(light.Colour));
+                    }
+                }
+
+                var view = renderer.Data.Get<Matrix>("view").Value;
+                var projection = renderer.Data.Get<Matrix>("projection").Value;
+                DebugShapeRenderer.Draw(new GameTime(), view, projection);
             }
 
             public void Draw(Renderer renderer)
@@ -342,14 +361,20 @@ namespace Myre.Graphics.Lighting
                     Vector3 direction = light.Direction;
                     Vector3.TransformNormal(ref direction, ref view, out direction);
 
-                    if (light.ShadowResolution > 0)
-                        material.Parameters["ShadowProjection"].SetValue(metadata.Get<Matrix>("inverseview").Value * light.view * light.projection);
+                    var shadowsEnabled = light.ShadowResolution > 0;
 
-                    material.Parameters["Direction"].SetValue(-direction);
+                    material.Parameters["Direction"].SetValue(direction);
                     material.Parameters["Colour"].SetValue(light.Colour);
-                    material.Parameters["EnableShadows"].SetValue(light.ShadowResolution > 0);
-                    material.Parameters["ShadowMapSize"].SetValue(new Vector2(light.ShadowResolution, light.ShadowResolution));
-                    material.Parameters["ShadowMap"].SetValue(light.shadowMap);
+                    material.Parameters["EnableShadows"].SetValue(shadowsEnabled);
+
+                    if (shadowsEnabled)
+                    {
+                        material.Parameters["ShadowProjection"].SetValue(metadata.Get<Matrix>("inverseview").Value * light.view * light.projection);
+                        material.Parameters["ShadowMapSize"].SetValue(new Vector2(light.ShadowResolution, light.ShadowResolution));
+                        material.Parameters["ShadowMap"].SetValue(light.shadowMap);
+                        material.Parameters["LightFarClip"].SetValue(light.farClip);
+                        material.Parameters["LightNearPlane"].SetValue(light.nearPlane);
+                    }
                 }
             }
 
@@ -360,6 +385,7 @@ namespace Myre.Graphics.Lighting
                 for (int i = 0; i < Behaviours.Count; i++)
                 {
                     var light = Behaviours[i];
+                    light.Direction = Vector3.Normalize(light.Direction);
 
                     if (light.shadowMap != null)
                     {
@@ -380,23 +406,44 @@ namespace Myre.Graphics.Lighting
 
             private void CalculateShadowMatrices(Renderer renderer, SunLight light)
             {
+                var min = float.PositiveInfinity;
+                var max = float.NegativeInfinity;
+                for (int i = 0; i < frustumCornersWS.Length; i++)
+                {
+                    var projection = Vector3.Dot(frustumCornersWS[i], light.Direction);
+                    min = Math.Min(min, projection);
+                    max = Math.Max(max, projection);
+                }
+
+                min = -500;
+                max = 500;
+
+                var depthOffset = -min;
+                var lightPosition = -light.Direction * depthOffset;
                 var lightIsVertical = light.Direction == Vector3.Up || light.Direction == Vector3.Down;
-                var viewMatrix = Matrix.CreateLookAt(-light.Direction, Vector3.Zero, lightIsVertical ? Vector3.Forward : Vector3.Up);
+                var viewMatrix = Matrix.CreateLookAt(lightPosition, Vector3.Zero, lightIsVertical ? Vector3.Forward : Vector3.Up);
 
                 Vector3.Transform(frustumCornersWS, ref viewMatrix, frustumCornersVS);
+                
+                var bounds = BoundingSphere.CreateFromPoints(frustumCornersVS);
 
-                var bounds = BoundingBox.CreateFromPoints(frustumCornersVS);
-                var farClip = bounds.Max.Z - bounds.Min.X + 1;
-                var projectionMatrix = Matrix.CreateOrthographicOffCenter(bounds.Max.X, bounds.Min.X, bounds.Min.Y, bounds.Max.Y, 1, farClip);
+                var farClip = max - min;
+                var projectionMatrix = Matrix.CreateOrthographicOffCenter(-bounds.Radius, bounds.Radius, -bounds.Radius, bounds.Radius, 0, farClip);
 
                 light.view = viewMatrix;
                 light.projection = projectionMatrix;
-                light.farClip = farClip;
+                light.farClip = farClip;        
+
+                var nearPlane = new Plane(light.Direction, depthOffset);
+                nearPlane.Normalize();
+                Plane transformedNearPlane;
+                Plane.Transform(ref nearPlane, ref renderer.Data.Get<Matrix>("view").Value, out transformedNearPlane);
+                light.nearPlane = new Vector4(transformedNearPlane.Normal, transformedNearPlane.D);
             }
 
             private void DrawShadowMap(Renderer renderer, SunLight light)
             {
-                var target = RenderTargetManager.GetTarget(renderer.Device, light.ShadowResolution, light.ShadowResolution, SurfaceFormat.Single, DepthFormat.Depth24Stencil8);
+                var target = RenderTargetManager.GetTarget(renderer.Device, light.ShadowResolution, light.ShadowResolution, SurfaceFormat.Single, DepthFormat.Depth24Stencil8, name:"sun light shadow map");
                 renderer.Device.SetRenderTarget(target);
                 renderer.Device.Clear(Color.Black);
 
@@ -420,12 +467,14 @@ namespace Myre.Graphics.Lighting
                 shadowView.SetMetadata(renderer.Data);
 
                 foreach (var item in renderer.Scene.FindManagers<IGeometryProvider>())
-                    item.Draw("shadows", renderer.Data);
+                    item.Draw("shadows_viewz", renderer.Data);
 
                 light.shadowMap = target;
                 resolution.Value = previousResolution;
                 previousView.SetMetadata(renderer.Data);
                 view.Value = previousView;
+
+                shadowmap = target;
             }
         }
     }

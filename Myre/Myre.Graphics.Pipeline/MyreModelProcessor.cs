@@ -217,10 +217,17 @@ namespace Myre.Graphics.Pipeline
         {
             var materialData = new MyreMaterialData();
             materialData.EffectName = Path.GetFullPath("DefaultShadows.fx");
-            materialData.Technique = "Technique1";
+            materialData.Technique = "ViewLength";
 
             var shadowMaterial = context.Convert<MyreMaterialData, MyreMaterialContent>(materialData, "MyreMaterialProcessor");
-            processedMaterials[material].Add("shadows", shadowMaterial);
+            processedMaterials[material].Add("shadows_viewlength", shadowMaterial);
+
+            materialData = new MyreMaterialData();
+            materialData.EffectName = Path.GetFullPath("DefaultShadows.fx");
+            materialData.Technique = "ViewZ";
+
+            shadowMaterial = context.Convert<MyreMaterialData, MyreMaterialContent>(materialData, "MyreMaterialProcessor");
+            processedMaterials[material].Add("shadows_viewz", shadowMaterial);
         }
 
         private void CreateGBufferMaterial(MaterialContent material, MeshContent mesh)
@@ -235,7 +242,7 @@ namespace Myre.Graphics.Pipeline
 
             var materialData = new MyreMaterialData();
             materialData.EffectName = Path.GetFullPath("DefaultGBuffer.fx");
-            materialData.Technique = "Technique1";
+            materialData.Technique = "ClipAlpha";//IsOpaque(diffuseTexture) ? "Default" : "ClipAlpha";
             materialData.Textures.Add("DiffuseMap", diffuseTexture);
             materialData.Textures.Add("NormalMap", normalTexture);
             materialData.Textures.Add("SpecularMap", specularTexture);
@@ -243,6 +250,28 @@ namespace Myre.Graphics.Pipeline
             var gbufferMaterial = context.Convert<MyreMaterialData, MyreMaterialContent>(materialData, "MyreMaterialProcessor");
             processedMaterials[material].Add("gbuffer", gbufferMaterial);
         }
+
+        //private bool IsOpaque(string textureFilename)
+        //{
+        //    var processorParameters = new OpaqueDataDictionary();
+        //    processorParameters.Add("PremultiplyAlpha", false);
+
+        //    var reference = new ExternalReference<TextureContent>(textureFilename);
+        //    var texture = (Texture2DContent)context.BuildAndLoadAsset<TextureContent, TextureContent>(reference, "SpriteTextureProcessor", processorParameters, null);
+        //    var bitmap = (PixelBitmapContent<Color>)texture.Mipmaps[0];
+
+        //    for (int x = 0; x < bitmap.Width; x++)
+        //    {
+        //        for (int y = 0; y < bitmap.Height; y++)
+        //        {
+        //            var colour = bitmap.GetPixel(x, y);
+        //            if (colour.A != 255)
+        //                return false;
+        //        }
+        //    }
+
+        //    return true;
+        //}
 
         private string FindDiffuseTexture(MeshContent mesh, MaterialContent material)
         {

@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <ProjectGuid>{F71C29F5-9273-4F59-A062-9F6914DEBEFD}</ProjectGuid>
+    <ProjectGuid>{F40925B3-500A-41C8-ABF8-78D6759C7F4A}</ProjectGuid>
     <ProjectTypeGuids>{6D335F3A-9D43-41b4-9D22-F6F17C4BE596};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">Xbox 360</Platform>
@@ -44,7 +44,11 @@
   <ItemGroup />
   <ItemGroup>
     <Compile Include="Camera.cs" />
-    <Compile Include="GeometryBufferPhase.cs" />
+    <Compile Include="CreateTargetComponent.cs" />
+    <Compile Include="AntiAliasComponent.cs" />
+    <Compile Include="EdgeDetectComponent.cs" />
+    <Compile Include="GeometryBufferComponent.cs" />
+    <Compile Include="Geometry\BoundingVolume.cs" />
     <Compile Include="Geometry\IBoxIntersectTester.cs" />
     <Compile Include="Geometry\ICullable.cs" />
     <Compile Include="Geometry\IGeometryProvider.cs" />
@@ -54,28 +58,38 @@
     <Compile Include="Geometry\ModelInstance.cs" />
     <Compile Include="Geometry\Octree.cs" />
     <Compile Include="Geometry\OrientedBoundingBox.cs" />
+    <Compile Include="IRenderable.cs" />
     <Compile Include="Lighting\AmbientLight.cs" />
     <Compile Include="Lighting\GammaCorrectionPhase.cs" />
     <Compile Include="Lighting\PointLight.cs" />
     <Compile Include="Lighting\Skybox.cs" />
     <Compile Include="Lighting\SpotLight.cs" />
+    <Compile Include="Lighting\Ssao.cs" />
     <Compile Include="Lighting\SunLight.cs" />
     <Compile Include="Lighting\ILightProvider.cs" />
-    <Compile Include="Lighting\LightingPhase.cs" />
-    <Compile Include="Lighting\ToneMapPhase.cs" />
+    <Compile Include="Lighting\LightingComponent.cs" />
+    <Compile Include="Lighting\ToneMapComponent.cs" />
     <Compile Include="Materials\Material.cs" />
     <Compile Include="Materials\MaterialParameter.cs" />
     <Compile Include="Materials\MaterialReader.cs" />
+    <Compile Include="Particles\EllipsoidParticleEmitter.cs" />
+    <Compile Include="Particles\ParticleEmitter.cs" />
+    <Compile Include="Particles\ParticlePhase.cs" />
+    <Compile Include="Particles\ParticleSystem.cs" />
+    <Compile Include="Particles\ParticleSystemDescription.cs" />
+    <Compile Include="Particles\ParticleVertex.cs" />
     <Compile Include="PostProcessing\Gaussian.cs" />
     <Compile Include="PostProcessing\Scale.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Quad.cs" />
+    <Compile Include="RenderableComponent.cs" />
     <Compile Include="Renderer.cs" />
     <Compile Include="RendererMetadata.cs" />
     <Compile Include="RendererSettings.cs" />
-    <Compile Include="RenderPhase.cs" />
+    <Compile Include="RendererComponent.cs" />
     <Compile Include="RenderPlan.cs" />
     <Compile Include="RenderTargetManager.cs" />
+    <Compile Include="RestoreDepthPhase.cs" />
     <Compile Include="View.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -83,10 +97,6 @@
     <Content Include="Documentation\RenderPhases.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Ninject\Ninject\(360) Ninject.csproj">
-      <Project>{A45A3E11-2E29-46F2-B743-8C0E879D2B47}</Project>
-      <Name>(360) Ninject</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Myre.Debugging\(360) Myre.Debugging.csproj">
       <Project>{28588CF1-B67A-40D6-B084-90A40E986220}</Project>
       <Name>(360) Myre.Debugging</Name>
@@ -130,6 +140,12 @@
     </Reference>
     <Reference Include="mscorlib">
       <Private>False</Private>
+    </Reference>
+    <Reference Include="Ninject">
+      <HintPath>..\..\Libraries\Xbox 360\Ninject.dll</HintPath>
+    </Reference>
+    <Reference Include="protobuf_net">
+      <HintPath>..\..\Libraries\Xbox 360\protobuf_net.dll</HintPath>
     </Reference>
     <Reference Include="System">
       <Private>False</Private>

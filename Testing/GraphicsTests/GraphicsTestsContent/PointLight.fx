@@ -66,7 +66,7 @@ float4 CalculateLighting(float2 texCoord, float3 viewPosition)
 	float RdV = max(dot(R, V), 0);
 
 	float3 light = Colour * attenuation;
-	return float4((NdL * diffuse * light) + ((specularIntensity * pow(RdV, specularPower)) * light), 1);
+	return float4(NdL * light * (diffuse + specularIntensity * pow(RdV, specularPower)), 1);
 }
 
 void GeometryVS(in float3 in_Position : POSITION0,

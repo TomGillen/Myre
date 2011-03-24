@@ -72,12 +72,19 @@ VertexShaderOutput VertexShaderFunction(VertexShaderInput input)
     return output;
 }
 
-void PixelShaderFunction(in VertexShaderOutput input,
+void PixelShaderFunction(uniform bool ClipAlpha,
+						 in VertexShaderOutput input,
 						 out float4 out_depth : COLOR0,
 						 out float4 out_normal : COLOR1,
 						 out float4 out_diffuse : COLOR2)
 {
     float4 diffuseSample = tex2D(diffuseSampler, input.TexCoord);
+
+	if (ClipAlpha)
+	{
+		clip(diffuseSample.a < 0.5 ? -1 : 1);
+	}
+
 	float4 normalSample = tex2D(normalSampler, input.TexCoord);
 	float4 specularSample = tex2D(specularSampler, input.TexCoord);
 
@@ -90,11 +97,20 @@ void PixelShaderFunction(in VertexShaderOutput input,
 	out_diffuse = float4(diffuseSample.rgb, specularSample.a);
 }
 
-technique Technique1
+technique Default
 {
     pass Pass1
     {
         VertexShader = compile vs_3_0 VertexShaderFunction();
-        PixelShader = compile ps_3_0 PixelShaderFunction();
+        PixelShader = compile ps_3_0 PixelShaderFunction(false);
+    }
+}
+
+technique ClipAlpha
+{
+    pass Pass1
+    {
+        VertexShader = compile vs_3_0 VertexShaderFunction();
+        PixelShader = compile ps_3_0 PixelShaderFunction(true);
     }
 }

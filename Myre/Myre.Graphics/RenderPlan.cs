@@ -11,10 +11,182 @@ namespace Myre.Graphics
 {
     public class RenderPlan
     {
+        public struct Output
+        {
+            private RenderTarget2D target;
+            private Resource resource;
+            private Renderer renderer;
+
+            public Texture2D Image
+            {
+                get { return target; }
+            }
+
+            internal Output(Renderer renderer, Resource resource)
+            {
+                this.renderer = renderer;
+                this.resource = resource;
+                this.target = resource.RenderTarget;
+            }
+            
+            public void Finalise()
+            {
+                resource.Finalise(renderer, target);
+            }
+        }
+
+        private struct FreePoint
+        {
+            public string Name;
+            public int Index;
+        }
+
+        private IKernel kernel;
+        private Renderer renderer;
+
+        private RendererComponent[] components;
+        private ResourceContext finalContext;
+        private Dictionary<string, int> resourceLastUsed;
+        private Dictionary<string, Resource> resources;
+        private FreePoint[] freePoints;
+        private Resource output;
+
+        internal RenderPlan(IKernel kernel, Renderer renderer)
+        {
+            this.kernel = kernel;
+            this.renderer = renderer;
+            this.components = new RendererComponent[0];
+            this.resources = new Dictionary<string, Resource>();
+            this.resourceLastUsed = new Dictionary<string, int>();
+            this.freePoints = new FreePoint[0];
+        }
+
+        private RenderPlan(RenderPlan previous, RendererComponent next)
+        {
+            this.kernel = previous.kernel;
+            this.renderer = previous.renderer;
+            this.resources = new Dictionary<string,Resource>(previous.resources);
+            this.resourceLastUsed = new Dictionary<string, int>(previous.resourceLastUsed);
+            this.components = Append(previous.components, next);
+
+            var context = CreateContext(previous.finalContext);
+            next.Initialise(renderer, context);
+
+            foreach (var resource in context.Inputs)
+		        resourceLastUsed[resource] = components.Length - 1;
+
+            foreach (var resource in context.Outputs)
+            {
+                if (!resources.ContainsKey(resource.Name))
+                    resources[resource.Name] = resource;
+                resourceLastUsed[resource.Name] = components.Length - 1;
+            }
+
+            this.finalContext = context;
+
+            if (context.Outputs.Count > 0)
+                this.output = resources[context.Outputs[0].Name];
+            else
+            {
+                this.output = previous.output;
+                resourceLastUsed[output.Name] = components.Length - 1;
+            }
+        }
+
+        private void Initialise()
+        {
+            freePoints = (from resource in resourceLastUsed
+                          orderby resource.Value ascending
+                          select new FreePoint() { Name = resource.Key, Index = resource.Value }).ToArray();
+        }
+
+        private RendererComponent[] Append(RendererComponent[] components,RendererComponent next)
+        {
+ 	        Array.Resize(ref components, components.Length + 1);
+            components[components.Length - 1] = next;
+
+            return components;
+        }
+
+        private ResourceContext CreateContext(ResourceContext previousContext)
+        {
+ 	        var available = resources.Values.Select(r => new ResourceInfo(r.Name, r.Format)).ToArray();
+            var setTargets = previousContext == null ? new ResourceInfo[0] : previousContext.Outputs.Where(r => r.IsLeftSet).Select(r => new ResourceInfo(r.Name, r.Format)).ToArray();
+
+            return new ResourceContext(available, setTargets);
+        }
+
+        public RenderPlan Then(RendererComponent component)
+        {
+            return new RenderPlan(this, component);
+        }
+
+        public RenderPlan Then<T>()
+            where T : RendererComponent
+        {
+            return Then(kernel.Get<T>());
+        }
+
+        public RenderPlan Show(string resource)
+        {
+            resourceLastUsed[resource] = components.Length - 1;
+            output = resources[resource];
+
+            return this;
+        }
+
+        public void Apply()
+        {
+            renderer.Plan = this;
+        }
+
+        public Output Execute(Renderer renderer)
+        {
+            if (freePoints == null)
+                Initialise();
+
+            int resourceIndex = 0;
+            for (int i = 0; i < components.Length; i++)
+            {
+                var component = components[i];
+                component.plan = this;
+                component.Draw(renderer);
+
+                while (resourceIndex < freePoints.Length && freePoints[resourceIndex].Index <= i)
+                {
+                    var point = freePoints[resourceIndex];
+                    if (point.Name != output.Name)
+                        resources[point.Name].Finalise(renderer);
+
+                    resourceIndex++;
+                }
+            }
+
+            return new Output(renderer, output);
+        }
+
+        internal RenderTarget2D GetResource(string name)
+        {
+            return resources[name].RenderTarget;
+        }
+
+        internal void SetResource(string name, RenderTarget2D resource)
+        {
+            resources[name].RenderTarget = resource;
+            renderer.Data.Set<Texture2D>(name, resource);
+        }
+
+        /*
         struct ResourceFreePoint
         {
             public string Name;
             public int Index;
+        }
+
+        public struct Output
+        {
+            public Texture2D Image;
+            public RendererComponent.Resource Resource;
         }
 
         private IKernel kernel;
@@ -94,12 +266,17 @@ namespace Myre.Graphics
 
         public RenderPlan FinishWith(string resourceName)
         {
+            var resourceAvailable = resources.ContainsKey(resourceName);
+
+            if (!resourceAvailable)
+                throw new InvalidOperationException(string.Format("The resource {0} is not available. Please insert an earlier component which outputs this resource.", resourceName));
+
             resourcesLastUsed[resourceName] = components.Count;
             finishWith = resourceName;
             return this;
         }
 
-        public Texture2D Execute(Renderer renderer)
+        public Output Execute(Renderer renderer)
         {
             if (freePoints == null)
                 Initialise();
@@ -137,14 +314,22 @@ namespace Myre.Graphics
                     resourceIndex++;
                 }
             }
-
+            
             if (finishWith != null)
             {
                 activeResource.Finalise(renderer);
-                return renderer.Data.Get<Texture2D>(finishWith).Value;
+                return new Output()
+                {
+                    Image = renderer.Data.Get<Texture2D>(finishWith).Value,
+                    Resource = resources[finishWith]
+                };
             }
 
-            return activeTarget;
+            return new Output()
+            {
+                Image = activeTarget,
+                Resource = activeResource
+            };
         }
 
         private void Initialise()
@@ -165,6 +350,7 @@ namespace Myre.Graphics
 
             return null;
         }
+         */
     }
 
     /*

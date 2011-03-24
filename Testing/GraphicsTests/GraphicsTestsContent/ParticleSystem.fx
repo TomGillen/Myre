@@ -6,6 +6,7 @@ float4x4 ViewProjection : VIEWPROJECTION;
 float4x4 Projection : PROJECTION;
 float4x4 InverseProjection : INVERSEPROJECTION;
 float FarClip : FARCLIP;
+float3 CameraPosition : CAMERAPOSITION;
 
 texture Depth : GBUFFER_DEPTH;
 
@@ -38,7 +39,7 @@ sampler depthSampler = sampler_state
 };
 
 // Vertex shader helper for computing the position of a particle.
-float4 ComputeParticlePosition(float3 position, float3 velocity, float age, float normalisedAge, uniform bool offsetBySize, float size)
+float4 ComputeParticlePosition(float3 position, float3 velocity, float age, float normalisedAge, float size, uniform bool offsetZBySize)
 {
     float startVelocity = length(velocity);
 
@@ -61,8 +62,13 @@ float4 ComputeParticlePosition(float3 position, float3 velocity, float age, floa
     // Apply the gravitational force.
     position += Gravity * age * normalisedAge;
 
-	if (offsetBySize)
-		position.z += size;
+	/*
+	if (offsetZBySize)
+	{
+		float3 toCamera = CameraPosition - position;
+		position += normalize(toCamera) * size;
+	}
+	*/
     
     // Apply the camera view and projection transforms.
     return mul(mul(float4(position, 1), World), ViewProjection);
@@ -136,13 +142,15 @@ void VertexShaderFunction(in float2 corner : POSITION0,
     float2x2 rotation = ComputeParticleRotation(velocity.w, age);
 
 	// Compute the particle position, size, color, and rotation.
-    out_Position = ComputeParticlePosition(position, velocity.xyz, age, normalisedAge, soft, size);
+    out_Position = ComputeParticlePosition(position, velocity.xyz, age, normalisedAge, size, soft);
 
-    out_Position.xy += mul(corner, rotation) * size * Projection._m11 * ViewportScale;
+	float2 offset = mul(corner, rotation) * size * Projection._m11 * ViewportScale;
+    out_Position.xy += offset;
+
 	out_PositionCS = out_Position;
 
 	float4 viewPosition = mul(out_Position, InverseProjection);
-	out_Depth = float2(length(viewPosition), size) / FarClip;
+	out_Depth = float2(-viewPosition.z, size / 2) / FarClip;
     
     out_Colour = ComputeParticleColour(startColour, endColour, normalisedAge);
     out_TexCoord = (corner + 1) / 2;

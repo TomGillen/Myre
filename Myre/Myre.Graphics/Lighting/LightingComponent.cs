@@ -11,42 +11,43 @@ using Myre.Extensions;
 
 namespace Myre.Graphics.Lighting
 {
-    public class LightingPhase
+    public class LightingComponent
        : RendererComponent
     {
-        protected override void SpecifyResources(IList<Input> inputs, IList<RendererComponent.Resource> outputs, out RenderTargetInfo? outputTarget)
-        {
-            inputs.Add(new Input() { Name = "gbuffer_depth" });
-            inputs.Add(new Input() { Name = "gbuffer_normals" });
-            inputs.Add(new Input() { Name = "gbuffer_diffuse" });
-            inputs.Add(new Input() { Name = "gbuffer_depth_downsample" });
+        //protected override void SpecifyResources(IList<Input> inputs, IList<RendererComponent.Resource> outputs, out RenderTargetInfo? outputTarget)
+        //{
+        //    inputs.Add(new Input() { Name = "gbuffer_depth" });
+        //    inputs.Add(new Input() { Name = "gbuffer_normals" });
+        //    inputs.Add(new Input() { Name = "gbuffer_diffuse" });
+        //    inputs.Add(new Input() { Name = "gbuffer_depth_downsample" });
 
-            outputs.Add(new Resource()
-            {
-                Name = "lightbuffer",
-                IsLeftSet = true,
-                Finaliser = (renderer, output) =>
-                    {
-                        var previous = renderer.Data.Get<Texture2D>("previouslightbuffer");
-                        if (previous.Value != null)
-                            RenderTargetManager.RecycleTarget(previous.Value as RenderTarget2D);
-                        previous.Value = renderer.Data.Get<Texture2D>("lightbuffer").Value;
-                    }
-            });
+        //    outputs.Add(new Resource()
+        //    {
+        //        Name = "lightbuffer",
+        //        IsLeftSet = true,
+        //        Finaliser = null
+        //    });
 
-            outputs.Add(new Resource() { Name = "ssao" });
+        //    outputs.Add(new Resource()
+        //    {
+        //        Name = "previouslightbuffer",
+        //        IsLeftSet = false,
+        //        Finaliser = null
+        //    });
 
-            outputTarget = new RenderTargetInfo()
-            {
-                SurfaceFormat = SurfaceFormat.HdrBlendable,
-                DepthFormat = DepthFormat.Depth24Stencil8
-            };
-        }
+        //    outputs.Add(new Resource() { Name = "ssao" });
 
-        protected internal override bool ValidateInput(RenderTargetInfo? previousRenderTarget)
-        {
-            return true;
-        }
+        //    outputTarget = new RenderTargetInfo()
+        //    {
+        //        SurfaceFormat = SurfaceFormat.HdrBlendable,
+        //        DepthFormat = DepthFormat.Depth24Stencil8
+        //    };
+        //}
+
+        //protected internal override bool ValidateInput(RenderTargetInfo? previousRenderTarget)
+        //{
+        //    return true;
+        //}
 
         Quad quad;
         Material restoreDepth;
@@ -54,6 +55,8 @@ namespace Myre.Graphics.Lighting
         DepthStencilState markGeometryState;
         Comparison<ILightProvider> lightComparison;
         List<ILightProvider> lights;
+        RenderTarget2D lightBuffer;
+        RenderTarget2D previousTarget;
 
         public static readonly DepthStencilState CullGeometry = new DepthStencilState()
         {
@@ -71,7 +74,7 @@ namespace Myre.Graphics.Lighting
             StencilFunction = CompareFunction.NotEqual
         };
 
-        public LightingPhase(
+        public LightingComponent(
             GraphicsDevice device,
             ContentManager content)
         {
@@ -94,33 +97,32 @@ namespace Myre.Graphics.Lighting
             lights = new List<ILightProvider>();
         }
 
-        public override void Initialise(Renderer renderer)
+        public override void Initialise(Renderer renderer, ResourceContext context)
         {
+            // create debug dettings
             var settings = renderer.Settings;
 
             settings.Add("lighting_attenuationscale", "Scales the rate at which lights attenuate over distance.", 100);
             settings.Add("lighting_threshold", "The fraction of the average scene luminance at which the rage of a light is cut off.", 0.05f);
-
-            settings.Add("ssao_enabled", "Determines if Screen Space Ambient Occlusion is enabled.", true);
-            settings.Add("ssao_halfres", "Determines if SSAO will run at full of half screen resolution.", true);
-            settings.Add("ssao_radius", "SSAO sample radius", 6f);
-            settings.Add("ssao_intensity", "SSAO intensity", 20f);
-            settings.Add("ssao_scale", "Scales distance between occluders and occludee.", 1f);
-            settings.Add("ssao_detailradius", "SSAO sample radius", 2.3f);
-            settings.Add("ssao_detailintensity", "SSAO intensity", 15f);
-            settings.Add("ssao_detailscale", "Scales distance between occluders and occludee.", 1.5f);
-            settings.Add("ssao_blur", "The amount to blur SSAO.", 1f);
-
             settings.Add("debuglights", "Shows light debug information", false);
 
+            // define inputs
+            context.DefineInput("gbuffer_depth");
+            context.DefineInput("gbuffer_normals");
+            context.DefineInput("gbuffer_diffuse");
+            context.DefineInput("gbuffer_depth_downsample");
 
-            //settings.Add("ssao_bias", "Controls the width of the occlusion cone considered by the occludee.", 0.045f);
-            //settings.Add("ssao_selfocclusion", "Controls how much self occlusion is simulated.", 0f);
-                        
-            base.Initialise(renderer);
+            if (context.AvailableResources.Any(r => r.Name == "ssao"))
+                context.DefineInput("ssao");
+
+            // define outputs
+            context.DefineOutput("lightbuffer", isLeftSet:true, finaliser: (r, t) => {}, surfaceFormat:SurfaceFormat.HdrBlendable, depthFormat:DepthFormat.Depth24Stencil8);
+            context.DefineOutput("previouslightbuffer", isLeftSet:false, surfaceFormat:SurfaceFormat.HdrBlendable, depthFormat:DepthFormat.Depth24Stencil8);
+
+            base.Initialise(renderer, context);
         }
 
-        public override RenderTarget2D Draw(Renderer renderer)
+        public override void Draw(Renderer renderer)
         {
             var metadata = renderer.Data;
             var device = renderer.Device;
@@ -135,8 +137,7 @@ namespace Myre.Graphics.Lighting
             var width = (int)resolution.X;
             var height = (int)resolution.Y;
 
-            var lightBuffer = RenderTargetManager.GetTarget(device, width, height, SurfaceFormat.HdrBlendable, DepthFormat.Depth24Stencil8, 0, false, RenderTargetUsage.DiscardContents);
-
+            SwapBuffers(renderer, device, width, height);
             device.SetRenderTarget(lightBuffer);
 
             device.BlendState = BlendState.Opaque;
@@ -165,9 +166,26 @@ namespace Myre.Graphics.Lighting
             }
 
             lights.Clear();
+            
+            Output("lightbuffer", lightBuffer);
+            Output("previouslightbuffer", previousTarget);
+        }
 
-            renderer.SetResource("lightbuffer", lightBuffer);
-            return lightBuffer;
+        private void SwapBuffers(Renderer renderer, GraphicsDevice device, int width, int height)
+        {
+            if (previousTarget != null)
+            {
+                //RenderTargetManager.RecycleTarget(previousTarget);
+                previousTarget = lightBuffer;
+            }
+            else
+            {
+                previousTarget = RenderTargetManager.GetTarget(renderer.Device, 1, 1, name:"previous light buffer");
+                renderer.Device.SetRenderTarget(previousTarget);
+                renderer.Device.Clear(Color.Transparent);
+            }
+
+            lightBuffer = RenderTargetManager.GetTarget(device, width, height, SurfaceFormat.HdrBlendable, DepthFormat.Depth24Stencil8, 0, false, RenderTargetUsage.DiscardContents, name:"light buffer");
         }
     }
 }

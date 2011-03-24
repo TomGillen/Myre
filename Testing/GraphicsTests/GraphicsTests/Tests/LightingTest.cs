@@ -30,23 +30,37 @@ namespace GraphicsTests.Tests
                 batch = new SpriteBatch(device);
             }
 
-            protected override void SpecifyResources(IList<Input> inputs, IList<RendererComponent.Resource> outputs, out RenderTargetInfo? outputTarget)
-            {
-                inputs.Add(new Input() { Name = "gbuffer_depth" });
-                inputs.Add(new Input() { Name = "gbuffer_normals" });
-                inputs.Add(new Input() { Name = "gbuffer_diffuse" });
-                inputs.Add(new Input() { Name = "lightbuffer" });
-                outputs.Add(new Resource() { Name = "scene", IsLeftSet = true });
+            //protected override void SpecifyResources(IList<Input> inputs, IList<RendererComponent.Resource> outputs, out RenderTargetInfo? outputTarget)
+            //{
+            //    inputs.Add(new Input() { Name = "gbuffer_depth" });
+            //    inputs.Add(new Input() { Name = "gbuffer_normals" });
+            //    inputs.Add(new Input() { Name = "gbuffer_diffuse" });
+            //    inputs.Add(new Input() { Name = "lightbuffer" });
+            //    outputs.Add(new Resource() { Name = "scene", IsLeftSet = true });
 
-                outputTarget = new RenderTargetInfo();
+            //    outputTarget = new RenderTargetInfo();
+            //}
+
+            //protected override bool ValidateInput(RenderTargetInfo? previousRenderTarget)
+            //{
+            //    return true;
+            //}
+
+            public override void Initialise(Renderer renderer, ResourceContext context)
+            {
+                // define inputs
+                context.DefineInput("gbuffer_depth");
+                context.DefineInput("gbuffer_normals");
+                context.DefineInput("gbuffer_diffuse");
+                context.DefineInput("lightbuffer");
+
+                // define outputs
+                context.DefineOutput("scene");
+                
+                base.Initialise(renderer, context);
             }
 
-            protected override bool ValidateInput(RenderTargetInfo? previousRenderTarget)
-            {
-                return true;
-            }
-
-            public override RenderTarget2D Draw(Renderer renderer)
+            public override void Draw(Renderer renderer)
             {
                 KeyboardState keyboard = Keyboard.GetState();
                 if (keyboard.IsKeyDown(Keys.Space) && previousKeyboard.IsKeyUp(Keys.Space))
@@ -92,8 +106,7 @@ namespace GraphicsTests.Tests
 
                 batch.End();
 
-                renderer.SetResource("scene", target);
-                return target;
+                Output("scene", target);
             }
         }
 
@@ -118,12 +131,15 @@ namespace GraphicsTests.Tests
         {
             scene = kernel.Get<TestScene>();
 
-            var plan = RenderPlan
-                .StartWith<GeometryBufferComponent>(kernel)
-                .Then<LightingPhase>()
-                .Then<Phase>();
-
-            scene.Scene.GetService<Renderer>().Plan = plan;
+            var renderer = scene.Scene.GetService<Renderer>();
+            renderer.StartPlan()
+                .Then<GeometryBufferComponent>()
+                .Then<EdgeDetectComponent>()
+                .Then<Ssao>()
+                .Then<LightingComponent>()
+                .Then<Phase>()
+                //.Show("shadowmap")
+                .Apply();
 
             base.OnShown();
         }

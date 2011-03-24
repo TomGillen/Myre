@@ -80,6 +80,10 @@ namespace Myre.UI
             if (control == focused)
                 return;
 
+            // clear buffers
+            unfocused.Clear();
+            newFocused.Clear();
+
             if (control != null && !control.LikesHavingFocus)
             {
                 foreach (var item in control.Children.OrderBy(byFocusPriority))
@@ -117,18 +121,34 @@ namespace Myre.UI
                 }
             }
 
+            var currentlyFocused = focused;
+
             // walk through the old controls, from leaf towards root, unfocusing them
             for (int i = 0; i < unfocused.Count; i++)
             {
-                RemoveFocus(unfocused[i]);
-                unfocused[i].FocusedCount--;
+                var u = unfocused[i];
+                focused = u;
+
+                RemoveFocus(u);
+                u.FocusedCount--;
+
+                // quit if FocusChanged focused another control
+                if (focused != u)
+                    return;
             }
 
             // walk through the new controls, from root to leaf, focusing them
             for (int i = newFocused.Count - 1; i >= 0; i--)
             {
+                var f = newFocused[i];
+                focused = f;
+
                 AddFocus(newFocused[i]);
                 newFocused[i].FocusedCount++;
+
+                // quit if FocusChanged focused another control
+                if (focused != f)
+                    return;
             }
 
             // push old control onto stack
@@ -144,12 +164,8 @@ namespace Myre.UI
             }
 
             // remember new control
-            focused = control;
+            //focused = control;
             root = newRoot;
-
-            // clear buffers
-            unfocused.Clear();
-            newFocused.Clear();
 
             CompactPreviousList();
         }

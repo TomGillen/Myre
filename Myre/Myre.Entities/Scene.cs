@@ -163,26 +163,21 @@ namespace Myre.Entities
 
         private void AddBehavioursToManager(IEnumerable<Type> behaviourTypes)
         {
-            foreach (var behaviourType in behaviourTypes)
-            {
-                var handler = managers.GetByBehaviour(behaviourType);
+            var behavioursToBeAdded = 
+                from behaviourType in behaviourTypes
+                let handler = managers.GetByBehaviour(behaviourType)
+                from entity in entities
+                from behaviour in entity.Behaviours
+                let type = behaviour.GetType()
+                where
+                    // this manager can manage the behaviour
+                    behaviourType.IsAssignableFrom(type)
+                    // and either there is no current manager, or (this manager is more derived than the current one, and there is no default manager).
+                    && (behaviour.CurrentManager.Handler == null || (!behaviourType.IsAssignableFrom(behaviour.CurrentManager.ManagedAs) && SearchForDefaultManager(type) == null))
+                select new { Handler = handler, Behaviour = behaviour };
 
-                foreach (var entity in entities)
-                {
-                    var behavioursToBeAdded = from b in entity.Behaviours
-                                              let type = b.GetType()
-                                              // this manager can manage the behaviour
-                                              where behaviourType.IsAssignableFrom(type)
-                                                  // and either there is no current manager, or (this manager is more derived than the current one, and there is no default manager).
-                                                 && (b.CurrentManager.Handler == null || (!behaviourType.IsAssignableFrom(b.CurrentManager.ManagedAs) && SearchForDefaultManager(type) == null))
-                                              select b;
-
-                    foreach (var behaviour in behavioursToBeAdded)
-                    {
-                        handler.Add(behaviour);
-                    }
-                }
-            }
+            foreach (var item in behavioursToBeAdded)
+                item.Handler.Add(item.Behaviour);
         }
 
         /// <summary>

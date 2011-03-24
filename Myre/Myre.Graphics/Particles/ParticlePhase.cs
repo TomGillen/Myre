@@ -9,48 +9,38 @@ using Microsoft.Xna.Framework;
 
 namespace Myre.Graphics.Particles
 {
-    public class ParticlePhase
+    public class ParticleComponent
         : RendererComponent
     {
         //private Model tank;
         private ReadOnlyCollection<ParticleEmitter.Manager> managers;
 
-        public ParticlePhase(ContentManager content)
+        public ParticleComponent(ContentManager content)
         {
             //tank = content.Load<Model>("tank");
         }
 
-        public override void Initialise(Renderer renderer)
+        public override void Initialise(Renderer renderer, ResourceContext context)
         {
             managers = renderer.Scene.FindManagers<ParticleEmitter.Manager>();
-            base.Initialise(renderer);
+
+            // define inputs
+            if (context.AvailableResources.Any(r => r.Name == "gbuffer_depth"))
+                context.DefineInput("gbuffer_depth");
+
+            // define outputs
+            foreach (var resource in context.SetRenderTargets)
+                context.DefineOutput(resource);
+
+            base.Initialise(renderer, context);
         }
 
-        protected override void SpecifyResources(IList<Input> inputs, IList<RendererComponent.Resource> outputs, out RenderTargetInfo? output)
-        {
-            inputs.Add(new Input() { Name = "gbuffer_depth", Optional = true });
-            output = null;
-        }
-
-        protected internal override bool ValidateInput(RenderTargetInfo? previousRenderTarget)
-        {
-            if (previousRenderTarget == null)
-                return false;
-
-            if (previousRenderTarget.Value.DepthFormat == DepthFormat.None)
-                return false;
-
-            return true;
-        }
-
-        public override RenderTarget2D Draw(Renderer renderer)
+        public override void Draw(Renderer renderer)
         {
             //DrawModel(renderer, tank);
 
             foreach (var item in managers)
                 item.Draw(renderer);
-
-            return null;
         }
 
         ///// <summary>

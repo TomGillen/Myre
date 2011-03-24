@@ -20,19 +20,27 @@ namespace GraphicsTests.Tests
         class A
             : RendererComponent
         {
-            protected override void SpecifyResources(IList<Input> inputs, IList<RendererComponent.Resource> outputs, out RenderTargetInfo? outputTarget)
-            {
-                outputs.Add(new Resource() { Name = "a", IsLeftSet = true });
+            //protected override void SpecifyResources(IList<Input> inputs, IList<RendererComponent.Resource> outputs, out RenderTargetInfo? outputTarget)
+            //{
+            //    outputs.Add(new Resource() { Name = "a", IsLeftSet = true });
 
-                outputTarget = new RenderTargetInfo();
+            //    outputTarget = new RenderTargetInfo();
+            //}
+
+            //protected override bool ValidateInput(RenderTargetInfo? previousRenderTarget)
+            //{
+            //    return true;
+            //}
+
+            public override void Initialise(Renderer renderer, ResourceContext context)
+            {
+                // define outputs
+                context.DefineOutput("a");
+                
+                base.Initialise(renderer, context);
             }
 
-            protected override bool ValidateInput(RenderTargetInfo? previousRenderTarget)
-            {
-                return true;
-            }
-
-            public override RenderTarget2D Draw(Renderer renderer)
+            public override void Draw(Renderer renderer)
             {
                 var target = RenderTargetManager.GetTarget(renderer.Device, new RenderTargetInfo() { Height = 50, Width = 50 });
                 renderer.Device.SetRenderTarget(target);
@@ -41,27 +49,34 @@ namespace GraphicsTests.Tests
                 spriteBatch.DrawString(font, "A", Vector2.Zero, Color.Black);
                 spriteBatch.End();
 
-                renderer.SetResource("a", target);
-                return target;
+                Output("a", target);
             }
         }
 
         class B
             : RendererComponent
         {
-            protected override void SpecifyResources(IList<Input> inputs, IList<RendererComponent.Resource> outputs, out RenderTargetInfo? outputTarget)
-            {
-                outputs.Add(new Resource() { Name = "b", IsLeftSet = true });
+            //protected override void SpecifyResources(IList<Input> inputs, IList<RendererComponent.Resource> outputs, out RenderTargetInfo? outputTarget)
+            //{
+            //    outputs.Add(new Resource() { Name = "b", IsLeftSet = true });
 
-                outputTarget = new RenderTargetInfo();
+            //    outputTarget = new RenderTargetInfo();
+            //}
+
+            //protected override bool ValidateInput(RenderTargetInfo? previousRenderTarget)
+            //{
+            //    return true;
+            //}
+
+            public override void Initialise(Renderer renderer, ResourceContext context)
+            {
+                // define outputs
+                context.DefineOutput("b");
+                
+                base.Initialise(renderer, context);
             }
 
-            protected override bool ValidateInput(RenderTargetInfo? previousRenderTarget)
-            {
-                return true;
-            }
-
-            public override RenderTarget2D Draw(Renderer renderer)
+            public override void Draw(Renderer renderer)
             {
                 var target = RenderTargetManager.GetTarget(renderer.Device, new RenderTargetInfo() { Height = 50, Width = 50 });
                 renderer.Device.SetRenderTarget(target);
@@ -69,29 +84,40 @@ namespace GraphicsTests.Tests
                 spriteBatch.DrawString(font, "B", Vector2.Zero, Color.White);
                 spriteBatch.End();
 
-                renderer.SetResource("b", target);
-                return target;
+                Output("b", target);
             }
         }
 
         class C
             : RendererComponent
         {
-            protected override void SpecifyResources(IList<Input> inputs, IList<RendererComponent.Resource> outputs, out RenderTargetInfo? outputTarget)
-            {
-                inputs.Add(new Input() { Name = "a" });
-                inputs.Add(new Input() { Name = "b" });
-                outputs.Add(new Resource() { Name = "c", IsLeftSet = true });
+            //protected override void SpecifyResources(IList<Input> inputs, IList<RendererComponent.Resource> outputs, out RenderTargetInfo? outputTarget)
+            //{
+            //    inputs.Add(new Input() { Name = "a" });
+            //    inputs.Add(new Input() { Name = "b" });
+            //    outputs.Add(new Resource() { Name = "c", IsLeftSet = true });
 
-                outputTarget = new RenderTargetInfo();
+            //    outputTarget = new RenderTargetInfo();
+            //}
+
+            //protected override bool ValidateInput(RenderTargetInfo? previousRenderTarget)
+            //{
+            //    return true;
+            //}
+
+            public override void Initialise(Renderer renderer, ResourceContext context)
+            {
+                // define inputs
+                context.DefineInput("a");
+                context.DefineInput("b");
+
+                // define outputs
+                context.DefineOutput("c");
+                
+                base.Initialise(renderer, context);
             }
 
-            protected override bool ValidateInput(RenderTargetInfo? previousRenderTarget)
-            {
-                return true;
-            }
-
-            public override RenderTarget2D Draw(Renderer renderer)
+            public override void Draw(Renderer renderer)
             {
                 var target = RenderTargetManager.GetTarget(renderer.Device, 50, 100);
                 renderer.Device.SetRenderTarget(target);
@@ -105,28 +131,38 @@ namespace GraphicsTests.Tests
                 spriteBatch.Draw(b, new Rectangle(50, 0, 50, 50), Color.White);
                 spriteBatch.End();
 
-                renderer.SetResource("c", target);
-                return target;
+                Output("c", target);
             }
         }
 
         class D
             : RendererComponent
         {
-            protected override void SpecifyResources(IList<Input> inputs, IList<RendererComponent.Resource> outputs, out RenderTargetInfo? outputTarget)
-            {
-                inputs.Add(new Input() { Name = "c" });
-                outputs.Add(new Resource() { Name = "d", IsLeftSet = true });
+            //protected override void SpecifyResources(IList<Input> inputs, IList<RendererComponent.Resource> outputs, out RenderTargetInfo? outputTarget)
+            //{
+            //    inputs.Add(new Input() { Name = "c" });
+            //    outputs.Add(new Resource() { Name = "d", IsLeftSet = true });
 
-                outputTarget = new RenderTargetInfo();
+            //    outputTarget = new RenderTargetInfo();
+            //}
+
+            //protected override bool ValidateInput(RenderTargetInfo? previousRenderTarget)
+            //{
+            //    return true;
+            //}
+
+            public override void Initialise(Renderer renderer, ResourceContext context)
+            {
+                // define inputs
+                context.DefineInput("c");
+
+                // define outputs
+                context.DefineOutput("d");
+                
+                base.Initialise(renderer, context);
             }
 
-            protected override bool ValidateInput(RenderTargetInfo? previousRenderTarget)
-            {
-                return true;
-            }
-
-            public override RenderTarget2D Draw(Renderer renderer)
+            public override void Draw(Renderer renderer)
             {
                 var target = RenderTargetManager.GetTarget(renderer.Device, 1280, 720);
                 renderer.Device.SetRenderTarget(target);
@@ -138,8 +174,7 @@ namespace GraphicsTests.Tests
                 spriteBatch.Draw(c, new Rectangle(590, 335, 100, 50), Color.White);
                 spriteBatch.End();
 
-                renderer.SetResource("d", target);
-                return target;
+                Output("d", target);
             }
         }
 
@@ -173,13 +208,13 @@ namespace GraphicsTests.Tests
             camera.AddBehaviour<View>();
             scene.Add(camera.Create());
 
-            var plan = RenderPlan
-                .StartWith<D>(kernel)
+            var renderer = scene.GetService<Renderer>();
+            renderer.StartPlan()
                 .Then<A>()
+                .Then<B>()
                 .Then<C>()
-                .Then<B>();
-
-            scene.GetService<Renderer>().Plan = plan;
+                .Then<D>()
+                .Apply();
 
             base.OnShown();
         }

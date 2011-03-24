@@ -23,18 +23,15 @@ namespace Myre.Graphics
             this.name = resourceName ?? string.Format("anonymous-{0}-{1}", counter, targetInfo.GetHashCode());
         }
 
-        protected override void SpecifyResources(IList<Input> inputResources, IList<RendererComponent.Resource> outputResources, out RenderTargetInfo? outputTarget)
-        {
-            outputResources.Add(new Resource() { Name = name });
-            outputTarget = targetInfo;
+        public override void Initialise(Renderer renderer, ResourceContext context)
+        {            
+            // define outputs
+            context.DefineOutput(name, true, null, targetInfo);
+
+            base.Initialise(renderer, context);
         }
 
-        protected internal override bool ValidateInput(RenderTargetInfo? previousRenderTarget)
-        {
-            return true;
-        }
-
-        public override RenderTarget2D Draw(Renderer renderer)
+        public override void Draw(Renderer renderer)
         {
             var info = targetInfo;
             if (info.Width == 0 || info.Height == 0)
@@ -48,7 +45,7 @@ namespace Myre.Graphics
             renderer.Device.SetRenderTarget(target);
             renderer.Device.Clear(Color.Black);
 
-            return target;
+            Output(name, target);
         }
     }
 }

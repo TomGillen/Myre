@@ -39,32 +39,46 @@ sampler diffuseSampler = sampler_state
 	AddressV = Clamp;
 };
 
-texture SSAO;
+texture SSAO : SSAO;
 sampler ssaoSampler = sampler_state
 {
-	Texture = SSAO;
-	MinFilter = Linear;
-	MipFilter = Linear;
-	MagFilter = Linear;
+	Texture = (SSAO);
+	MinFilter = Point;
+	MipFilter = Point;
+	MagFilter = Point;
 };
 
-float3 ReadSsao(float2 texCoord)
+float4 ReadSsao(float2 texCoord)
 {
-	//return tex2D(ssaoSampler, texCoord).x;
+	//return tex2D(ssaoSampler, texCoord);
     
+	float4 ao = 0;
+	for (int i = 0; i < 4; i++)
+	{
+		for (int j = 0; j < 4; j++)
+		{
+			float2 coord = texCoord + float2(i / Resolution.x, j / Resolution.y);
+			ao += tex2D(ssaoSampler, coord);
+		}
+	}
+
+	return ao / 16;
+	
+	/*
 	const float2 vec[3] = {
 		float2(1,1),
 		float2(1,0),
 		float2(0,1),
 	};
 	  
-	float3 ao = tex2D(ssaoSampler, texCoord).x;
+	float4 ao = tex2D(ssaoSampler, texCoord);
 	for (int k=0;k<3;k++){
 		float2 tcoord = texCoord + float2(vec[k].x / Resolution.x, vec[k].y / Resolution.y);
-		ao += tex2D(ssaoSampler, tcoord).rgb;
+		ao += tex2D(ssaoSampler, tcoord);
 	}
 
 	return ao / 4;
+	*/
 }
 
 void PixelShaderFunction(in float2 in_TexCoord : TEXCOORD0,
@@ -79,7 +93,11 @@ void PixelShaderFunction(in float2 in_TexCoord : TEXCOORD0,
 	float3 colour = lerp(GroundColour, SkyColour, alpha);
 
 	if (enableSsao)
-		colour *= ReadSsao(in_TexCoord);
+	{
+		float4 ssao = ReadSsao(in_TexCoord);
+		colour *= ssao.a;
+		colour += ssao.rgb;
+	}
 
 	float3 diffuse = tex2D(diffuseSampler, in_TexCoord).rgb;
 	colour *= GammaToLinear(diffuse);

@@ -1,8 +1,7 @@
 #include "EncodeNormals.fxh"
 #include "GammaCorrection.fxh"
 #include "FullScreenQuad.fxh"
-
-#define BIAS 0.00008 //0.8
+#include "Shadows.fxh"
 
 float3 Colour;
 float3 LightPosition;
@@ -10,7 +9,6 @@ float3 LightDirection;
 float Angle;
 float Range;
 float LightFalloffFactor;
-float2 ShadowMapSize;
 float3 CameraPosition : CAMERAPOSITION;
 bool EnableProjectiveTexturing;
 bool EnableShadows;
@@ -19,7 +17,7 @@ float FarClip : FARCLIP;
 float4x4 WorldViewProjection : WORLDVIEWPROJECTION;
 float4x4 WorldView : WORLDVIEW;
 float4x4 CameraViewToLightProjection;
-float4x4 CameraViewToLightView;
+float4 LightNearPlane;
 float LightFarClip;
 
 texture Depth : GBUFFER_DEPTH;
@@ -66,85 +64,6 @@ sampler maskSampler = sampler_state
 	AddressV = Clamp;
 };
 
-texture ShadowMap;
-sampler shadowSampler = sampler_state
-{
-	Texture = (ShadowMap);
-	MinFilter = Point;
-	MipFilter = None;
-	MagFilter = Point;
-	AddressU = Clamp;
-	AddressV = Clamp;
-};
-
-// Calculates the shadow occlusion using bilinear PCF
-float CalcShadowTermPCF(float fLightDepth, float2 vTexCoord)
-{
-    float fShadowTerm = 0.0f;
-
-    // transform to texel space
-    float2 vShadowMapCoord = ShadowMapSize * vTexCoord;
-    
-    // Determine the lerp amounts           
-    float2 vLerps = frac(vShadowMapCoord);
-
-    // read in bilerp stamp, doing the shadow checks
-    float fSamples[4];
-    
-    fSamples[0] = (tex2D(shadowSampler, vTexCoord).x + BIAS < fLightDepth) ? 0.0f: 1.0f;  
-    fSamples[1] = (tex2D(shadowSampler, vTexCoord + float2(1.0/ShadowMapSize.x, 0)).x + BIAS < fLightDepth) ? 0.0f: 1.0f;  
-    fSamples[2] = (tex2D(shadowSampler, vTexCoord + float2(0, 1.0/ShadowMapSize.y)).x + BIAS < fLightDepth) ? 0.0f: 1.0f;  
-    fSamples[3] = (tex2D(shadowSampler, vTexCoord + float2(1.0/ShadowMapSize.x, 1.0/ShadowMapSize.y)).x + BIAS < fLightDepth) ? 0.0f: 1.0f;  
-    
-    // lerp between the shadow values to calculate our light amount
-    fShadowTerm = lerp( lerp( fSamples[0], fSamples[1], vLerps.x ),
-                              lerp( fSamples[2], fSamples[3], vLerps.x ),
-                              vLerps.y );                              
-                                
-    return fShadowTerm;                                 
-}
-
-// Calculates the shadow term using PCF with edge tap smoothing
-float CalcShadowTermSoftPCF(float fLightDepth, float2 vTexCoord, int iSqrtSamples)
-{
-    float fShadowTerm = 0.0f;  
-        
-    float fRadius = (iSqrtSamples - 1.0f) / 2;        
-    for (float y = -fRadius; y <= fRadius; y++)
-    {
-        for (float x = -fRadius; x <= fRadius; x++)
-        {
-            float2 vOffset = 0;
-            vOffset = float2(x, y);                
-            vOffset /= ShadowMapSize;
-            float2 vSamplePoint = vTexCoord + vOffset;            
-            float fDepth = tex2D(shadowSampler, vSamplePoint).x;
-            float fSample = (fLightDepth <= fDepth + BIAS);
-            
-            // Edge tap smoothing
-            float xWeight = 1;
-            float yWeight = 1;
-            
-            if (x == -fRadius)
-                xWeight = 1 - frac(vTexCoord.x * ShadowMapSize.x);
-            else if (x == fRadius)
-                xWeight = frac(vTexCoord.x * ShadowMapSize.x);
-                
-            if (y == -fRadius)
-                yWeight = 1 - frac(vTexCoord.y * ShadowMapSize.y);
-            else if (y == fRadius)
-                yWeight = frac(vTexCoord.y * ShadowMapSize.y);
-                
-            fShadowTerm += fSample * xWeight * yWeight;
-        }                                            
-    }        
-    
-    fShadowTerm /= (iSqrtSamples * iSqrtSamples );
-    
-    return fShadowTerm;
-}
-
-
 float4 CalculateLighting(float2 texCoord, float3 viewPosition)
 {
 	float3 surfaceToLight = LightPosition - viewPosition;
@@ -171,7 +90,7 @@ float4 CalculateLighting(float2 texCoord, float3 viewPosition)
 
 		float3 light = Colour * attenuation;
 
-		float4 projectedTexCoord;
+		float4 projectedTexCoord = 0;
 		if (EnableProjectiveTexturing || EnableShadows)
 		{
 			projectedTexCoord = mul(float4(viewPosition, 1), CameraViewToLightProjection);
@@ -187,22 +106,12 @@ float4 CalculateLighting(float2 texCoord, float3 viewPosition)
 
 		if (EnableShadows)
 		{
-			//float4 lightProjectedPosition = mul(viewPosition, CameraViewToLightProjection);
-			//float depth = lightProjectedPosition.z / lightProjectedPosition.w;
-			//float depth = length(viewPosition - LightPosition);
-			//float shadowDepth = tex2D(shadowSampler, projectedTexCoord.xy).x;
-			//float4 lightViewPosition = mul(viewPosition, CameraViewToLightView);
-			//float depth = -lightViewPosition.z / LightFarClip;
-
-			//light *= step(shadowDepth + 0.001, depth);
-			//light *= (depth - 0.01 <= shadowDepth);
-			//if (shadowDepth < depth)
-			//	light = 0;
-
-			light *= CalcShadowTermSoftPCF(projectedTexCoord.z, projectedTexCoord.xy, 9);
+			//float depth = (dot(viewPosition, LightNearPlane.xyz) + LightNearPlane.w) / LightFarClip;
+			float depth = length(LightPosition - viewPosition) / LightFarClip;
+			light *= CalculateShadow(depth, projectedTexCoord.xy, 9, LightFarClip);
 		}
 		
-		return float4((NdL * diffuse * light) + ((specularIntensity * pow(RdV, specularPower)) * light), 1);
+		return float4(NdL * light * (diffuse + specularIntensity * pow(RdV, specularPower)), 1);
 	}
 	else
 	{

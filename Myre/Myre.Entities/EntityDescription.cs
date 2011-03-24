@@ -441,8 +441,6 @@ namespace Myre.Entities
             else
                 e = new Entity(CreateProperties(), CreateBehaviours(), new EntityVersion(this, Version));
 
-            e.CreateProperties();
-
             return e;
         }
 

@@ -24,24 +24,36 @@ namespace Myre.Graphics
             this.ClearDepth = true;
         }
 
-        protected override void SpecifyResources(IList<Input> inputs, IList<Resource> outputs, out RenderTargetInfo? output)
+        //protected override void SpecifyResources(IList<Input> inputs, IList<Resource> outputs, out RenderTargetInfo? output)
+        //{
+        //    inputs.Add(new Input() { Name = "gbuffer_depth" });
+        //    output = null;
+        //}
+
+        //protected internal override bool ValidateInput(RenderTargetInfo? previousRenderTarget)
+        //{
+        //    if (previousRenderTarget == null)
+        //        return false;
+
+        //    if (previousRenderTarget.Value.DepthFormat == DepthFormat.None)
+        //        return false;
+
+        //    return true;
+        //}
+
+        public override void Initialise(Renderer renderer, ResourceContext context)
         {
-            inputs.Add(new Input() { Name = "gbuffer_depth" });
-            output = null;
+            // define inputs
+            context.DefineInput("gbuffer_depth");
+
+            // define outputs
+            foreach (var resource in context.SetRenderTargets)
+                context.DefineOutput(resource);
+            
+            base.Initialise(renderer, context);
         }
 
-        protected internal override bool ValidateInput(RenderTargetInfo? previousRenderTarget)
-        {
-            if (previousRenderTarget == null)
-                return false;
-
-            if (previousRenderTarget.Value.DepthFormat == DepthFormat.None)
-                return false;
-
-            return true;
-        }
-
-        public override RenderTarget2D Draw(Renderer renderer)
+        public override void Draw(Renderer renderer)
         {
             // work arround for a bug in xna 4.0
             renderer.Device.SamplerStates[0] = SamplerState.LinearClamp;
@@ -59,8 +71,6 @@ namespace Myre.Graphics
             //renderer.Device.SamplerStates[0] = SamplerState.PointClamp;
             //sb.Draw(renderer.Data.Get<Texture2D>("gbuffer_depth").Value, Vector2.Zero, Color.White);
             //sb.End();
-
-            return null;
         }
     }
 }
