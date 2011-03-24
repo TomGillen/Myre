@@ -25,6 +25,8 @@ using System.Diagnostics;
 using Microsoft.Xna.Framework.Graphics.PackedVector;
 using Myre.UI.InputDevices;
 using Myre.Debugging;
+using System.IO;
+using System.Threading;
 
 namespace GraphicsTests
 {
@@ -40,23 +42,40 @@ namespace GraphicsTests
         UserInterface ui;
         Statistic frameTime;
         FrequencyTracker fps;
+        KeyboardState previousKeyboard;
+        TextWriter framerate;
+
+        public bool DisplayUI { get; set; }
+        public InputActor Player { get; set; }
 
         public TestGame()
             : base(new EntityNinjectModule())
         {
             graphics = new GraphicsDeviceManager(this);
             graphics.PreparingDeviceSettings += new EventHandler<PreparingDeviceSettingsEventArgs>(graphics_PreparingDeviceSettings);
-            graphics.PreferredBackBufferWidth = 1280;
-            graphics.PreferredBackBufferHeight = 720;
-            graphics.SynchronizeWithVerticalRetrace = false;
-            graphics.IsFullScreen = false;
+            graphics.PreferredBackBufferWidth = 1920;
+            graphics.PreferredBackBufferHeight = 1080;
+            graphics.SynchronizeWithVerticalRetrace = true;
+            graphics.IsFullScreen = true;
 
             Content.RootDirectory = "Content";
 
             IsMouseVisible = true;
             IsFixedTimeStep = false;
+            //TargetElapsedTime = TimeSpan.FromSeconds(1f / 30f);
+            DisplayUI = true;
 
             Kernel.Components.Add<IBindingResolver, ConditionalBindingResolver>();
+
+            previousKeyboard = Keyboard.GetState();
+
+            framerate = new StreamWriter(File.OpenWrite("framerate.csv"));
+            Exiting += new EventHandler<EventArgs>(TestGame_Exiting);
+        }
+
+        void TestGame_Exiting(object sender, EventArgs e)
+        {
+            framerate.Close();
         }
 
         void graphics_PreparingDeviceSettings(object sender, PreparingDeviceSettingsEventArgs e)
@@ -82,12 +101,11 @@ namespace GraphicsTests
         {
             // TODO: Add your initialization logic here
             ui = new UserInterface(GraphicsDevice);
-            Components.Add(ui);
 
-            var player = new InputActor(1, new MouseDevice(), new KeyboardDevice(PlayerIndex.One, Window.Handle));
-            Kernel.Bind<InputActor>().ToConstant(player);
-            Components.Add(player);
-            ui.Actors.Add(player);
+            Player = new InputActor(1, new MouseDevice(), new KeyboardDevice(PlayerIndex.One, Window.Handle));
+            //Kernel.Bind<InputActor>().ToConstant(player);
+            Components.Add(Player);
+            ui.Actors.Add(Player);
 
             var statLog = new StatisticTextLog(ui.Root, Content.Load<SpriteFont>("Consolas"), true);
             statLog.SetPoint(Points.TopLeft, 10, 10);
@@ -97,6 +115,9 @@ namespace GraphicsTests
 
             var console = new CommandConsole(this, Content.Load<SpriteFont>("Consolas"), ui.Root);
             Kernel.Bind<CommandConsole>().ToConstant(console);
+
+            screens = new ScreenManager();
+            screens.Push(Kernel.Get<MainMenu>());  
 
             base.Initialize();
         }
@@ -110,9 +131,7 @@ namespace GraphicsTests
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            // TODO: use this.Content to load your game content here
-            screens = new ScreenManager();
-            screens.Push(Kernel.Get<MainMenu>());            
+            // TODO: use this.Content to load your game content here          
         }
 
         /// <summary>
@@ -138,8 +157,11 @@ namespace GraphicsTests
             fps.Pulse();
             frameTime.Value = (float)gameTime.ElapsedGameTime.TotalMilliseconds;
 
+            framerate.Write(gameTime.ElapsedGameTime.TotalMilliseconds.ToString() + ",");
+
             //// TODO: Add your update logic here
             screens.Update(gameTime);
+            ui.Update(gameTime);
 
             base.Update(gameTime);
         }
@@ -155,6 +177,9 @@ namespace GraphicsTests
             //// TODO: Add your drawing code here
             screens.PrepareDraw();
             screens.Draw(gameTime);
+
+            if (DisplayUI)
+                ui.Draw(gameTime);
 
             //var model = Content.Load<Model>("Sponza");
 
@@ -201,6 +226,25 @@ namespace GraphicsTests
             //}
 
             base.Draw(gameTime);
+
+            var currentKeyboard = Keyboard.GetState();
+
+            if (currentKeyboard.IsKeyDown(Keys.PrintScreen) && previousKeyboard.IsKeyUp(Keys.PrintScreen))
+            {
+                var pp = GraphicsDevice.PresentationParameters;
+                var data = new Color[pp.BackBufferWidth * pp.BackBufferHeight];
+                GraphicsDevice.GetBackBufferData(data);
+
+                // must be a less stupid way of doing this
+                var texture = new Texture2D(GraphicsDevice, pp.BackBufferWidth, pp.BackBufferHeight);
+                texture.SetData<Color>(data);
+
+                var filename = Path.Combine(Environment.CurrentDirectory, "screenshot.jpg");
+                using (var stream = File.Create(filename))
+                    texture.SaveAsJpeg(stream, texture.Width, texture.Height);
+            }
+
+            previousKeyboard = currentKeyboard;
         }
     }
 }

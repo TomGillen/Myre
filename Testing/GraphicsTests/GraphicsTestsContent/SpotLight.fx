@@ -90,7 +90,7 @@ float4 CalculateLighting(float2 texCoord, float3 viewPosition)
 
 		float3 light = Colour * attenuation;
 
-		float4 projectedTexCoord;
+		float4 projectedTexCoord = 0;
 		if (EnableProjectiveTexturing || EnableShadows)
 		{
 			projectedTexCoord = mul(float4(viewPosition, 1), CameraViewToLightProjection);

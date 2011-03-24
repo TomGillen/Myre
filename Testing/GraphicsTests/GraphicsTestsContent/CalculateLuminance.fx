@@ -45,6 +45,11 @@ float4 AdaptLuminancePS() : COLOR0 //in float2 in_TexCoord : TEXCOORD0) : COLOR0
     return float4(adaptedLum, adaptedLum, adaptedLum, 1);
 }
 
+float4 CopyPS() : COLOR0
+{
+	return tex2D(textureSampler, float2(0.5, 0.5)).x;
+}
+
 technique ExtractLuminance
 {
 	pass Pass1
@@ -69,5 +74,14 @@ technique AdaptLuminance
 	{
 		VertexShader = compile vs_3_0 FullScreenQuadVS();
 		PixelShader = compile ps_3_0 AdaptLuminancePS();
+	}
+}
+
+technique Copy
+{
+	pass Pass1
+	{
+		VertexShader = compile vs_3_0 FullScreenQuadVS();
+		PixelShader = compile ps_3_0 CopyPS();
 	}
 }

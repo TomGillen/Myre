@@ -117,7 +117,7 @@
     <Compile Include="Lighting\SunLight.cs" />
     <Compile Include="Lighting\ILightProvider.cs" />
     <Compile Include="Lighting\LightingComponent.cs" />
-    <Compile Include="Lighting\ToneMapPhase.cs" />
+    <Compile Include="Lighting\ToneMapComponent.cs" />
     <Compile Include="Materials\Material.cs" />
     <Compile Include="Materials\MaterialParameter.cs" />
     <Compile Include="Materials\MaterialReader.cs" />

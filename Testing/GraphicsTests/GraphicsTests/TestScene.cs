@@ -33,6 +33,7 @@ namespace GraphicsTests
 
         Vector3 cameraPosition;
         Vector3 cameraRotation;
+        CameraScript cameraScript;
 
         public Scene Scene
         {
@@ -123,13 +124,13 @@ namespace GraphicsTests
             ambientLight.AddBehaviour<AmbientLight>();
             scene.Add(ambientLight.Create());
 
-            var floor = content.Load<ModelData>(@"Models\Ground");
-            var floorEntity = kernel.Get<EntityDescription>();
-            floorEntity.AddProperty<ModelData>("model", floor);
-            floorEntity.AddProperty<Matrix>("transform", Matrix.CreateScale(2));
-            floorEntity.AddProperty<bool>("isstatic", true);
-            floorEntity.AddBehaviour<ModelInstance>();
-            scene.Add(floorEntity.Create());
+            //var floor = content.Load<ModelData>(@"Models\Ground");
+            //var floorEntity = kernel.Get<EntityDescription>();
+            //floorEntity.AddProperty<ModelData>("model", floor);
+            //floorEntity.AddProperty<Matrix>("transform", Matrix.CreateScale(2));
+            //floorEntity.AddProperty<bool>("isstatic", true);
+            //floorEntity.AddBehaviour<ModelInstance>();
+            //scene.Add(floorEntity.Create());
 
             var lizard = content.Load<ModelData>(@"Models\lizard");
             var lizardEntity = kernel.Get<EntityDescription>();
@@ -171,11 +172,32 @@ namespace GraphicsTests
             var console = kernel.Get<CommandConsole>();
             renderer.Settings.BindCommandEngine(console.Engine);
 
-            var fire1 = Fire.Create(kernel, content, new Vector3(123.5f, 32f, -55f));
-            var fire2 = Fire.Create(kernel, content, new Vector3(123.5f, 32f, 35f));
+            var fire1 = Fire.Create(kernel, content, new Vector3(123.5f, 30f, -55f));
+            var fire2 = Fire.Create(kernel, content, new Vector3(123.5f, 30f, 35f));
+            var fire3 = Fire.Create(kernel, content, new Vector3(-157f, 30f, 35f));
+            var fire4 = Fire.Create(kernel, content, new Vector3(-157f, 30f, -55f));
 
             scene.Add(fire1);
             scene.Add(fire2);
+            scene.Add(fire3);
+            scene.Add(fire4);
+
+            cameraScript = new CameraScript(camera);
+            cameraScript.AddWaypoint(0, new Vector3(218, 160, 104), new Vector3(0, 150, 0));
+            cameraScript.AddWaypoint(10, new Vector3(-195, 160, 104), new Vector3(-150, 150, 0));
+            cameraScript.AddWaypoint(12, new Vector3(-270, 160, 96), new Vector3(-150, 150, 0));
+            cameraScript.AddWaypoint(14, new Vector3(-302, 160, 45), new Vector3(-150, 150, 0));
+            cameraScript.AddWaypoint(16, new Vector3(-286, 160, 22), new Vector3(-150, 150, 0));
+            cameraScript.AddWaypoint(18, new Vector3(-276, 160, 22), new Vector3(-150, 100, 0));
+            cameraScript.AddWaypoint(20, new Vector3(-158, 42, 19), new Vector3(-150, 40, 0));
+            cameraScript.AddWaypoint(21, new Vector3(-105, 24, -7), new Vector3(-150, 40, 0));
+            cameraScript.AddWaypoint(23, new Vector3(-105, 44, -7), new Vector3(-150, 40, 0));
+            cameraScript.AddWaypoint(27, new Vector3(-105, 50, -7), new Vector3(-80, 50, -100));
+            cameraScript.AddWaypoint(32, new Vector3(100, 50, -7), new Vector3(150, 40, 0));
+            cameraScript.AddWaypoint(34, new Vector3(100, 50, -7), new Vector3(150, 40, 100));
+            cameraScript.AddWaypoint(36, new Vector3(100, 50, -7), new Vector3(0, 40, 0));
+            cameraScript.AddWaypoint(1000, new Vector3(100, 50, -7), new Vector3(0, 40, 0));
+            cameraScript.Initialise();
         }
 
         public void Update(GameTime gameTime)
@@ -186,6 +208,7 @@ namespace GraphicsTests
             MouseState mouse = Mouse.GetState();
             KeyboardState keyboard = Keyboard.GetState();
 
+            game.IsMouseVisible = false;
             if (mouse.IsButtonDown(MouseButtons.Right))
             {
                 var mousePosition = new Vector2(mouse.X, mouse.Y);
@@ -210,15 +233,15 @@ namespace GraphicsTests
                 if (keyboard.IsKeyDown(Keys.D))
                     cameraPosition += right * time * 50f;
 
-                System.Diagnostics.Debug.WriteLine(cameraPosition);
-
                 camera.View = Matrix.Invert(rotation * Matrix.CreateTranslation(cameraPosition));
 
-                game.IsMouseVisible = false;
                 Mouse.SetPosition((int)resolution.Value.X / 2, (int)resolution.Value.Y / 2);
             }
             else
-                game.IsMouseVisible = true;
+            {
+                cameraScript.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
+                cameraPosition = cameraScript.Position;
+            }
 
             //camera.View = spotLight.view;
             //camera.Projection = spotLight.projection;

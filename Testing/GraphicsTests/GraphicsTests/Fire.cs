@@ -8,6 +8,7 @@ using Myre.Entities;
 using Microsoft.Xna.Framework.Content;
 using Myre.Graphics.Particles;
 using Microsoft.Xna.Framework.Graphics;
+using Myre.Graphics.Lighting;
 
 namespace GraphicsTests
 {
@@ -17,7 +18,10 @@ namespace GraphicsTests
         {
             var particleEntityDesc = kernel.Get<EntityDescription>();
             particleEntityDesc.AddProperty("position", position);
+            particleEntityDesc.AddProperty("colour", Vector3.Normalize(new Vector3(5, 2, 2)) * 2);
             particleEntityDesc.AddBehaviour<EllipsoidParticleEmitter>();
+            particleEntityDesc.AddBehaviour<PointLight>();
+            
             var particleEntity = particleEntityDesc.Create();
             var emitter = particleEntity.GetBehaviour<EllipsoidParticleEmitter>();
 
@@ -36,11 +40,11 @@ namespace GraphicsTests
             emitter.MaxAngularVelocity = MathHelper.Pi / 4;
             emitter.MaxEndColour = Color.Blue;
             emitter.MaxStartColour = Color.White;
-            emitter.MaxStartSize = 5;
+            emitter.MaxStartSize = 10;
             emitter.MinAngularVelocity = -MathHelper.Pi / 4;
             emitter.MinEndColour = Color.White;
             emitter.MinStartColour = Color.Red;
-            emitter.MinStartSize = 3;
+            emitter.MinStartSize = 1;
             emitter.Transform = Matrix.Identity;
             emitter.Velocity = new Vector3(0, 5, 0);
             emitter.VelocityBleedThrough = 0;

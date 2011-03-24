@@ -79,7 +79,6 @@ namespace Myre.Entities.Behaviours
 
         public BehaviourManagerContainer()
         {
-            Debug.WriteLine("manager container created");
             managers = new List<IBehaviourManager>();
             byType = new Dictionary<Type, IBehaviourManager>();
             byBehaviour = new Dictionary<Type, IManagerHandler>();

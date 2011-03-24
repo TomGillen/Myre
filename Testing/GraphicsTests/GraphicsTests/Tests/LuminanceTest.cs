@@ -85,7 +85,7 @@ namespace GraphicsTests.Tests
                     batch.GraphicsDevice.SamplerStates[0] = SamplerState.PointClamp;
                     batch.Draw(light, new Rectangle(0, 0, width, height), Color.White);
                     //batch.Draw(luminance, new Rectangle(50, height - (height / 5) - 50, height / 5, height / 5), Color.White);
-                    batch.Draw(toneMap.AdaptedLuminance, new Rectangle(50 + 20 + (height / 5), height - (height / 5) - 50, height / 5, height / 5), Color.White);
+                    //batch.Draw(toneMap.AdaptedLuminance, new Rectangle(50 + 20 + (height / 5), height - (height / 5) - 50, height / 5, height / 5), Color.White);
                     batch.GraphicsDevice.SamplerStates[0] = SamplerState.LinearClamp;
                 }
                 else

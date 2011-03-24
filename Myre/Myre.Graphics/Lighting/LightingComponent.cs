@@ -119,8 +119,6 @@ namespace Myre.Graphics.Lighting
             context.DefineOutput("lightbuffer", isLeftSet:true, finaliser: (r, t) => {}, surfaceFormat:SurfaceFormat.HdrBlendable, depthFormat:DepthFormat.Depth24Stencil8);
             context.DefineOutput("previouslightbuffer", isLeftSet:false, surfaceFormat:SurfaceFormat.HdrBlendable, depthFormat:DepthFormat.Depth24Stencil8);
 
-            context.DefineOutput("shadowmap", isLeftSet: false, finaliser: (r, t) => { });
-
             base.Initialise(renderer, context);
         }
 
@@ -171,8 +169,6 @@ namespace Myre.Graphics.Lighting
             
             Output("lightbuffer", lightBuffer);
             Output("previouslightbuffer", previousTarget);
-
-            Output("shadowmap", SpotLight.Manager.shadowmap);
         }
 
         private void SwapBuffers(Renderer renderer, GraphicsDevice device, int width, int height)

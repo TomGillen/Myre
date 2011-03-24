@@ -9,10 +9,11 @@ using Microsoft.Xna.Framework;
 using Myre.Debugging.Statistics;
 using Myre.Collections;
 using Myre.Graphics.PostProcessing;
+using System.Threading;
 
 namespace Myre.Graphics.Lighting
 {
-    public class ToneMapPhase
+    public class ToneMapComponent
        : RendererComponent
     {
         //protected override void SpecifyResources(IList<Input> inputs, IList<RendererComponent.Resource> outputs, out RenderTargetInfo? outputTarget)
@@ -38,11 +39,19 @@ namespace Myre.Graphics.Lighting
         Material calculateLuminance;
         Material readLuminance;
         Material adaptLuminance;
+        Material copyLuminance;
         Material toneMap;
         Effect bloom;
         Gaussian gaussian;
         Resample scale;
         RenderTarget2D[] adaptedLuminance;
+        RenderTarget2D averageLuminance;
+        RenderTarget2D readbackTexture;
+        OcclusionQuery occlusionQuery;
+        Thread readbackThread;
+        volatile bool readbackAvailable;
+        int readbackInterval;
+        Box<float> adaptedLuminanceData;
         float[] textureData = new float[1];
         int current = 0;
         int previous = 1;
@@ -52,7 +61,7 @@ namespace Myre.Graphics.Lighting
             get { return adaptedLuminance[current]; }
         }
 
-        public ToneMapPhase(
+        public ToneMapComponent(
             GraphicsDevice device,
             ContentManager content)
         {
@@ -61,6 +70,7 @@ namespace Myre.Graphics.Lighting
             calculateLuminance = new Material(effect.Clone(), "ExtractLuminance");
             adaptLuminance = new Material(effect.Clone(), "AdaptLuminance");
             readLuminance = new Material(effect.Clone(), "ReadLuminance");
+            copyLuminance = new Material(effect.Clone(), "Copy");
             toneMap = new Material(content.Load<Effect>("ToneMap"), null);
             bloom = content.Load<Effect>("Bloom");
             gaussian = new Gaussian(device, content);
@@ -70,9 +80,36 @@ namespace Myre.Graphics.Lighting
             adaptedLuminance[0] = new RenderTarget2D(device, 1, 1, false, SurfaceFormat.Single, DepthFormat.None);
             adaptedLuminance[1] = new RenderTarget2D(device, 1, 1, false, SurfaceFormat.Single, DepthFormat.None);
 
+            readbackTexture = new RenderTarget2D(device, 1, 1, false, SurfaceFormat.Single, DepthFormat.None);
+            occlusionQuery = new OcclusionQuery(device);
+            readbackInterval = 30;
+            readbackThread = new Thread(ReadbackAdaptedLuminance);
+            readbackThread.IsBackground = true;
+            //readbackThread.Start();
+
             device.SetRenderTarget(adaptedLuminance[previous]);
             device.Clear(Color.Transparent);
             device.SetRenderTarget(null);
+        }
+
+        private void ReadbackAdaptedLuminance()
+        {
+            while (true)
+            {
+                if (readbackAvailable && occlusionQuery.IsComplete)
+                {
+                    // we can read back the adapted luminance value
+                    var start = DateTime.Now;
+                    readbackTexture.GetData(textureData);
+                    var time = DateTime.Now - start;
+                    adaptedLuminanceData.Value = textureData[0];
+                    System.Diagnostics.Debug.WriteLine(time);
+
+                    readbackAvailable = false;
+                }
+
+                Thread.Sleep(readbackInterval);
+            }
         }
 
         public override void Initialise(Renderer renderer, ResourceContext context)
@@ -94,6 +131,8 @@ namespace Myre.Graphics.Lighting
             context.DefineOutput("luminance", isLeftSet: false, width: 1, height: 1, surfaceFormat: SurfaceFormat.Single);
             context.DefineOutput("bloom", isLeftSet: false, surfaceFormat: SurfaceFormat.Rgba64);
             context.DefineOutput("tonemapped", isLeftSet: true);
+
+            //adaptedLuminanceData = renderer.Data.Get<float>("adaptedluminance");
             
             base.Initialise(renderer, context);
         }
@@ -105,6 +144,19 @@ namespace Myre.Graphics.Lighting
 
             var lightBuffer = metadata.Get<Texture2D>("lightbuffer").Value;
             var resolution = metadata.Get<Vector2>("resolution");
+
+            //if (averageLuminance != null)
+            //{
+            //    lastReadLuminance -= renderer.Data.Get<float>("timedelta").Value;
+            //    if (lastReadLuminance <= 0)
+            //    {
+            //        averageLuminance.GetData(averageLuminance.LevelCount - 1, null, textureData, 0, 1);
+            //        renderer.Data.Set("adaptedluminance", textureData[0]);
+            //        lastReadLuminance = 5f;
+            //    }
+
+            //    RenderTargetManager.RecycleTarget(averageLuminance);
+            //}
 
             CalculateLuminance(renderer, resolution, device, lightBuffer);
             Bloom(renderer, resolution, device, lightBuffer);
@@ -127,7 +179,7 @@ namespace Myre.Graphics.Lighting
             Output("luminance", luminanceMap);
 
             // read bottom mipmap to find average luminance
-            var averageLuminance = RenderTargetManager.GetTarget(device, 1, 1, SurfaceFormat.Single, name: "average luminance");
+            averageLuminance = RenderTargetManager.GetTarget(device, 1, 1, SurfaceFormat.Single, name: "average luminance");
             device.SetRenderTarget(averageLuminance);
             readLuminance.Parameters["Texture"].SetValue(luminanceMap);
             quad.Draw(readLuminance, renderer.Data);
@@ -138,7 +190,17 @@ namespace Myre.Graphics.Lighting
             adaptLuminance.Parameters["PreviousAdaption"].SetValue(adaptedLuminance[previous]);
             quad.Draw(adaptLuminance, renderer.Data);
 
-            RenderTargetManager.RecycleTarget(averageLuminance);
+            // copy the adapted luminance into the readback texture
+            if (!readbackAvailable)
+            {
+                device.SetRenderTarget(readbackTexture);
+                copyLuminance.Parameters["Texture"].SetValue(adaptedLuminance[current]);
+
+                occlusionQuery.Begin();
+                quad.Draw(copyLuminance, renderer.Data);
+                occlusionQuery.End();
+                readbackAvailable = true;
+            }
         }
 
         private void Bloom(Renderer renderer, Box<Vector2> resolution, GraphicsDevice device, Texture2D lightBuffer)

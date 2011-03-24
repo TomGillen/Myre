@@ -101,8 +101,6 @@ namespace Myre.Graphics.Lighting
         public class Manager
             : BehaviourManager<SpotLight>, ILightProvider
         {
-            public static RenderTarget2D shadowmap;
-
             private Material geometryLightingMaterial;
             private Material quadLightingMaterial;
             private Material nothingMaterial;
@@ -300,8 +298,6 @@ namespace Myre.Graphics.Lighting
                 resolution.Value = previousResolution;
                 previousView.SetMetadata(renderer.Data);
                 view.Value = previousView;
-
-                shadowmap = target;
             }
 
             public void Draw(Renderer renderer)

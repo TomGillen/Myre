@@ -25,7 +25,7 @@ sampler luminanceSampler = sampler_state
 texture Bloom : BLOOM;
 sampler bloomSampler = sampler_state
 {
-	Texture = Bloom;
+	Texture = (Bloom);
 	MinFilter = Linear;
 	MagFilter = Linear;
 };

@@ -59,11 +59,15 @@
     <Compile Include="Collisions\ContactTester.cs" />
     <Compile Include="Collisions\Geometry.cs" />
     <Compile Include="Collisions\Polygon.cs" />
-    <Compile Include="Collisions\Pool.cs" />
     <Compile Include="Collisions\Projection.cs" />
     <Compile Include="Collisions\SatResult.cs" />
     <Compile Include="Collisions\SatTester.cs" />
     <Compile Include="DynamicPhysics.cs" />
+    <Compile Include="Dynamics\Constraints\Damping.cs" />
+    <Compile Include="Dynamics\Constraints\PositionConstraint.cs" />
+    <Compile Include="Dynamics\Integrators\Euler.cs" />
+    <Compile Include="Dynamics\Integrators\Verlet.cs" />
+    <Compile Include="Dynamics\InverseMassCalculator.cs" />
     <Compile Include="PhysicsManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Transform.cs" />

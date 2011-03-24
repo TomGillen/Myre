@@ -149,6 +149,9 @@ namespace Myre.Entities
 
             // create initialisation context
             this.initialisationContext = new InitialisationContext(this);
+
+            // allow behaviours to add their own properites
+            CreateProperties();
         }
 
         /*
@@ -213,7 +216,7 @@ namespace Myre.Entities
             IsDisposed = true;
         }
 
-        internal void CreateProperties()
+        private void CreateProperties()
         {
             initialisationContext.frozen = false;
 

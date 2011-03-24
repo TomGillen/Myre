@@ -25,9 +25,15 @@ namespace GraphicsTests
         : Screen
     {
         private UserInterface ui;
+        private InputActor player;
+        private Menu menu;
+        private TestGame game;
 
-        public MainMenu(Game game, InputActor player, CommandConsole console, GraphicsDevice device, ContentManager content, IServiceProvider services)
+        public MainMenu(TestGame game, CommandConsole console, GraphicsDevice device, ContentManager content, IServiceProvider services)
         {
+            this.game = game;
+            this.player = game.Player;
+
             ui = new UserInterface(device);
             ui.Actors.Add(player);
 
@@ -36,7 +42,7 @@ namespace GraphicsTests
                         where !type.IsAbstract
                         select type;
 
-            var menu = new Menu(ui.Root);
+            this.menu = new Menu(ui.Root);
             menu.SetPoint(Points.BottomLeft, 50, -50);
 
 
@@ -50,8 +56,9 @@ namespace GraphicsTests
                 testKernel.Bind<GraphicsDevice>().ToConstant(device);
                 testKernel.Bind<ContentManager>().ToConstant(new ContentManager(services));
                 testKernel.Bind<Game>().ToConstant(game);
+                testKernel.Bind<TestGame>().ToConstant(game);
                 testKernel.Bind<CommandConsole>().ToConstant(console);
-                testKernel.Bind<InputActor>().ToConstant(player);
+                //testKernel.Bind<InputActor>().ToConstant(player);
 
                 var instance = testKernel.Get(test) as TestScreen;
 
@@ -67,6 +74,13 @@ namespace GraphicsTests
             menu.Arrange(Justification.Left);
         }
 
+        public override void OnShown()
+        {
+            game.DisplayUI = true;
+            player.Focus(menu);
+            base.OnShown();
+        }
+
         public override void Update(Microsoft.Xna.Framework.GameTime gameTime)
         {
             ui.Update(gameTime);
@@ -75,7 +89,9 @@ namespace GraphicsTests
 
         public override void Draw(Microsoft.Xna.Framework.GameTime gameTime)
         {
-            ui.Draw(gameTime);
+            if (game.DisplayUI)
+                ui.Draw(gameTime);
+
             base.Draw(gameTime);
         }
     }

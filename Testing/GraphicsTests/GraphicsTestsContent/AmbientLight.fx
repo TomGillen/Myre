@@ -42,7 +42,7 @@ sampler diffuseSampler = sampler_state
 texture SSAO : SSAO;
 sampler ssaoSampler = sampler_state
 {
-	Texture = SSAO;
+	Texture = (SSAO);
 	MinFilter = Point;
 	MipFilter = Point;
 	MagFilter = Point;

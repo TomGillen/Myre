@@ -65,11 +65,10 @@ namespace Myre.Entities.Behaviours
         /// Initialises this instance.
         /// </summary>
         /// <param name="context">
-        /// Initialisation context. This object can be used to publish properties to the owning entity,
-        /// and to query properties and behaviours.
+        /// Initialisation context. This object can be used to query properties and behaviours.
         /// </param>
         /// <remarks>
-        /// Initialise/Shutdown/CreateProperties may be called multiple times, as the instance is recycled.
+        /// Initialise/Shutdown may be called multiple times, as the instance is recycled.
         /// Here the behaviour should do any setup needed to put the behaviour into its' initial state, including getting optional properties from the entity which may have been created by other behaviours, and register to any services.
         /// Initialise is called before the behaviour is added to the manager.
         /// </remarks>
@@ -82,11 +81,10 @@ namespace Myre.Entities.Behaviours
         /// Initialises this instance.
         /// </summary>
         /// <param name="context">
-        /// Initialisation context. This object can be used to publish properties to the owning entity,
-        /// and to query properties and behaviours.
+        /// Initialisation context. This object can be used to publish properties to the owning entity.
         /// </param>
         /// <remarks>
-        /// Initialise/Shutdown/CreateProperties may be called multiple times, as the instance is recycled.
+        /// CreatePropeties is called once when the entity is constructed.
         /// Here the behaviour should create any properties required by this behaviour to function.
         /// Create properties is called before Initialise.
         /// </remarks>
@@ -99,7 +97,7 @@ namespace Myre.Entities.Behaviours
         /// Shuts down this instance.
         /// </summary>
         /// <remarks>
-        /// Initialise/Shutdown/CreateProperties may be called multiple times, as the instance is recycled.
+        /// Initialise/Shutdown may be called multiple times, as the instance is recycled.
         /// Shutdown is called after the behaviour has been removed from the manager.
         /// </remarks>
         public virtual void Shutdown()

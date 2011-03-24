@@ -13,6 +13,7 @@ namespace Myre.StateManagement
     {
         Stack<Screen> screenStack;
         List<Screen> screens;
+        List<Screen> oldScreens;
 
         IEnumerable<Screen> transitioningOn;
         IEnumerable<Screen> transitioningOff;
@@ -53,6 +54,7 @@ namespace Myre.StateManagement
                     s.TransitionState = TransitionState.Off;
             }
 
+            screens.Add(screen);
             screenStack.Push(screen);
             screen.TransitionState = TransitionState.On;
             screen.Manager = this;
@@ -65,6 +67,7 @@ namespace Myre.StateManagement
         public Screen Pop()
         {
             var oldScreen = screenStack.Pop();
+            oldScreen.TransitionState = TransitionState.Off;
 
             if (screenStack.Count > 0)
             {
@@ -81,7 +84,7 @@ namespace Myre.StateManagement
         /// <param name="gameTime">The game time.</param>
         public void Update(GameTime gameTime)
         {
-            screens.AddRange(screenStack);
+            //screens.AddRange(screenStack);
 
             bool screensAreTransitioningOff = false;
             foreach (var screen in transitioningOff)
@@ -102,13 +105,16 @@ namespace Myre.StateManagement
                 if (screen.TransitionProgress == 1)
                     screen.TransitionState = TransitionState.Shown;
             }
-
-            foreach (var screen in visible)
+            
+            for (int i = screens.Count - 1; i >= 0; i--)
             {
-                screen.Update(gameTime);
+                if (screens[i].TransitionState == TransitionState.Hidden)
+                    screens.RemoveAt(i);
+                else
+                    screens[i].Update(gameTime);
             }
 
-            screens.Clear();
+            //screens.Clear();
         }
 
         private void UpdateTransition(Screen screen, GameTime gameTime)
@@ -134,14 +140,14 @@ namespace Myre.StateManagement
         /// </summary>
         public void PrepareDraw()
         {
-            screens.AddRange(screenStack);
+            //screens.AddRange(screenStack);
 
             foreach (var screen in visible)
             {
                 screen.PrepareDraw();
             }
 
-            screens.Clear();
+            //screens.Clear();
         }
 
         /// <summary>
@@ -150,7 +156,7 @@ namespace Myre.StateManagement
         /// <param name="gameTime">The game time.</param>
         public void Draw(GameTime gameTime)
         {
-            screens.AddRange(screenStack);
+            //screens.AddRange(screenStack);
 
             foreach (var screen in screens)
             {
@@ -158,7 +164,7 @@ namespace Myre.StateManagement
                     screen.Draw(gameTime);
             }
 
-            screens.Clear();
+            //screens.Clear();
         }
     }
 }

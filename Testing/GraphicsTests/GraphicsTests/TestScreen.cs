@@ -19,6 +19,7 @@ namespace GraphicsTests
     abstract class TestScreen
         : Screen
     {
+        private TestGame game;
         private ContentManager content;
         private InputActor actor;
 
@@ -28,6 +29,7 @@ namespace GraphicsTests
         public TestScreen(string name, IKernel kernel)
         {
             Name = name;
+            game = kernel.Get<TestGame>();
 
             content = kernel.Get<ContentManager>();
             content.RootDirectory = "Content";
@@ -35,7 +37,7 @@ namespace GraphicsTests
             UI = kernel.Get<UserInterface>();
             UI.Root.Gestures.Bind((gesture, time, device) => Manager.Pop(), new KeyReleased(Keys.Escape));
 
-            actor = kernel.Get<InputActor>();
+            actor = game.Player;
             UI.Actors.Add(actor);
 
             var title = new Label(UI.Root, content.Load<SpriteFont>("Consolas"));
@@ -47,6 +49,10 @@ namespace GraphicsTests
         public override void OnShown()
         {
             actor.Focus(UI.Root);
+
+            //game.IsFixedTimeStep = false;
+            game.DisplayUI = true;
+
             base.OnShown();
         }
 
@@ -61,7 +67,9 @@ namespace GraphicsTests
 
         public override void Draw(GameTime gameTime)
         {
-            UI.Draw(gameTime);
+            if (game.DisplayUI)
+                UI.Draw(gameTime);
+
             base.Draw(gameTime);
         }
 

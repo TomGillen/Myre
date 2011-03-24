@@ -102,15 +102,10 @@ namespace Myre.Graphics
             device.SetRenderTarget(null);
 
             spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
-            //colourCorrection.Parameters["Resolution"].SetValue(data.Get<Vector2>("resolution").Value);
             foreach (var view in views)
             {
                 var output = viewResults.Dequeue();
                 var viewport = view.Viewport;
-
-                //colourCorrection.Parameters["Texture"].SetValue(output);
-                //quad.SetPosition(viewport.Bounds);
-                //quad.Draw(colourCorrection);
 
                 if (output.Image.Format.IsFloatingPoint())
                     device.SamplerStates[0] = SamplerState.PointClamp;

@@ -1,18 +1,18 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <ProjectGuid>{16BBB7B6-E1AD-4103-9007-0C1066C61087}</ProjectGuid>
+    <ProjectGuid>{B0714813-F310-4A0F-AE2B-952C9527F01D}</ProjectGuid>
     <ProjectTypeGuids>{6D335F3A-9D43-41b4-9D22-F6F17C4BE596};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
-    <OutputType>WinExe</OutputType>
+    <Platform Condition=" '$(Platform)' == '' ">Xbox 360</Platform>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>GraphicsTests</RootNamespace>
     <AssemblyName>%284.0%29 GraphicsTests</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <XnaFrameworkVersion>v4.0</XnaFrameworkVersion>
-    <XnaPlatform>Windows</XnaPlatform>
+    <XnaPlatform>Xbox 360</XnaPlatform>
     <XnaProfile>HiDef</XnaProfile>
     <XnaCrossPlatformGroupID>b606e1d3-ddcd-4934-8958-39824ba79781</XnaCrossPlatformGroupID>
     <XnaOutputType>Game</XnaOutputType>
@@ -34,61 +34,31 @@
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|Xbox 360' ">
+    <OutputPath>bin\Xbox 360\Debug</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <NoStdLib>true</NoStdLib>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\x86\Debug</OutputPath>
-    <DefineConstants>DEBUG;TRACE;WINDOWS</DefineConstants>
+    <DefineConstants>DEBUG;TRACE;XBOX;XBOX360</DefineConstants>
+    <XnaCompressContent>true</XnaCompressContent>
+    <LangVersion>default</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|Xbox 360' ">
+    <OutputPath>bin\Xbox 360\Release</OutputPath>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <NoStdLib>true</NoStdLib>
     <UseVSHostingProcess>false</UseVSHostingProcess>
-    <PlatformTarget>x86</PlatformTarget>
-    <XnaCompressContent>false</XnaCompressContent>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\x86\Release</OutputPath>
-    <DefineConstants>TRACE;WINDOWS</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <NoStdLib>true</NoStdLib>
-    <UseVSHostingProcess>false</UseVSHostingProcess>
-    <PlatformTarget>x86</PlatformTarget>
+    <DefineConstants>TRACE;XBOX;XBOX360</DefineConstants>
     <XnaCompressContent>true</XnaCompressContent>
   </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="Microsoft.Xna.Framework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
-    <Reference Include="Microsoft.Xna.Framework.Avatar, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=MSIL" />
-    <Reference Include="Microsoft.Xna.Framework.Game, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
-    <Reference Include="Microsoft.Xna.Framework.GamerServices, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=MSIL" />
-    <Reference Include="Microsoft.Xna.Framework.Graphics, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
-    <Reference Include="Microsoft.Xna.Framework.Net, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=MSIL" />
-    <Reference Include="Microsoft.Xna.Framework.Storage, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=MSIL" />
-    <Reference Include="Microsoft.Xna.Framework.Video, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=MSIL" />
-    <Reference Include="Microsoft.Xna.Framework.Xact, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
-    <Reference Include="mscorlib">
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Ninject">
-      <HintPath>..\..\..\Libraries\x86\Ninject.dll</HintPath>
-    </Reference>
-    <Reference Include="System">
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Xml">
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="System.Core">
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="System.Xml.Linq">
-      <Private>False</Private>
-    </Reference>
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Compile Include="CameraScript.cs" />
     <Compile Include="Fire.cs" />
@@ -116,37 +86,37 @@
     <Content Include="GameThumbnail.png" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Myre\Myre.Debugging.UI\%28x86%29 Myre.Debugging.UI.csproj">
-      <Project>{A753A526-F119-4913-AA45-252706E9C84B}</Project>
-      <Name>%28x86%29 Myre.Debugging.UI</Name>
+    <ProjectReference Include="..\..\..\Myre\Myre.Debugging.UI\(360) Myre.Debugging.UI.csproj">
+      <Project>{DEB160AD-2CEA-471C-AE78-9F2DFDD58D7F}</Project>
+      <Name>(360) Myre.Debugging.UI</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\Myre\Myre.Debugging\%28x86%29 Myre.Debugging.csproj">
-      <Project>{F987DEC5-E12F-4566-A200-DE18D6044E21}</Project>
-      <Name>%28x86%29 Myre.Debugging</Name>
+    <ProjectReference Include="..\..\..\Myre\Myre.Debugging\(360) Myre.Debugging.csproj">
+      <Project>{28588CF1-B67A-40D6-B084-90A40E986220}</Project>
+      <Name>(360) Myre.Debugging</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\Myre\Myre.Entities\%28x86%29 Myre.Entities.csproj">
-      <Project>{5CDABE8C-7C9C-4163-8C85-FEA731088239}</Project>
-      <Name>%28x86%29 Myre.Entities</Name>
+    <ProjectReference Include="..\..\..\Myre\Myre.Entities\(360) Myre.Entities.csproj">
+      <Project>{AFCBCBDD-FD5A-4627-B645-E74BE8DD259A}</Project>
+      <Name>(360) Myre.Entities</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\Myre\Myre.Graphics\%28x86%29 Myre.Graphics.csproj">
-      <Project>{FC3D8E34-3333-42FB-9B47-3A273B1B50D8}</Project>
-      <Name>%28x86%29 Myre.Graphics</Name>
+    <ProjectReference Include="..\..\..\Myre\Myre.Graphics\(360) Myre.Graphics.csproj">
+      <Project>{F40925B3-500A-41C8-ABF8-78D6759C7F4A}</Project>
+      <Name>(360) Myre.Graphics</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\Myre\Myre.Physics\%28x86%29 Myre.Physics.csproj">
-      <Project>{DF7B71E5-B8C9-4919-A15D-F1187556A909}</Project>
-      <Name>%28x86%29 Myre.Physics</Name>
+    <ProjectReference Include="..\..\..\Myre\Myre.Physics\(360) Myre.Physics.csproj">
+      <Project>{F47B81C7-36F7-4DD5-9437-EDEE749E8A30}</Project>
+      <Name>(360) Myre.Physics</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\Myre\Myre.StateManagement\%28x86%29 Myre.StateManagement.csproj">
-      <Project>{630AEBBC-AF42-4700-A24F-F4B6FF8172F1}</Project>
-      <Name>%28x86%29 Myre.StateManagement</Name>
+    <ProjectReference Include="..\..\..\Myre\Myre.StateManagement\(360) Myre.StateManagement.csproj">
+      <Project>{518A150F-DB32-4106-9A57-D7A2FA2A6F1B}</Project>
+      <Name>(360) Myre.StateManagement</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\Myre\Myre.UI\%28x86%29 Myre.UI.csproj">
-      <Project>{ADFDCC4A-8805-4BCA-9FBA-FB04920AFA33}</Project>
-      <Name>%28x86%29 Myre.UI</Name>
+    <ProjectReference Include="..\..\..\Myre\Myre.UI\(360) Myre.UI.csproj">
+      <Project>{0DFFBEA4-FB61-4C72-98C4-04030E9EE7EC}</Project>
+      <Name>(360) Myre.UI</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\Myre\Myre\%28x86%29 Myre.csproj">
-      <Project>{FDB5A9D8-9266-4F7B-BDE7-D4E720F5B45F}</Project>
-      <Name>%28x86%29 Myre</Name>
+    <ProjectReference Include="..\..\..\Myre\Myre\(360) Myre.csproj">
+      <Project>{D8692844-58C6-477A-B85F-20A08B6E191B}</Project>
+      <Name>(360) Myre</Name>
     </ProjectReference>
     <ProjectReference Include="..\GraphicsTestsContent\GraphicsTestsContent.contentproj">
       <Project>{DEC9B15B-B494-4E18-82D6-5B62E9CD32FF}</Project>
@@ -183,6 +153,56 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.Xna.Framework">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Microsoft.Xna.Framework.Avatar">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Microsoft.Xna.Framework.Game">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Microsoft.Xna.Framework.GamerServices">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Microsoft.Xna.Framework.Graphics">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Microsoft.Xna.Framework.Net">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Microsoft.Xna.Framework.Storage">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Microsoft.Xna.Framework.Video">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Microsoft.Xna.Framework.Xact">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="mscorlib">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Ninject">
+      <HintPath>..\..\..\Libraries\Xbox 360\Ninject.dll</HintPath>
+    </Reference>
+    <Reference Include="protobuf_net">
+      <HintPath>..\..\..\Libraries\Xbox 360\protobuf_net.dll</HintPath>
+    </Reference>
+    <Reference Include="System">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Core">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Xml">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Xml.Linq">
+      <Private>False</Private>
+    </Reference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\XNA Game Studio\Microsoft.Xna.GameStudio.targets" />

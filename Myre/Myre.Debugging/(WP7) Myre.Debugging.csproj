@@ -58,6 +58,7 @@
     <Compile Include="CommandAttribute.cs" />
     <Compile Include="CommandEngine.cs" />
     <Compile Include="CommandHelp.cs" />
+    <Compile Include="DebugShapeRenderer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Statistics\FrequencyTracker.cs" />
     <Compile Include="Statistics\Statistic.cs" />

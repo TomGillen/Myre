@@ -3,7 +3,7 @@
 texture SSAO;
 sampler ssaoSampler = sampler_state
 {
-	Texture = SSAO;
+	Texture = (SSAO);
 	MinFilter = Point;
 	MipFilter = Point;
 	MagFilter = Point;
@@ -12,7 +12,7 @@ sampler ssaoSampler = sampler_state
 texture Edges : EDGES;
 sampler edgeSampler = sampler_state
 {
-	Texture = Edges;
+	Texture = (Edges);
 	MinFilter = Point;
 	MipFilter = Point;
 	MagFilter = Point;
