@@ -73,23 +73,15 @@ namespace Myre.Physics
             set { timeMultiplier.Value = value; }
         }
 
-        public const String POSITION = "position";
-        public const String ROTATION = "rotation";
-        public const String MASS = "mass";
-        public const String INERTIA_TENSOR = "inertia_tensor";
-        public const String LINEAR_VELOCITY = "linear_velocity";
-        public const String ANGULAR_VELOCITY = "angular_velocity";
-        public const String TIME_MULTIPLIER = "time_multiplier";
-
         public override void CreateProperties(Entity.InitialisationContext context)
         {
-            this.position = context.CreateProperty<Vector2>(POSITION);
-            this.rotation = context.CreateProperty<float>(ROTATION);
-            this.mass = context.CreateProperty<float>(MASS);
-            this.inertiaTensor = context.CreateProperty<float>(INERTIA_TENSOR);
-            this.linearVelocity = context.CreateProperty<Vector2>(LINEAR_VELOCITY);
-            this.angularVelocity = context.CreateProperty<float>(ANGULAR_VELOCITY);
-            this.timeMultiplier = context.CreateProperty<float>(TIME_MULTIPLIER);
+            this.position = context.CreateProperty<Vector2>(PropertyName.POSITION);
+            this.rotation = context.CreateProperty<float>(PropertyName.ROTATION);
+            this.mass = context.CreateProperty<float>(PropertyName.MASS);
+            this.inertiaTensor = context.CreateProperty<float>(PropertyName.INERTIA_TENSOR);
+            this.linearVelocity = context.CreateProperty<Vector2>(PropertyName.LINEAR_VELOCITY);
+            this.angularVelocity = context.CreateProperty<float>(PropertyName.ANGULAR_VELOCITY);
+            this.timeMultiplier = context.CreateProperty<float>(PropertyName.TIME_MULTIPLIER);
 
             base.CreateProperties(context);
         }

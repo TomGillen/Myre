@@ -13,13 +13,13 @@ namespace Myre.Physics.Dynamics.Integrators
         :Behaviour
     {
         private Property<Vector3> position;
-        private Property<Vector3> velocity;
+        private Property<Vector3> linearVelocity;
         private Property<Vector3> acceleration;
 
         public override void CreateProperties(Entity.InitialisationContext context)
         {
-            position = context.GetProperty<Vector3>("position");
-            velocity = context.GetProperty<Vector3>("velocity");
+            position = context.GetProperty<Vector3>(PropertyName.POSITION);
+            linearVelocity = context.GetProperty<Vector3>(PropertyName.LINEAR_VELOCITY);
             acceleration = context.GetProperty<Vector3>("acceleration");
 
             base.CreateProperties(context);
@@ -27,8 +27,8 @@ namespace Myre.Physics.Dynamics.Integrators
 
         private void Integrate(float deltaTime)
         {
-            position.Value += velocity.Value * deltaTime;
-            velocity.Value += acceleration.Value * deltaTime;
+            position.Value += linearVelocity.Value * deltaTime;
+            linearVelocity.Value += acceleration.Value * deltaTime;
 
             acceleration.Value = Vector3.Zero;
         }
