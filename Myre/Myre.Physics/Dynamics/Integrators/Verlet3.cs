@@ -10,7 +10,7 @@ using Myre.Entities;
 namespace Myre.Physics.Dynamics.Integrators
 {
     [DefaultManager(typeof(Manager))]
-    public class Verlet
+    public class Verlet3
         :Behaviour
     {
         public Vector3 PreviousPosition
@@ -23,11 +23,22 @@ namespace Myre.Physics.Dynamics.Integrators
         private Property<Vector3> velocity;
         private Property<Vector3> acceleration;
 
+        private string positionName;
+        private string velocityName;
+        private string accelerationName;
+
+        public Verlet3(string position, string velocity, string acceleration)
+        {
+            this.positionName = position;
+            this.velocityName = velocity;
+            this.accelerationName = acceleration;
+        }
+
         public override void CreateProperties(Entity.InitialisationContext context)
         {
-            position = context.CreateProperty<Vector3>("position");
-            velocity = context.CreateProperty<Vector3>("velocity");
-            acceleration = context.CreateProperty<Vector3>("acceleration");
+            position = context.CreateProperty<Vector3>(positionName);
+            velocity = context.CreateProperty<Vector3>(velocityName);
+            acceleration = context.CreateProperty<Vector3>(accelerationName);
 
             base.CreateProperties(context);
         }
@@ -49,7 +60,7 @@ namespace Myre.Physics.Dynamics.Integrators
         }
 
         public class Manager
-            :BehaviourManager<Verlet>, IProcess
+            :BehaviourManager<Verlet3>, IProcess
         {
             public bool IsComplete
             {

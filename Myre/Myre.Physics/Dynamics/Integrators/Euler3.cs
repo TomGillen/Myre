@@ -9,32 +9,44 @@ using Microsoft.Xna.Framework;
 
 namespace Myre.Physics.Dynamics.Integrators
 {
-    public class Euler
+    [DefaultManager(typeof(Manager))]
+    public class Euler3
         :Behaviour
     {
         private Property<Vector3> position;
-        private Property<Vector3> linearVelocity;
+        private Property<Vector3> velocity;
         private Property<Vector3> acceleration;
+
+        private string positionName;
+        private string velocityName;
+        private string accelerationName;
+
+        public Euler3(string position, string velocity, string acceleration)
+        {
+            this.positionName = position;
+            this.velocityName = velocity;
+            this.accelerationName = acceleration;
+        }
 
         public override void CreateProperties(Entity.InitialisationContext context)
         {
-            position = context.GetProperty<Vector3>(PropertyName.POSITION);
-            linearVelocity = context.GetProperty<Vector3>(PropertyName.LINEAR_VELOCITY);
-            acceleration = context.GetProperty<Vector3>("acceleration");
+            position = context.GetProperty<Vector3>(positionName);
+            velocity = context.GetProperty<Vector3>(velocityName);
+            acceleration = context.GetProperty<Vector3>(accelerationName);
 
             base.CreateProperties(context);
         }
 
         private void Integrate(float deltaTime)
         {
-            position.Value += linearVelocity.Value * deltaTime;
-            linearVelocity.Value += acceleration.Value * deltaTime;
+            position.Value += velocity.Value * deltaTime;
+            velocity.Value += acceleration.Value * deltaTime;
 
             acceleration.Value = Vector3.Zero;
         }
 
         public class Manager
-            :BehaviourManager<Euler>, IProcess
+            :BehaviourManager<Euler3>, IProcess
         {
             public bool IsComplete
             {
