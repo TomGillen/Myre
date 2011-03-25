@@ -16,16 +16,19 @@ namespace Myre.Physics.Dynamics.Integrators
         protected Property<T> position;
         protected Property<T> velocity;
         protected Property<T> acceleration;
+        protected Property<T> velocityBias;
 
         private string positionName;
         private string velocityName;
         private string accelerationName;
+        private string velocityBiasName;
 
-        protected Integrator(string position, string velocity, string acceleration)
+        protected Integrator(string position, string velocity, string acceleration, string velocityBias)
         {
             this.positionName = position;
             this.velocityName = velocity;
             this.accelerationName = acceleration;
+            this.velocityBiasName = velocityBias;
         }
 
         public override void CreateProperties(Entity.InitialisationContext context)
@@ -33,6 +36,7 @@ namespace Myre.Physics.Dynamics.Integrators
             position = context.GetProperty<T>(positionName);
             velocity = context.GetProperty<T>(velocityName);
             acceleration = context.GetProperty<T>(accelerationName);
+            velocityBias = context.GetProperty<T>(velocityBiasName);
 
             base.CreateProperties(context);
         }

@@ -19,8 +19,8 @@ namespace Myre.Physics.Dynamics.Integrators
             private set;
         }
 
-        public Verlet2(string position, string velocity, string acceleration)
-            : base(position, velocity, acceleration)
+        public Verlet2(string position, string velocity, string acceleration, string velocityBias)
+            : base(position, velocity, acceleration, velocityBias)
         {
         }
 
@@ -35,9 +35,10 @@ namespace Myre.Physics.Dynamics.Integrators
 
             velocity.Value = position.Value - PreviousPosition;
             PreviousPosition = position.Value;
-            position.Value = (position.Value + velocity.Value) * timeRatio + acceleration.Value * deltaTimeSquare;
+            position.Value = (position.Value + velocity.Value + velocityBias.Value) * timeRatio + acceleration.Value * deltaTimeSquare;
 
             acceleration.Value = Vector2.Zero;
+            velocityBias.Value = Vector2.Zero;
         }
 
         public void SetPosition(Vector2 pos)

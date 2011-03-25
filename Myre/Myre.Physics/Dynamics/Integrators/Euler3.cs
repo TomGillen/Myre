@@ -14,14 +14,14 @@ namespace Myre.Physics.Dynamics.Integrators
     public class Euler3
         :Integrator<Vector3>
     {
-        public Euler3(string position, string velocity, string acceleration)
-            :base(position, velocity, acceleration)
+        public Euler3(string position, string velocity, string acceleration, string velocityBias)
+            :base(position, velocity, acceleration, velocityBias)
         {
         }
 
         protected override void Integrate(float deltaTime)
         {
-            position.Value += velocity.Value * deltaTime;
+            position.Value += (velocity.Value + velocityBias.Value) * deltaTime;
             velocity.Value += acceleration.Value * deltaTime;
 
             acceleration.Value = Vector3.Zero;

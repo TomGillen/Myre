@@ -10,8 +10,8 @@ namespace Myre.Physics.Dynamics
     public class InverseMassCalculator
         :Behaviour
     {
-        public const String MASS = "mass";
-        public const String INVERSE_MASS = "inverse_mass";
+        public const String MASS = PropertyName.MASS;
+        public const String INVERSE_MASS = PropertyName.INVERSE_MASS;
 
         public override void CreateProperties(Entities.Entity.InitialisationContext context)
         {

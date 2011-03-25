@@ -12,17 +12,18 @@ namespace Myre.Physics.Dynamics.Integrators
     public class Euler1
         : Integrator<float>
     {
-        public Euler1(string position, string velocity, string acceleration)
-            : base(position, velocity, acceleration)
+        public Euler1(string position, string velocity, string acceleration, string velocityBias)
+            : base(position, velocity, acceleration, velocityBias)
         {
         }
 
         protected override void Integrate(float deltaTime)
         {
-            position.Value += velocity.Value * deltaTime;
+            position.Value += (velocity.Value + velocityBias.Value) * deltaTime;
             velocity.Value += acceleration.Value * deltaTime;
 
             acceleration.Value = 0;
+            velocityBias.Value = 0;
         }
 
         public class Manager
