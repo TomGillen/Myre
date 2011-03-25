@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Myre.Entities.Behaviours;
-using Myre.Entities.Services;
 using Microsoft.Xna.Framework;
 using Myre.Entities;
 using Ninject;
@@ -11,17 +10,17 @@ using Ninject;
 namespace Myre.Physics.Dynamics.Integrators
 {
     [DefaultManager(typeof(Manager))]
-    public class Verlet3
-        :Integrator<Vector3>
+    public class Verlet2
+        : Integrator<Vector2>
     {
-        public Vector3 PreviousPosition
+        public Vector2 PreviousPosition
         {
             get;
             private set;
         }
 
-        public Verlet3(string position, string velocity, string acceleration)
-            :base(position, velocity, acceleration)
+        public Verlet2(string position, string velocity, string acceleration)
+            : base(position, velocity, acceleration)
         {
         }
 
@@ -38,20 +37,20 @@ namespace Myre.Physics.Dynamics.Integrators
             PreviousPosition = position.Value;
             position.Value = (position.Value + velocity.Value) * timeRatio + acceleration.Value * deltaTimeSquare;
 
-            acceleration.Value = Vector3.Zero;
+            acceleration.Value = Vector2.Zero;
         }
 
-        public void SetPosition(Vector3 pos)
+        public void SetPosition(Vector2 pos)
         {
             position.Value = pos;
             PreviousPosition = pos;
         }
 
         public class Manager
-            :Integrator<Vector3>.Manager<Verlet3>
+            : Integrator<Vector2>.Manager<Verlet2>
         {
             public Manager(IKernel kernel)
-                :base(kernel, true)
+                : base(kernel, true)
             {
             }
 

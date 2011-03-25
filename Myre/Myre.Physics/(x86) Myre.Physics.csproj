@@ -82,7 +82,12 @@
     <Compile Include="Collisions\Geometry.cs" />
     <Compile Include="Dynamics\Constraints\Damping.cs" />
     <Compile Include="Dynamics\Constraints\PositionConstraint.cs" />
+    <Compile Include="Dynamics\Integrators\Euler1.cs" />
+    <Compile Include="Dynamics\Integrators\Euler2.cs" />
     <Compile Include="Dynamics\Integrators\Euler3.cs" />
+    <Compile Include="Dynamics\Integrators\Integrator.cs" />
+    <Compile Include="Dynamics\Integrators\Verlet1.cs" />
+    <Compile Include="Dynamics\Integrators\Verlet2.cs" />
     <Compile Include="Dynamics\Integrators\Verlet3.cs" />
     <Compile Include="Dynamics\InverseMassCalculator.cs" />
     <Compile Include="PhysicsManager.cs" />

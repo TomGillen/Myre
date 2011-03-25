@@ -3,19 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Myre.Entities.Behaviours;
-using Myre.Entities.Services;
 using Myre.Entities;
-using Microsoft.Xna.Framework;
 using Ninject;
 
 namespace Myre.Physics.Dynamics.Integrators
 {
     [DefaultManager(typeof(Manager))]
-    public class Euler3
-        :Integrator<Vector3>
+    public class Euler1
+        : Integrator<float>
     {
-        public Euler3(string position, string velocity, string acceleration)
-            :base(position, velocity, acceleration)
+        public Euler1(string position, string velocity, string acceleration)
+            : base(position, velocity, acceleration)
         {
         }
 
@@ -24,14 +22,14 @@ namespace Myre.Physics.Dynamics.Integrators
             position.Value += velocity.Value * deltaTime;
             velocity.Value += acceleration.Value * deltaTime;
 
-            acceleration.Value = Vector3.Zero;
+            acceleration.Value = 0;
         }
 
         public class Manager
-            :Integrator<Vector3>.Manager<Euler3>
+            : Integrator<float>.Manager<Euler1>
         {
             public Manager(IKernel kernel)
-                :base(kernel, false)
+                : base(kernel, false)
             {
             }
 
