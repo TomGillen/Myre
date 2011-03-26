@@ -43,9 +43,9 @@ namespace Myre.Physics.Dynamics.Integrators
 
         protected abstract void Integrate(float deltaTime);
 
-        public abstract class Manager<T>
-            : BehaviourManager<T>, IProcess
-            where T : Behaviour
+        public abstract class Manager<B>
+            : BehaviourManager<B>, IProcess
+            where B : Behaviour
         {
             public bool IsComplete
             {

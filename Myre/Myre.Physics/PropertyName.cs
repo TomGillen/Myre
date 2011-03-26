@@ -15,5 +15,7 @@ namespace Myre.Physics
         public const String LINEAR_VELOCITY = "linear_velocity";
         public const String ANGULAR_VELOCITY = "angular_velocity";
         public const String TIME_MULTIPLIER = "time_multiplier";
+        public const String ACCELERATION = "acceleration";
+        public const String LINEAR_VELOCITY_BIAS = "linear_velocity_bias";
     }
 }
