@@ -9,7 +9,7 @@ namespace Myre.Physics.Dynamics.Integrators
         :Verlet3
     {
         public PositionVerlet3()
-            :base(PropertyName.POSITION, PropertyName.LINEAR_VELOCITY, PropertyName.ACCELERATION, PropertyName.LINEAR_VELOCITY_BIAS)
+            :base(PropertyName.POSITION, PropertyName.LINEAR_VELOCITY, PropertyName.ACCELERATION, PropertyName.LINEAR_VELOCITY)
         {
 
         }

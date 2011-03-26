@@ -11,7 +11,7 @@ using Ninject;
 namespace Myre.Physics.Dynamics.Integrators
 {
     [DefaultManager(typeof(Manager))]
-    public abstract class Verlet3
+    public class Verlet3
         :Integrator<Vector3>
     {
         public Vector3 PreviousPosition

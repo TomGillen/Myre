@@ -25,6 +25,7 @@ namespace Myre.Physics.Dynamics.Integrators
             velocity.Value += acceleration.Value * deltaTime;
 
             acceleration.Value = Vector3.Zero;
+            velocityBias.Value = Vector3.Zero;
         }
 
         public class Manager
