@@ -461,7 +461,6 @@ Global
 		{B0714813-F310-4A0F-AE2B-952C9527F01D}.Debug|Any CPU.ActiveCfg = Debug|Xbox 360
 		{B0714813-F310-4A0F-AE2B-952C9527F01D}.Debug|Mixed Platforms.ActiveCfg = Debug|Xbox 360
 		{B0714813-F310-4A0F-AE2B-952C9527F01D}.Debug|Mixed Platforms.Build.0 = Debug|Xbox 360
-		{B0714813-F310-4A0F-AE2B-952C9527F01D}.Debug|Mixed Platforms.Deploy.0 = Debug|Xbox 360
 		{B0714813-F310-4A0F-AE2B-952C9527F01D}.Debug|x86.ActiveCfg = Debug|Xbox 360
 		{B0714813-F310-4A0F-AE2B-952C9527F01D}.Debug|Xbox 360.ActiveCfg = Debug|Xbox 360
 		{B0714813-F310-4A0F-AE2B-952C9527F01D}.Debug|Xbox 360.Build.0 = Debug|Xbox 360

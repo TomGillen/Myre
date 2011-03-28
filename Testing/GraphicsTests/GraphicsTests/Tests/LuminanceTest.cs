@@ -25,9 +25,9 @@ namespace GraphicsTests.Tests
         {
             private SpriteBatch batch;
             private bool drawScene = true;
-            private ToneMapPhase toneMap;
+            private ToneMapComponent toneMap;
 
-            public Phase(LuminanceTest test, GraphicsDevice device, ToneMapPhase toneMap)
+            public Phase(LuminanceTest test, GraphicsDevice device, ToneMapComponent toneMap)
             {
                 batch = new SpriteBatch(device);
                 this.toneMap = toneMap;
@@ -137,7 +137,7 @@ namespace GraphicsTests.Tests
             light = sunEntity.Create();
             //scene.Scene.Add(light);
 
-            var toneMap = kernel.Get<ToneMapPhase>();
+            var toneMap = kernel.Get<ToneMapComponent>();
             var renderer = scene.Scene.GetService<Renderer>();
             renderer.StartPlan()
                 .Then<GeometryBufferComponent>()

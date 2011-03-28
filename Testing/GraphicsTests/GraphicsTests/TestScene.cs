@@ -90,6 +90,7 @@ namespace GraphicsTests
             var pointLight = kernel.Get<EntityDescription>();
             pointLight.AddProperty<Vector3>("position", new Vector3(0, 10, 0));
             pointLight.AddProperty<Vector3>("colour", new Vector3(0, 5, 0));
+            pointLight.AddProperty<float>("range", 200);
             pointLight.AddBehaviour<PointLight>();
             //scene.Add(pointLight.Create());
 
@@ -107,9 +108,10 @@ namespace GraphicsTests
 
             var spotLight = kernel.Get<EntityDescription>();
             spotLight.AddProperty<Vector3>("position", new Vector3(-180, 250, 0));
-            spotLight.AddProperty<Vector3>("colour", new Vector3(700));
+            spotLight.AddProperty<Vector3>("colour", new Vector3(10));
             spotLight.AddProperty<Vector3>("direction", new Vector3(0, -1, 0));
             spotLight.AddProperty<float>("angle", MathHelper.PiOver2);
+            spotLight.AddProperty<float>("range", 500);
             spotLight.AddProperty<Texture2D>("mask", null);//content.Load<Texture2D>("Chrysanthemum"));
             spotLight.AddProperty<int>("shadow_resolution", 1024);
             spotLight.AddBehaviour<SpotLight>();
@@ -211,35 +213,38 @@ namespace GraphicsTests
             game.IsMouseVisible = false;
             if (mouse.IsButtonDown(MouseButtons.Right))
             {
-                var mousePosition = new Vector2(mouse.X, mouse.Y);
-                var mouseDelta = mousePosition - resolution.Value / 2;
+                //var mousePosition = new Vector2(mouse.X, mouse.Y);
+                //var mouseDelta = mousePosition - resolution.Value / 2;
 
-                cameraRotation.Y -= mouseDelta.X * time * 0.1f;
-                cameraRotation.X -= mouseDelta.Y * time * 0.1f;
+                //cameraRotation.Y -= mouseDelta.X * time * 0.1f;
+                //cameraRotation.X -= mouseDelta.Y * time * 0.1f;
 
-                var rotation = Matrix.CreateFromYawPitchRoll(cameraRotation.Y, cameraRotation.X, cameraRotation.Z);
-                var forward = Vector3.TransformNormal(Vector3.Forward, rotation);
-                var right = Vector3.TransformNormal(Vector3.Right, rotation);
+                //var rotation = Matrix.CreateFromYawPitchRoll(cameraRotation.Y, cameraRotation.X, cameraRotation.Z);
+                //var forward = Vector3.TransformNormal(Vector3.Forward, rotation);
+                //var right = Vector3.TransformNormal(Vector3.Right, rotation);
 
-                forward.Normalize();
-                right.Normalize();
+                //forward.Normalize();
+                //right.Normalize();
 
-                if (keyboard.IsKeyDown(Keys.W))
-                    cameraPosition += forward * time * 50;
-                if (keyboard.IsKeyDown(Keys.S))
-                    cameraPosition -= forward * time * 50f;
-                if (keyboard.IsKeyDown(Keys.A))
-                    cameraPosition -= right * time * 50f;
-                if (keyboard.IsKeyDown(Keys.D))
-                    cameraPosition += right * time * 50f;
+                //if (keyboard.IsKeyDown(Keys.W))
+                //    cameraPosition += forward * time * 50;
+                //if (keyboard.IsKeyDown(Keys.S))
+                //    cameraPosition -= forward * time * 50f;
+                //if (keyboard.IsKeyDown(Keys.A))
+                //    cameraPosition -= right * time * 50f;
+                //if (keyboard.IsKeyDown(Keys.D))
+                //    cameraPosition += right * time * 50f;
 
-                camera.View = Matrix.Invert(rotation * Matrix.CreateTranslation(cameraPosition));
+                //camera.View = Matrix.Invert(rotation * Matrix.CreateTranslation(cameraPosition));
 
-                Mouse.SetPosition((int)resolution.Value.X / 2, (int)resolution.Value.Y / 2);
+                //Mouse.SetPosition((int)resolution.Value.X / 2, (int)resolution.Value.Y / 2);
+                camera.View = Matrix.CreateLookAt(new Vector3(0, 60, -7), new Vector3(50, 30, -50), Vector3.Up);
             }
             else
             {
-                cameraScript.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
+                if (!keyboard.IsKeyDown(Keys.Space))
+                    cameraScript.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
+
                 cameraPosition = cameraScript.Position;
             }
 

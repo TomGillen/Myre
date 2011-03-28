@@ -41,6 +41,7 @@
     <Optimize>true</Optimize>
     <DefineConstants>TRACE;XBOX;XBOX360</DefineConstants>
     <XnaCompressContent>true</XnaCompressContent>
+    <LangVersion>default</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Profile|Xbox 360'">
     <OutputPath>bin\Xbox 360\Profile\</OutputPath>

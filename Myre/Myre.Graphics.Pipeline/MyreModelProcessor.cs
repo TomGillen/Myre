@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework.Content.Pipeline.Graphics;
 using Microsoft.Xna.Framework.Content.Pipeline.Processors;
 using System.IO;
 using System.Diagnostics;
+using System.ComponentModel;
 
 namespace Myre.Graphics.Pipeline
 {
@@ -22,7 +23,7 @@ namespace Myre.Graphics.Pipeline
     /// TODO: change the ContentProcessor attribute to specify the correct
     /// display name for this processor.
     /// </summary>
-    [ContentProcessor(DisplayName = "Myre.Graphics.Pipeline.MyreModelProcessor")]
+    [ContentProcessor(DisplayName = "Myre Model Processor")]
     public class MyreModelProcessor : ContentProcessor<NodeContent, MyreModelContent>
     {
 
@@ -36,19 +37,30 @@ namespace Myre.Graphics.Pipeline
         Dictionary<MaterialContent, Dictionary<string, MyreMaterialContent>> processedMaterials =
                             new Dictionary<MaterialContent, Dictionary<string, MyreMaterialContent>>();
 
+        [DisplayName("Diffuse Texture")]
         public string DiffuseTexture
         {
             get;
             set;
         }
 
+        [DisplayName("Specular Texture")]
         public string SpecularTexture
         {
             get;
             set;
         }
 
+        [DisplayName("Normal Texture")]
         public string NormalTexture
+        {
+            get;
+            set;
+        }
+        
+        [DisplayName("Allow null diffuse textures")]
+        [DefaultValue(true)]
+        public bool AllowNullDiffuseTexture
         {
             get;
             set;
@@ -119,6 +131,14 @@ namespace Myre.Graphics.Pipeline
             if (mesh != null)
             {
                 MeshHelper.OptimizeForCache(mesh);
+
+                // create texture coordinates of 0 if none are present
+                var texCoord0 = VertexChannelNames.TextureCoordinate(0);
+                foreach (var item in mesh.Geometry)
+                {
+                    if (!item.Vertices.Channels.Contains(texCoord0))
+                        item.Vertices.Channels.Add<Vector2>(texCoord0, null);
+                }
 
                 // calculate tangent frames for normal mapping
                 var hasTangents = GeometryContainsChannel(mesh.Geometry, VertexChannelNames.Tangent(0));
@@ -200,6 +220,8 @@ namespace Myre.Graphics.Pipeline
         Dictionary<string, MyreMaterialContent> ProcessMaterial(MaterialContent material, MeshContent mesh)
         {
             //material = context.Convert<MaterialContent, MaterialContent>(material, "MaterialProcessor");
+            if (material == null)
+                material = new MaterialContent();
 
             // Have we already processed this material?
             if (!processedMaterials.ContainsKey(material))
@@ -282,7 +304,9 @@ namespace Myre.Graphics.Pipeline
                 if (texture != null)
                     return texture;
 
-                // we cant find a texture, and there isnt really any sane default to use.
+                if (AllowNullDiffuseTexture)
+                    return "null_specular.tga";
+
                 return null;
             }
             else

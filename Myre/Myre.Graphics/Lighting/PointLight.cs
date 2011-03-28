@@ -21,7 +21,7 @@ namespace Myre.Graphics.Lighting
     {
         private Property<Vector3> colour;
         private Property<Vector3> position;
-        private float range;
+        private Property<float> range;
 
         public Vector3 Colour
         {
@@ -35,10 +35,17 @@ namespace Myre.Graphics.Lighting
             set { position.Value = value; }
         }
 
+        public float Range
+        {
+            get { return range.Value; }
+            set { range.Value = value; }
+        }
+
         public override void CreateProperties(Entity.InitialisationContext context)
         {
             colour = context.CreateProperty<Vector3>("colour");
             position = context.CreateProperty<Vector3>("position");
+            range = context.CreateProperty<float>("range");
             
             base.CreateProperties(context);
         }
@@ -136,17 +143,17 @@ namespace Myre.Graphics.Lighting
                 geometryLightingMaterial.Parameters["LightFalloffFactor"].SetValue(falloffFactor);
                 quadLightingMaterial.Parameters["LightFalloffFactor"].SetValue(falloffFactor);
 
-                float threshold = renderer.Data.Get("lighting_threshold", 1f / 100f).Value;
-                float adaptedLuminance = renderer.Data.Get<float>("adaptedluminance", 1).Value;
+                //float threshold = renderer.Data.Get("lighting_threshold", 1f / 100f).Value;
+                //float adaptedLuminance = renderer.Data.Get<float>("adaptedluminance", 1).Value;
 
-                threshold = adaptedLuminance * threshold;
+                //threshold = adaptedLuminance * threshold;
 
                 foreach (var light in Behaviours)
                 {
-                    var luminance = Math.Max(light.Colour.X, Math.Max(light.Colour.Y, light.Colour.Z));
-                    light.range = (float)Math.Sqrt(luminance * falloffFactor / threshold);
+                    //var luminance = Math.Max(light.Colour.X, Math.Max(light.Colour.Y, light.Colour.Z));
+                    //light.range = (float)Math.Sqrt(luminance * falloffFactor / threshold);
 
-                    var bounds = new BoundingSphere(light.Position, light.range);
+                    var bounds = new BoundingSphere(light.Position, light.Range);
                     if (!bounds.Intersects(frustum))
                         continue;
 
@@ -240,9 +247,10 @@ namespace Myre.Graphics.Lighting
                     Vector3 position = Vector3.Transform(light.Position, metadata.Get<Matrix>("view").Value);
                     material.Parameters["LightPosition"].SetValue(position);
                     material.Parameters["Colour"].SetValue(light.Colour);
+                    material.Parameters["Range"].SetValue(light.Range);
                 }
 
-                var world = Matrix.CreateScale(light.range / geometry.Meshes[0].BoundingSphere.Radius)
+                var world = Matrix.CreateScale(light.Range / geometry.Meshes[0].BoundingSphere.Radius)
                             * Matrix.CreateTranslation(light.Position);
                 metadata.Set<Matrix>("world", world);
                 Matrix.Multiply(ref world, ref metadata.Get<Matrix>("view").Value, out metadata.Get<Matrix>("worldview").Value);

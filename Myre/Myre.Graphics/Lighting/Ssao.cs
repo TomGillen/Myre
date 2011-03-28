@@ -83,7 +83,7 @@ namespace Myre.Graphics.Lighting
             //settings.Add("ssao_detailintensity", "SSAO intensity", 15f);
             //settings.Add("ssao_detailscale", "Scales distance between occluders and occludee.", 1.5f);
             settings.Add("ssao_blur", "The amount to blur SSAO.", 1f);
-            settings.Add("ssao_radiosityintensity", "The intensity of local radiosity colour transfer.", 0.0f);
+            //settings.Add("ssao_radiosityintensity", "The intensity of local radiosity colour transfer.", 0.0f);
             settings.Add("ssao_highquality", "Switches between high and low quality SSAO sampling pattern.", false);
 
             // define inputs
@@ -104,15 +104,15 @@ namespace Myre.Graphics.Lighting
         {
             var resolution = renderer.Data.Get<Vector2>("resolution").Value;
 
-            if (renderer.Data.Get<float>("ssao_radiosityintensity").Value > 0)
-                ssaoMaterial.CurrentTechnique = ssaoMaterial.Techniques["SSGI"];
-            else
-            {
+            //if (renderer.Data.Get<float>("ssao_radiosityintensity").Value > 0)
+            //    ssaoMaterial.CurrentTechnique = ssaoMaterial.Techniques["SSGI"];
+            //else
+            //{
                 if (renderer.Data.Get<bool>("ssao_highquality").Value)
                     ssaoMaterial.CurrentTechnique = ssaoMaterial.Techniques["HQ_SSAO"];
                 else
                     ssaoMaterial.CurrentTechnique = ssaoMaterial.Techniques["LQ_SSAO"];
-            }
+            //}
 
             var unblured = RenderTargetManager.GetTarget(renderer.Device, (int)resolution.X, (int)resolution.Y, surfaceFormat: SurfaceFormat.HalfVector4, name: "ssao unblurred");//, SurfaceFormat.HalfVector4);
             renderer.Device.SetRenderTarget(unblured);

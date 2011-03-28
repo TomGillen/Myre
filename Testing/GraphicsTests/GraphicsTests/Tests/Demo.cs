@@ -26,15 +26,10 @@ namespace GraphicsTests.Tests
         private TestScene scene;
         private TestGame game;
 
-        //private AviManager aviManager;
-        //private VideoStream aviStream;
-        //private DefaultTimeline timeline;
-        //private IGroup videoGroup;
-        //private ITrack videoTrack;
-        //private int framesPerSecond = 60;
-        //private int width = 1280;
-        //private int height = 720;
-        private float time;
+        private RenderPlan fullPlan;
+        private RenderPlan ssaoPlan;
+        private RenderPlan lightingPlan;
+        private RenderPlan edgeDetectPlan;
 
         public Demo(
             IKernel kernel,
@@ -61,16 +56,31 @@ namespace GraphicsTests.Tests
             scene = kernel.Get<TestScene>();
 
             var renderer = scene.Scene.GetService<Renderer>();
-            renderer.StartPlan()
+            
+            fullPlan = renderer.StartPlan()
                 .Then<GeometryBufferComponent>()
                 .Then<EdgeDetectComponent>()
                 .Then<Ssao>()
                 .Then<LightingComponent>()
-                .Then<ToneMapPhase>()
-                //.Then<RestoreDepthPhase>()
-                .Then<ParticleComponent>()
-                //.Then<AntiAliasComponent>()
-                .Apply();
+                .Then<ToneMapComponent>()
+                .Then<ParticleComponent>();
+
+            ssaoPlan = renderer.StartPlan()
+                .Then<GeometryBufferComponent>()
+                .Then<Ssao>()
+                .Show("ssao");
+
+            lightingPlan = renderer.StartPlan()
+                .Then<GeometryBufferComponent>()
+                .Then<LightingComponent>()
+                .Show("lightbuffer");
+
+            edgeDetectPlan = renderer.StartPlan()
+                .Then<GeometryBufferComponent>()
+                .Then<EdgeDetectComponent>()
+                .Show("edges");
+
+            fullPlan.Apply();
 
             base.OnShown();
 
@@ -81,52 +91,29 @@ namespace GraphicsTests.Tests
 
         public override void OnHidden()
         {
-            //aviStream.Close();
-            //aviManager.Close();
-
-            //IRenderer renderer = new WindowsMediaRenderer(timeline, "demo.wmv", WindowsMediaProfiles.HighQualityVideo);
-            //IAsyncResult result = renderer.BeginRender(null, null);
-            //renderer.EndRender(result);
-
             base.OnHidden();
         }
 
         public override void Update(GameTime gameTime)
         {
+            var keyboard = Keyboard.GetState();
+            if (keyboard.IsKeyDown(Keys.D1))
+                ssaoPlan.Apply();
+            else if (keyboard.IsKeyDown(Keys.D2))
+                lightingPlan.Apply();
+            else if (keyboard.IsKeyDown(Keys.D3))
+                edgeDetectPlan.Apply();
+            else
+                fullPlan.Apply();
+
             scene.Update(gameTime);
             base.Update(gameTime);
-
-            time += (float)gameTime.ElapsedGameTime.TotalSeconds;
-            if (time >= 40)
-                Manager.Pop();
         }
 
         public override void Draw(GameTime gameTime)
         {
             scene.Draw(gameTime);
             base.Draw(gameTime);
-
-            //var pp = game.GraphicsDevice.PresentationParameters;
-            ////var data = new Color[pp.BackBufferWidth * pp.BackBufferHeight];
-            ////game.GraphicsDevice.GetBackBufferData(data);
-
-            //byte[] textureData = new byte[4 * pp.BackBufferWidth * pp.BackBufferHeight];
-            //game.GraphicsDevice.GetBackBufferData<byte>(textureData);
-            
-            //Bitmap bmp = new System.Drawing.Bitmap(pp.BackBufferWidth, pp.BackBufferHeight, PixelFormat.Format32bppArgb);
-            //BitmapData bmpData = bmp.LockBits(new System.Drawing.Rectangle(0, 0, pp.BackBufferWidth, pp.BackBufferHeight), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
-            //IntPtr safePtr = bmpData.Scan0;
-            //Marshal.Copy(textureData, 0, safePtr, textureData.Length); 
-            //bmp.UnlockBits(bmpData);
-
-            ////if (aviStream == null)
-            ////    aviStream = aviManager.AddVideoStream(false, 60, bmp);
-            ////else
-            ////    aviStream.AddFrame(bmp);
-
-            //videoTrack.AddImage(bmp, time, time + 1f / framesPerSecond);
-
-            //bmp.Dispose();
         }
     }
 }

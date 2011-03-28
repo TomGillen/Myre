@@ -19,6 +19,7 @@ namespace GraphicsTests
             var particleEntityDesc = kernel.Get<EntityDescription>();
             particleEntityDesc.AddProperty("position", position);
             particleEntityDesc.AddProperty("colour", Vector3.Normalize(new Vector3(5, 2, 2)) * 2);
+            particleEntityDesc.AddProperty("range", 70f);
             particleEntityDesc.AddBehaviour<EllipsoidParticleEmitter>();
             particleEntityDesc.AddBehaviour<PointLight>();
             

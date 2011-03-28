@@ -6,6 +6,7 @@ float3 Colour;
 float3 LightPosition;
 float LightFalloffFactor;
 float3 CameraPosition : CAMERAPOSITION;
+float Range;
 
 float FarClip : FARCLIP;
 float4x4 WorldViewProjection : WORLDVIEWPROJECTION;
@@ -56,7 +57,8 @@ float4 CalculateLighting(float2 texCoord, float3 viewPosition)
 
 	float3 surfaceToLight = LightPosition - viewPosition;
 	float distance = length(surfaceToLight);
-	float attenuation = saturate(LightFalloffFactor / (distance * distance));
+	float attenuation = 1 - saturate(distance / Range); //saturate(LightFalloffFactor / (distance * distance));
+	attenuation *= attenuation;
 
 	float3 L = surfaceToLight / distance;
 	float3 V = normalize(CameraPosition - viewPosition);

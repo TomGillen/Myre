@@ -46,12 +46,6 @@ namespace Myre.Graphics.Lighting
         Resample scale;
         RenderTarget2D[] adaptedLuminance;
         RenderTarget2D averageLuminance;
-        RenderTarget2D readbackTexture;
-        OcclusionQuery occlusionQuery;
-        Thread readbackThread;
-        volatile bool readbackAvailable;
-        int readbackInterval;
-        Box<float> adaptedLuminanceData;
         float[] textureData = new float[1];
         int current = 0;
         int previous = 1;
@@ -80,36 +74,9 @@ namespace Myre.Graphics.Lighting
             adaptedLuminance[0] = new RenderTarget2D(device, 1, 1, false, SurfaceFormat.Single, DepthFormat.None);
             adaptedLuminance[1] = new RenderTarget2D(device, 1, 1, false, SurfaceFormat.Single, DepthFormat.None);
 
-            readbackTexture = new RenderTarget2D(device, 1, 1, false, SurfaceFormat.Single, DepthFormat.None);
-            occlusionQuery = new OcclusionQuery(device);
-            readbackInterval = 30;
-            readbackThread = new Thread(ReadbackAdaptedLuminance);
-            readbackThread.IsBackground = true;
-            //readbackThread.Start();
-
             device.SetRenderTarget(adaptedLuminance[previous]);
             device.Clear(Color.Transparent);
             device.SetRenderTarget(null);
-        }
-
-        private void ReadbackAdaptedLuminance()
-        {
-            while (true)
-            {
-                if (readbackAvailable && occlusionQuery.IsComplete)
-                {
-                    // we can read back the adapted luminance value
-                    var start = DateTime.Now;
-                    readbackTexture.GetData(textureData);
-                    var time = DateTime.Now - start;
-                    adaptedLuminanceData.Value = textureData[0];
-                    System.Diagnostics.Debug.WriteLine(time);
-
-                    readbackAvailable = false;
-                }
-
-                Thread.Sleep(readbackInterval);
-            }
         }
 
         public override void Initialise(Renderer renderer, ResourceContext context)
@@ -120,7 +87,7 @@ namespace Myre.Graphics.Lighting
             settings.Add("hdr_bloomthreshold", "The under-exposure applied during bloom thresholding.", 6f);
             settings.Add("hdr_bloommagnitude", "The overall brightness of the bloom effect.", 3f);
             settings.Add("hdr_bloomblurammount", "The ammount to blur the bloom target.", 2.2f);
-            settings.Add("hdr_minexposure", "The minimum exposure the camera can adapt to.", -1f);
+            settings.Add("hdr_minexposure", "The minimum exposure the camera can adapt to.", -1.1f);
             settings.Add("hdr_maxexposure", "The maximum exposure the camera can adapt to.", 1.1f);
 
             // define inputs
@@ -130,9 +97,7 @@ namespace Myre.Graphics.Lighting
             //context.DefineOutput("luminancemap", isLeftSet: false, width: 1024, height: 1024, surfaceFormat: SurfaceFormat.Single);
             context.DefineOutput("luminance", isLeftSet: false, width: 1, height: 1, surfaceFormat: SurfaceFormat.Single);
             context.DefineOutput("bloom", isLeftSet: false, surfaceFormat: SurfaceFormat.Rgba64);
-            context.DefineOutput("tonemapped", isLeftSet: true);
-
-            //adaptedLuminanceData = renderer.Data.Get<float>("adaptedluminance");
+            context.DefineOutput("tonemapped", isLeftSet: true, surfaceFormat: SurfaceFormat.Color, depthFormat: DepthFormat.Depth24Stencil8);
             
             base.Initialise(renderer, context);
         }
@@ -144,19 +109,6 @@ namespace Myre.Graphics.Lighting
 
             var lightBuffer = metadata.Get<Texture2D>("lightbuffer").Value;
             var resolution = metadata.Get<Vector2>("resolution");
-
-            //if (averageLuminance != null)
-            //{
-            //    lastReadLuminance -= renderer.Data.Get<float>("timedelta").Value;
-            //    if (lastReadLuminance <= 0)
-            //    {
-            //        averageLuminance.GetData(averageLuminance.LevelCount - 1, null, textureData, 0, 1);
-            //        renderer.Data.Set("adaptedluminance", textureData[0]);
-            //        lastReadLuminance = 5f;
-            //    }
-
-            //    RenderTargetManager.RecycleTarget(averageLuminance);
-            //}
 
             CalculateLuminance(renderer, resolution, device, lightBuffer);
             Bloom(renderer, resolution, device, lightBuffer);
@@ -189,18 +141,6 @@ namespace Myre.Graphics.Lighting
             adaptLuminance.Parameters["Texture"].SetValue(averageLuminance);
             adaptLuminance.Parameters["PreviousAdaption"].SetValue(adaptedLuminance[previous]);
             quad.Draw(adaptLuminance, renderer.Data);
-
-            // copy the adapted luminance into the readback texture
-            if (!readbackAvailable)
-            {
-                device.SetRenderTarget(readbackTexture);
-                copyLuminance.Parameters["Texture"].SetValue(adaptedLuminance[current]);
-
-                occlusionQuery.Begin();
-                quad.Draw(copyLuminance, renderer.Data);
-                occlusionQuery.End();
-                readbackAvailable = true;
-            }
         }
 
         private void Bloom(Renderer renderer, Box<Vector2> resolution, GraphicsDevice device, Texture2D lightBuffer)
@@ -249,8 +189,12 @@ namespace Myre.Graphics.Lighting
 
         private void ToneMap(Renderer renderer, Box<Vector2> resolution, GraphicsDevice device, Texture2D lightBuffer)
         {
-            var toneMapped = RenderTargetManager.GetTarget(device, (int)resolution.Value.X, (int)resolution.Value.Y, SurfaceFormat.Color, name:"tone mapped");
+            var toneMapped = RenderTargetManager.GetTarget(device, (int)resolution.Value.X, (int)resolution.Value.Y, SurfaceFormat.Color, depthFormat: DepthFormat.Depth24Stencil8, name:"tone mapped");
             device.SetRenderTarget(toneMapped);
+            device.Clear(Color.Transparent);
+            device.DepthStencilState = DepthStencilState.None;
+            device.BlendState = BlendState.Opaque;
+
             toneMap.Parameters["Texture"].SetValue(lightBuffer);
             toneMap.Parameters["Luminance"].SetValue(adaptedLuminance[current]);
             toneMap.Parameters["MinExposure"].SetValue(renderer.Data.Get<float>("hdr_minexposure").Value);
