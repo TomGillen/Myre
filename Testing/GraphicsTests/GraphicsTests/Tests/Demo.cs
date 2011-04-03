@@ -14,6 +14,7 @@ using Myre.Graphics.Lighting;
 using Microsoft.Xna.Framework.Input;
 using Myre.UI.Gestures;
 using Myre.Graphics.Particles;
+using Myre.Collections;
 
 namespace GraphicsTests.Tests
 {
@@ -26,6 +27,7 @@ namespace GraphicsTests.Tests
         private TestScene scene;
         private TestGame game;
 
+        private Box<float> ssaoIntensity;
         private RenderPlan fullPlan;
         private RenderPlan ssaoPlan;
         private RenderPlan lightingPlan;
@@ -56,6 +58,8 @@ namespace GraphicsTests.Tests
             scene = kernel.Get<TestScene>();
 
             var renderer = scene.Scene.GetService<Renderer>();
+
+            ssaoIntensity = renderer.Data.Get<float>("ssao_intensity");
             
             fullPlan = renderer.StartPlan()
                 .Then<GeometryBufferComponent>()
@@ -72,8 +76,10 @@ namespace GraphicsTests.Tests
 
             lightingPlan = renderer.StartPlan()
                 .Then<GeometryBufferComponent>()
+                .Then<Ssao>()
                 .Then<LightingComponent>()
-                .Show("lightbuffer");
+                .Then<ParticleComponent>();
+                //.Show("lightbuffer");
 
             edgeDetectPlan = renderer.StartPlan()
                 .Then<GeometryBufferComponent>()
@@ -99,12 +105,17 @@ namespace GraphicsTests.Tests
             var keyboard = Keyboard.GetState();
             if (keyboard.IsKeyDown(Keys.D1))
                 ssaoPlan.Apply();
-            else if (keyboard.IsKeyDown(Keys.D2))
-                lightingPlan.Apply();
             else if (keyboard.IsKeyDown(Keys.D3))
                 edgeDetectPlan.Apply();
+            else if (keyboard.IsKeyDown(Keys.D4))
+                lightingPlan.Apply();
             else
                 fullPlan.Apply();
+
+            if (keyboard.IsKeyDown(Keys.D2))
+                ssaoIntensity.Value = 0;
+            else
+                ssaoIntensity.Value = 20;
 
             scene.Update(gameTime);
             base.Update(gameTime);

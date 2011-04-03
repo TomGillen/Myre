@@ -55,7 +55,7 @@ namespace GraphicsTests
             graphics.PreparingDeviceSettings += new EventHandler<PreparingDeviceSettingsEventArgs>(graphics_PreparingDeviceSettings);
             graphics.PreferredBackBufferWidth = 1920;
             graphics.PreferredBackBufferHeight = 1080;
-            graphics.SynchronizeWithVerticalRetrace = true;
+            graphics.SynchronizeWithVerticalRetrace = !false;
             graphics.IsFullScreen = true;
 
             Content.RootDirectory = "Content";
@@ -157,7 +157,7 @@ namespace GraphicsTests
             fps.Pulse();
             frameTime.Value = (float)gameTime.ElapsedGameTime.TotalMilliseconds;
 
-            framerate.Write(gameTime.ElapsedGameTime.TotalMilliseconds.ToString() + ",");
+            //framerate.Write(gameTime.ElapsedGameTime.TotalMilliseconds.ToString() + ",");
 
             //// TODO: Add your update logic here
             screens.Update(gameTime);
