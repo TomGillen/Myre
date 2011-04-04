@@ -73,8 +73,6 @@
     <Compile Include="Scene.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Serialisation\EntityXmlParser.cs" />
-    <Compile Include="Serialisation\ProtobufNonGenericAdaptor.cs" />
     <Compile Include="Services\DrawingService.cs" />
     <Compile Include="Services\IProcess.cs" />
     <Compile Include="Services\IService.cs" />
@@ -95,9 +93,6 @@
     <Reference Include="Ninject, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Libraries\Windows Phone\Ninject.dll</HintPath>
-    </Reference>
-    <Reference Include="protobuf_net">
-      <HintPath>..\..\Libraries\Windows Phone\protobuf_net.dll</HintPath>
     </Reference>
     <Reference Include="System">
       <Private>False</Private>

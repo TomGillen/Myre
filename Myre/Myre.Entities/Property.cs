@@ -16,11 +16,11 @@ namespace Myre.Entities
 
         object Value { get; set; }
 
-        PropertyCopyBehaviour CopyBehaviour { get; }
-
         Type Type { get; }
 
         event PropertyChangedDelegate PropertyChanged;
+
+        void Clear();
     }
 
     public sealed class Property<T>
@@ -41,8 +41,6 @@ namespace Myre.Entities
                 OnValueChanged();
             }
         }
-
-        public PropertyCopyBehaviour CopyBehaviour { get; private set; }
 
         private event PropertyChangedDelegate propertyChanged;
 
@@ -65,11 +63,15 @@ namespace Myre.Entities
             get { return typeof(T); }
         }
 
-        public Property(string name, T value, PropertyCopyBehaviour copyBehaviour)
+        void IProperty.Clear()
+        {
+            value = default(T);
+        }
+
+        public Property(string name)
         {
             this.Name = name;
-            this.CopyBehaviour = copyBehaviour;
-            this.Value = value;
+            this.value = default(T);
         }
 
         private void OnValueChanged()

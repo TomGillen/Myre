@@ -43,14 +43,15 @@ namespace Myre.Entities
                 this.entity = entity;
             }
 
-            public Property<T> CreateProperty<T>(string name, T defaultValue = default(T), PropertyCopyBehaviour copyBehaviour = PropertyCopyBehaviour.None)
+            public Property<T> CreateProperty<T>(string name, T value = default(T))
             {
                 CheckFrozen();
 
                 var property = entity.GetProperty<T>(name);
                 if (property == null)
                 {
-                    property = new Property<T>(name, defaultValue, copyBehaviour);
+                    property = new Property<T>(name);
+                    property.Value = value;
                     entity.AddProperty(property);
                 }
 
@@ -154,41 +155,31 @@ namespace Myre.Entities
             CreateProperties();
         }
 
-        /*
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Entity"/> class.
-        /// </summary>
-        /// <param name="properties">The properties.</param>
-        /// <param name="behaviours">The behaviours.</param>
-        public Entity(IKernel kernel, IEnumerable<PropertyData> propertyData, IEnumerable<BehaviourData> behaviourData)
-            : this(kernel, propertyData, behaviourData, EntityVersion.None)
+        private void CatagoriseBehaviour(Dictionary<Type, List<Behaviour>> catagorised, Behaviour behaviour)
         {
+            Type type = behaviour.GetType();
+
+            List<Behaviour> behavioursOfType;
+            if (!catagorised.TryGetValue(type, out behavioursOfType))
+            {
+                behavioursOfType = new List<Behaviour>();
+                catagorised.Add(type, behavioursOfType);
+            }
+
+            behavioursOfType.Add(behaviour);
         }
 
-        internal Entity(IKernel kernel, IEnumerable<PropertyData> propertyData, IEnumerable<BehaviourData> behaviourData, EntityVersion version)
+        private void CreateProperties()
         {
-            this.Version = version;
-            
-            // create properties
-            this.properties = new Dictionary<string, IProperty>();
-            foreach (var item in propertyData)
-                AddProperty(kernel, item);
-            
-            // create behaviours
-            var b = CreateBehaviours(kernel, behaviourData).ToArray();
-            var catagorised = new Dictionary<Type, List<Behaviour>>();
-            foreach (var item in b)
-                CatagoriseBehaviour(catagorised, item);
+            initialisationContext.frozen = false;
 
-            this.behaviours = new Dictionary<Type, Behaviour[]>();
-            foreach (var item in catagorised)
-                behaviours.Add(item.Key, item.Value.ToArray());
+            foreach (var item in Behaviours)
+            {
+                item.CreateProperties(initialisationContext);
+            }
 
-            // create public read-only collections
-            this.Properties = new ReadOnlyCollection<IProperty>(properties.Values.ToArray());
-            this.Behaviours = new ReadOnlyCollection<Behaviour>(b);
+            initialisationContext.frozen = true;
         }
-         * */
 
         /// <summary>
         /// Releases unmanaged resources and performs other cleanup operations before the
@@ -214,18 +205,6 @@ namespace Myre.Entities
         protected virtual void Dispose(bool disposeManagedResources)
         {
             IsDisposed = true;
-        }
-
-        private void CreateProperties()
-        {
-            initialisationContext.frozen = false;
-
-            foreach (var item in Behaviours)
-            {
-                item.CreateProperties(initialisationContext);
-            }
-
-            initialisationContext.frozen = true;
         }
 
         /// <summary>
@@ -348,61 +327,6 @@ namespace Myre.Entities
             where T : Behaviour
         {
             return GetBehaviours(typeof(T)) as T[];
-        }
-
-        /*
-        internal IProperty AddProperty(IKernel kernel, PropertyData propertyData)
-        {
-            var property = CreatePropertyInstance(kernel, propertyData);
-            properties.Add(property.Name, property);
-
-            return property;
-        }
-
-        private IProperty CreatePropertyInstance(IKernel kernel, PropertyData property)
-        {
-            Type type;
-            if (!propertyTypes.TryGetValue(property.DataType, out type))
-            {
-                type = genericType.MakeGenericType(property.DataType);
-                propertyTypes.Add(property.DataType, type);
-            }
-
-            var data = property.CreateValue(kernel);
-            return type.CreateInstance(
-                new Type[] { typeof(string), property.DataType, typeof(PropertyCopyBehaviour), typeof(bool) },
-                new object[] { property.Name, data, property.CopyBehaviour, property.Serialise })
-               as IProperty;
-        }
-
-        private IEnumerable<Behaviour> CreateBehaviours(IKernel kernel, IEnumerable<BehaviourData> behaviourData)
-        {
-            foreach (var item in behaviourData)
-            {
-                var name = new ConstructorArgument("name", item.Name);
-                var settings = new ConstructorArgument("settings", item.Settings);
-                var entity = new Parameter("entity", this, true);
-                var behaviour = kernel.Get(item.Type, name, settings, entity) as Behaviour;
-                behaviour.Settings = item.Settings;
-                behaviour.Owner = this;
-
-                yield return behaviour;
-            }
-        }
-        */
-
-        private void CatagoriseBehaviour(Dictionary<Type, List<Behaviour>> catagorised, Behaviour behaviour)
-        {
-            Type type = behaviour.GetType();
-
-            List<Behaviour> behavioursOfType;
-            if (!catagorised.TryGetValue(type, out behavioursOfType))
-            {
-                behavioursOfType = new List<Behaviour>();
-                catagorised.Add(type, behavioursOfType);
-            }
-
-            behavioursOfType.Add(behaviour);
         }
     }
 }
