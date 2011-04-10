@@ -17,13 +17,16 @@ namespace Myre.Serialisation
         public class ListNode
             : Node
         {
+            public Type ElementType;
             public List<Node> Children;
         }
 
         public class DictionaryNode
             : Node
         {
-            public Dictionary<string, Node> Children;
+            public Type KeyType;
+            public Type ValueType;
+            public Dictionary<Node, Node> Children;
         }
 
         public class LiteralNode
@@ -33,13 +36,17 @@ namespace Myre.Serialisation
         }
 
         public class ObjectNode
+            : Node
         {
             public Dictionary<string, Node> Children;
         }
         #endregion
 
-        #region fields
-        public Node Root;
-        #endregion
+        public Node Root { get; private set; }
+
+        public Dom(Node root)
+        {
+            this.Root = root;
+        }
     }
 }
