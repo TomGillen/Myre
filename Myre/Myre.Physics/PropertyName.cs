@@ -9,13 +9,18 @@ namespace Myre.Physics
     {
         public const String POSITION = "position";
         public const String ROTATION = "rotation";
+
         public const String MASS = "mass";
         public const String INVERSE_MASS = "inverse_mass";
         public const String INERTIA_TENSOR = "inertia_tensor";
+
         public const String LINEAR_VELOCITY = "linear_velocity";
         public const String ANGULAR_VELOCITY = "angular_velocity";
+
         public const String TIME_MULTIPLIER = "time_multiplier";
+
         public const String ACCELERATION = "acceleration";
+
         public const String LINEAR_VELOCITY_BIAS = "linear_velocity_bias";
     }
 }

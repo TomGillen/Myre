@@ -21,11 +21,14 @@ namespace Myre.Physics.Dynamics.Integrators
         {
             velocity.Value = Arithmetic.Add(velocity.Value, acceleration.Value);
 
-            var deltaPosition = Arithmetic.Multiply(Arithmetic.Add(velocity.Value, velocityBias.Value), deltaTime);
+            var v = velocityBias == null ? velocity.Value : Arithmetic.Add(velocity.Value, velocityBias.Value);
+            var deltaPosition = Arithmetic.Multiply(v, deltaTime);
+
             position.Value = Arithmetic.Add(position.Value, deltaPosition);
 
             acceleration.Value = Arithmetic.Zero;
-            velocityBias.Value = Arithmetic.Zero;
+            if (velocityBias != null)
+                velocityBias.Value = Arithmetic.Zero;
         }
 
         public class Manager

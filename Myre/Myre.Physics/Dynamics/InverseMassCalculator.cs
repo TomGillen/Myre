@@ -18,11 +18,9 @@ namespace Myre.Physics.Dynamics
             Property<float> mass = context.CreateProperty<float>(MASS);
             Property<float> invMass = context.CreateProperty<float>(INVERSE_MASS);
 
-            mass.PropertyChanged += _ =>
-            {
-                invMass.Value = 1 / mass.Value;
-            };
+            mass.PropertyChanged += _ => { invMass.Value = 1 / mass.Value; };
 
+            //trigger the changed property to initialise inverse mass to a useful value
             mass.Value = mass.Value;
 
             base.CreateProperties(context);
