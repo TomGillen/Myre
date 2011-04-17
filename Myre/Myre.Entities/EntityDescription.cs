@@ -22,6 +22,11 @@ namespace Myre.Entities
         public string Name;
         public Type DataType;
 
+        public override int GetHashCode()
+        {
+            return DataType.GetHashCode();
+        }
+
         public override bool Equals(object obj)
         {
             if (obj is PropertyData)
@@ -44,6 +49,12 @@ namespace Myre.Entities
     {
         public string Name;
         public Type Type;
+        public Func<String, Behaviour> Factory;
+
+        public override int GetHashCode()
+        {
+            return Type.GetHashCode();
+        }
 
         public override bool Equals(object obj)
         {
@@ -173,9 +184,15 @@ namespace Myre.Entities
         /// <param name="create">A factory function which creates an instance of this behaviour</param>
         /// <param name="name">the name.</param>
         /// <returns><c>true</c> if the behaviour was added; else <c>false</c>.</returns>
-        public bool AddBehaviour<T>(Func<T> create, string name = null)
+        public bool AddBehaviour<T>(Func<String, T> create, string name = null)
+            where T : Behaviour
         {
-            throw new NotImplementedException();
+            return AddBehaviour(new BehaviourData()
+            {
+                Name = name,
+                Type = typeof(T),
+                Factory = create,
+            });
         }
 
         /// <summary>
@@ -361,10 +378,14 @@ namespace Myre.Entities
 
         private Behaviour CreateBehaviourInstance(IKernel kernel, BehaviourData behaviour)
         {
-            var name = new ConstructorArgument("name", behaviour.Name);
-            var instance = kernel.Get(behaviour.Type, name) as Behaviour;
-            instance.Name = behaviour.Name;
+            Behaviour instance;
 
+            if (behaviour.Factory != null)
+                instance = behaviour.Factory(behaviour.Name);
+            else
+                instance = kernel.Get(behaviour.Type, new ConstructorArgument("name", behaviour.Name)) as Behaviour;
+
+            instance.Name = behaviour.Name;
             return instance;
         }
     }
