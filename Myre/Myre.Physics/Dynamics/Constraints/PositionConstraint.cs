@@ -16,10 +16,14 @@ namespace Myre.Physics.Dynamics.Constraints
         private Property<float> mass;
         private Property<float> inverseMass;
 
+        public PositionConstraint()
+        {
+        }
+
         public override void CreateProperties(Entity.InitialisationContext context)
         {
-            position = context.GetProperty<Vector3>("position");
-            mass = context.GetProperty<float>("mass");
+            position = context.GetProperty<Vector3>(PropertyName.POSITION);
+            mass = context.GetProperty<float>(PropertyName.MASS);
             inverseMass = context.GetProperty<float>(InverseMassCalculator.INVERSE_MASS);
 
             base.CreateProperties(context);

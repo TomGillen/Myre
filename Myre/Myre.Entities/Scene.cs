@@ -163,7 +163,7 @@ namespace Myre.Entities
 
         private void AddBehavioursToManager(IEnumerable<Type> behaviourTypes)
         {
-            var behavioursToBeAdded = 
+            var behavioursToBeAdded =
                 from behaviourType in behaviourTypes
                 let handler = managers.GetByBehaviour(behaviourType)
                 from entity in entities

@@ -82,8 +82,20 @@
     <Compile Include="Collisions\Geometry.cs" />
     <Compile Include="Dynamics\Constraints\Damping.cs" />
     <Compile Include="Dynamics\Constraints\PositionConstraint.cs" />
-    <Compile Include="Dynamics\Integrators\Euler.cs" />
-    <Compile Include="Dynamics\Integrators\Verlet.cs" />
+    <Compile Include="Dynamics\Integrators\Arithmetic\Arithmetic.cs" />
+    <Compile Include="Dynamics\Integrators\Arithmetic\Arithmetic3.cs" />
+    <Compile Include="Dynamics\Integrators\Arithmetic\Arithmetic2.cs" />
+    <Compile Include="Dynamics\Integrators\Arithmetic\Arithmetic1.cs" />
+    <Compile Include="Dynamics\Integrators\Euler\Euler.cs" />
+    <Compile Include="Dynamics\Integrators\Euler\Euler1.cs" />
+    <Compile Include="Dynamics\Integrators\Euler\Euler2.cs" />
+    <Compile Include="Dynamics\Integrators\Euler\Euler3.cs" />
+    <Compile Include="Dynamics\Integrators\Integrator.cs" />
+    <Compile Include="Dynamics\Integrators\Verlet\PositionVerlet3.cs" />
+    <Compile Include="Dynamics\Integrators\Verlet\Verlet.cs" />
+    <Compile Include="Dynamics\Integrators\Verlet\Verlet1.cs" />
+    <Compile Include="Dynamics\Integrators\Verlet\Verlet2.cs" />
+    <Compile Include="Dynamics\Integrators\Verlet\Verlet3.cs" />
     <Compile Include="Dynamics\InverseMassCalculator.cs" />
     <Compile Include="PhysicsManager.cs" />
     <Compile Include="Collisions\Polygon.cs" />
@@ -91,6 +103,7 @@
     <Compile Include="Collisions\SatResult.cs" />
     <Compile Include="Collisions\SatTester.cs" />
     <Compile Include="DynamicPhysics.cs" />
+    <Compile Include="PropertyName.cs" />
     <Compile Include="Transform.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -104,6 +117,7 @@
       <Name>%28x86%29 Myre</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\XNA Game Studio\Microsoft.Xna.GameStudio.targets" />
   <!--
