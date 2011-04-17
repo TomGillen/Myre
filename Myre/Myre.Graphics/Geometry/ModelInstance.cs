@@ -47,24 +47,6 @@ namespace Myre.Graphics.Geometry
             base.CreateProperties(context);
         }
 
-        /*
-        public Property<ModelData> Model { get; private set; }
-
-        public Property<Matrix> Transform { get; private set; }
-
-        public Property<bool> IsStatic { get; private set; }
-
-        public ModelInstance(
-            Property<ModelData> model,
-            Property<Matrix> transform,
-            Property<bool> isstatic)
-        {
-            Model = model;
-            Transform = transform;
-            IsStatic = isstatic;
-            //IsStatic = entity.GetProperty<bool>("isstatic");
-        }
-        */
 
         public class Manager
             : BehaviourManager<ModelInstance>, IGeometryProvider

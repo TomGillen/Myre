@@ -58,14 +58,14 @@ namespace Myre.Graphics
             quad.Draw(clear, metadata);
             device.DepthStencilState = DepthStencilState.Default;
 
-            var blend = new BlendState();
-            blend.ColorBlendFunction = BlendFunction.Add;
-            blend.ColorSourceBlend = Blend.One;
-            blend.ColorDestinationBlend = Blend.Zero;
-            blend.AlphaBlendFunction = BlendFunction.Add;
-            blend.AlphaSourceBlend = Blend.One;
-            blend.AlphaDestinationBlend = Blend.Zero;
-            device.BlendState = blend;
+            //var blend = new BlendState();
+            //blend.ColorBlendFunction = BlendFunction.Add;
+            //blend.ColorSourceBlend = Blend.One;
+            //blend.ColorDestinationBlend = Blend.Zero;
+            //blend.AlphaBlendFunction = BlendFunction.Add;
+            //blend.AlphaSourceBlend = Blend.One;
+            //blend.AlphaDestinationBlend = Blend.Zero;
+            device.BlendState = BlendState.Opaque;
 
             foreach (var geometryProvider in renderer.Scene.FindManagers<IGeometryProvider>())
                 geometryProvider.Draw("gbuffer", metadata);

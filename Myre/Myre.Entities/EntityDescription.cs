@@ -9,102 +9,23 @@ using System.Xml.Linq;
 using Myre;
 using Myre.Extensions;
 using System.IO;
-using ProtoBuf;
-using Myre.Entities.Serialisation;
+using System.Collections.ObjectModel;
+using System.Reflection;
 
 namespace Myre.Entities
 {
     /// <summary>
-    /// An enum which defines how property values are copied into new property instances.
-    /// </summary>
-    public enum PropertyCopyBehaviour
-    {
-        /// <summary>
-        /// The value is assigned to the property instance.
-        /// </summary>
-        None,
-
-        /// <summary>
-        /// The value is copied to the property instance via the ICopyable interface.
-        /// </summary>
-        Copy,
-
-        /// <summary>
-        /// A new instance is created of the property type.
-        /// </summary>
-        New
-    }
-
-    /// <summary>
     /// A struct which contains data about an entity property.
     /// </summary>
-    [ProtoContract]
-    public class PropertyData
+    public struct PropertyData
     {
-        [ProtoMember(1)]
-        public PropertyCopyBehaviour CopyBehaviour;
-
-        [ProtoMember(2)]
         public string Name;
-
-        [ProtoMember(3)]
-        public byte[] SerialisedValue;
-
-        [ProtoMember(4)]
-        public string DataTypeName;
-
-        public object Value;
         public Type DataType;
-
-        public void Rehydrate()
-        {
-            // restore the data type or type name
-            if (DataType == null)
-                DataType = Type.GetType(DataTypeName);
-            else if (DataTypeName == null)
-                DataTypeName = DataType.AssemblyQualifiedName;
-
-#if PROTOBUFFERS
-            // restore value or serialised value
-            if (Value == null && SerialisedValue != null)
-            {
-                using (var stream = new MemoryStream(SerialisedValue))
-                    Value = ProtobufNonGenericAdaptor.Deserialise(stream, DataType);
-            }
-            else if (Value != null && SerialisedValue == null)
-            {
-                using (var stream = new MemoryStream())
-                {
-                    ProtobufNonGenericAdaptor.Serialise(stream, Value, DataType);
-                    SerialisedValue = stream.ToArray();
-                }
-            }
-#endif
-        }
-
-        public object CreateValue(IKernel kernel)
-        {
-            switch (CopyBehaviour)
-            {
-                case PropertyCopyBehaviour.None:
-                    return Value;
-
-                case PropertyCopyBehaviour.Copy:
-                    var cloneable = Value as ICopyable;
-                    return cloneable.Copy();
-
-                case PropertyCopyBehaviour.New:
-                    return kernel.Get(DataType);
-
-                default:
-                    return null;
-            }
-        }
 
         public override bool Equals(object obj)
         {
             if (obj is PropertyData)
-                return Equals(obj as PropertyData);
+                return Equals((PropertyData)obj);
             
             return base.Equals(obj);
         }
@@ -112,46 +33,22 @@ namespace Myre.Entities
         public bool Equals(PropertyData data)
         {
             return this.Name == data.Name
-                && this.DataTypeName == data.DataTypeName;
+                && this.DataType == data.DataType;
         }
     }
 
     /// <summary>
     /// A struct which contains data about an entity behaviour.
     /// </summary>
-    [ProtoContract]
-    public class BehaviourData
+    public struct BehaviourData
     {
-        [ProtoMember(1)]
         public string Name;
-
-        [ProtoMember(2)]
-        public byte[] SerialisedValue;
-
-        [ProtoMember(3)]
-        public string TypeName;
-
         public Type Type;
-        
-        internal MemoryStream MemoryStream;
-
-        public void Rehydrate()
-        {
-            // restore the data type or type name
-            if (Type == null)
-                Type = Type.GetType(TypeName);
-            else if (TypeName == null)
-                TypeName = Type.AssemblyQualifiedName;
-
-            // restore memory stream
-            if (SerialisedValue != null && MemoryStream == null)
-                MemoryStream = new MemoryStream(SerialisedValue);
-        }
 
         public override bool Equals(object obj)
         {
             if (obj is BehaviourData)
-                return Equals(obj as BehaviourData);
+                return Equals((BehaviourData)obj);
 
             return base.Equals(obj);
         }
@@ -159,18 +56,17 @@ namespace Myre.Entities
         public bool Equals(BehaviourData data)
         {
             return this.Name == data.Name
-                && this.TypeName == data.TypeName;
+                && this.Type == data.Type;
         }
     }
 
     /// <summary>
     /// A class which describes the elements of an entity, and can be used to construct new entity instances.
     /// </summary>
-    [ProtoContract]
     public class EntityDescription
     {
-        private static Dictionary<Type, Type> propertyTypes = new Dictionary<Type, Type>();
-        private static Type genericType = Type.GetType("Myre.Entities.Property`1");
+        private static readonly Dictionary<Type, ConstructorInfo> propertyConstructors = new Dictionary<Type, ConstructorInfo>();
+        private static readonly Type genericType = Type.GetType("Myre.Entities.Property`1");
 
         private IKernel kernel;
         private List<BehaviourData> behaviours;
@@ -183,33 +79,13 @@ namespace Myre.Entities
         /// Gets a list of behaviours in this instance.
         /// </summary>
         /// <value>The behaviours.</value>
-        [ProtoMember(1)]
-        public List<BehaviourData> Behaviours 
-        { 
-            get { return behaviours; }
-            set
-            {
-                Assert.ArgumentNotNull("value", value);
-                IncrementVersion();
-                behaviours = value;
-            }
-        }
+        public ReadOnlyCollection<BehaviourData> Behaviours { get; private set; }
         
         /// <summary>
         /// Gets a list of properties in this instance.
         /// </summary>
         /// <value>The properties.</value>
-        [ProtoMember(2)]
-        public List<PropertyData> Properties 
-        { 
-            get { return properties; }
-            set
-            {
-                Assert.ArgumentNotNull("value", value);
-                IncrementVersion();
-                properties = value;
-            }
-        }
+        public ReadOnlyCollection<PropertyData> Properties { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EntityDescription"/> class.
@@ -221,6 +97,9 @@ namespace Myre.Entities
             this.behaviours = new List<BehaviourData>();
             this.properties = new List<PropertyData>();
             this.pool = new Queue<Entity>();
+
+            this.Behaviours = new ReadOnlyCollection<BehaviourData>(behaviours);
+            this.Properties = new ReadOnlyCollection<PropertyData>(properties);
         }
 
         /// <summary>
@@ -244,8 +123,7 @@ namespace Myre.Entities
                 AddBehaviour(new BehaviourData()
                 {
                     Name = item.Name,
-                    Type = item.GetType(),
-                    SerialisedValue = serialiseBehaviourValues ? SerialiseBehaviour(item) : null
+                    Type = item.GetType()
                 });
             }
 
@@ -254,9 +132,7 @@ namespace Myre.Entities
                 AddProperty(new PropertyData()
                 {
                     Name = item.Name,
-                    DataType = item.Type,
-                    Value = serialisePropertyValues ? item.Value : null,
-                    CopyBehaviour = item.CopyBehaviour
+                    DataType = item.Type
                 });
             }
         }
@@ -282,8 +158,6 @@ namespace Myre.Entities
         public bool AddBehaviour(BehaviourData behaviour)
         {
             Assert.ArgumentNotNull("behaviour.Type", behaviour.Type);
-
-            behaviour.Rehydrate();
 
             if (behaviours.Contains(behaviour))
                 return false;
@@ -363,8 +237,6 @@ namespace Myre.Entities
             Assert.ArgumentNotNull("property.Name", property.Name);
             Assert.ArgumentNotNull("property.DataType", property.DataType);
 
-            property.Rehydrate();
-
             if (properties.Contains(property))
                 return false;
 
@@ -382,14 +254,12 @@ namespace Myre.Entities
         /// <param name="initialValue">The initial value.</param>
         /// <param name="copyBehaviour">The copy behaviour.</param>
         /// <returns><c>true</c> if the behaviour was added; else <c>false</c>.</returns>
-        public bool AddProperty(Type dataType, string name, object initialValue = null, PropertyCopyBehaviour copyBehaviour = PropertyCopyBehaviour.None)
+        public bool AddProperty(Type dataType, string name, object initialValue = null)
         {
             var data = new PropertyData()
             {
                 Name = name,
-                DataType = dataType,
-                Value = initialValue,
-                CopyBehaviour = copyBehaviour,
+                DataType = dataType
             };
 
             return AddProperty(data);
@@ -403,9 +273,9 @@ namespace Myre.Entities
         /// <param name="initialValue">The initial value.</param>
         /// <param name="copyBehaviour">The copy behaviour.</param>
         /// <returns><c>true</c> if the behaviour was added; else <c>false</c>.</returns>
-        public bool AddProperty<T>(string name, T initialValue = default(T), PropertyCopyBehaviour copyBehaviour = PropertyCopyBehaviour.None)
+        public bool AddProperty<T>(string name, T initialValue = default(T))
         {
-            return AddProperty(typeof(T), name, initialValue, copyBehaviour);
+            return AddProperty(typeof(T), name, initialValue);
         }
 
         /// <summary>
@@ -461,19 +331,8 @@ namespace Myre.Entities
         private Entity InitialisePooledEntity()
         {
             var entity = pool.Dequeue();
-
             foreach (var item in entity.Properties)
-            {
-                for (int i = 0; i < properties.Count; i++)
-                {
-                    if (properties[i].Name == item.Name)
-                    {
-                        var data = properties[i].CreateValue(kernel);
-                        item.Value = data;
-                        break;
-                    }
-                }                
-            }
+                item.Clear();
 
             return entity;
         }
@@ -502,50 +361,24 @@ namespace Myre.Entities
 
         private IProperty CreatePropertyInstance(IKernel kernel, PropertyData property)
         {
-            property.Rehydrate();
-
-            Type type;
-            if (!propertyTypes.TryGetValue(property.DataType, out type))
+            ConstructorInfo constructor;
+            if (!propertyConstructors.TryGetValue(property.DataType, out constructor))
             {
-                type = genericType.MakeGenericType(property.DataType);
-                propertyTypes.Add(property.DataType, type);
+                var type = genericType.MakeGenericType(property.DataType);
+                constructor = type.GetConstructor(new Type[] { typeof(string) });
+                propertyConstructors.Add(property.DataType, constructor);
             }
 
-            var data = property.CreateValue(kernel);
-            return type.CreateInstance(
-                new Type[] { typeof(string), property.DataType, typeof(PropertyCopyBehaviour) },
-                new object[] { property.Name, data, property.CopyBehaviour })
-               as IProperty;
+            return constructor.Invoke(new[] { property.Name }) as IProperty;
         }
 
         private Behaviour CreateBehaviourInstance(IKernel kernel, BehaviourData behaviour)
         {
-            behaviour.Rehydrate();
-
             var name = new ConstructorArgument("name", behaviour.Name);
             var instance = kernel.Get(behaviour.Type, name) as Behaviour;
             instance.Name = behaviour.Name;
 
-            if (behaviour.SerialisedValue != null)
-            {
-                behaviour.MemoryStream.Position = 0;
-                ProtobufNonGenericAdaptor.Merge(behaviour.MemoryStream, instance, behaviour.Type);
-            }
-
             return instance;
-        }
-
-        private byte[] SerialiseBehaviour(Behaviour behaviour)
-        {
-#if PROTOBUFFERS
-            using (var stream = new MemoryStream())
-            {
-                ProtobufNonGenericAdaptor.Serialise(stream, behaviour, behaviour.GetType());
-                return stream.ToArray();
-            }
-#else
-            return null;
-#endif
         }
     }
 }
