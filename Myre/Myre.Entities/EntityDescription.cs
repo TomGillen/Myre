@@ -257,7 +257,7 @@ namespace Myre.Entities
         /// <param name="initialValue">The initial value.</param>
         /// <param name="copyBehaviour">The copy behaviour.</param>
         /// <returns><c>true</c> if the behaviour was added; else <c>false</c>.</returns>
-        public bool AddProperty(Type dataType, string name, object initialValue = null)
+        public bool AddProperty(Type dataType, string name)
         {
             var data = new PropertyData()
             {
@@ -276,9 +276,9 @@ namespace Myre.Entities
         /// <param name="initialValue">The initial value.</param>
         /// <param name="copyBehaviour">The copy behaviour.</param>
         /// <returns><c>true</c> if the behaviour was added; else <c>false</c>.</returns>
-        public bool AddProperty<T>(string name, T initialValue = default(T))
+        public bool AddProperty<T>(string name)
         {
-            return AddProperty(typeof(T), name, initialValue);
+            return AddProperty(typeof(T), name);
         }
 
         /// <summary>

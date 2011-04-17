@@ -151,14 +151,24 @@ namespace Myre.Entities
             // create initialisation context
             this.initialisationContext = new InitialisationContext(this);
 
-            // allow behaviours to add their own properites
+            // allow behaviours to add their own properties
             CreateProperties();
         }
 
         private void CatagoriseBehaviour(Dictionary<Type, List<Behaviour>> catagorised, Behaviour behaviour)
         {
             Type type = behaviour.GetType();
+            do
+            {
+                LazyGetCategoryList(type, catagorised).Add(behaviour);
 
+                type = type.BaseType;
+            }
+            while (type != typeof(Behaviour));
+        }
+
+        private List<Behaviour> LazyGetCategoryList(Type type, Dictionary<Type, List<Behaviour>> catagorised)
+        {
             List<Behaviour> behavioursOfType;
             if (!catagorised.TryGetValue(type, out behavioursOfType))
             {
@@ -166,7 +176,7 @@ namespace Myre.Entities
                 catagorised.Add(type, behavioursOfType);
             }
 
-            behavioursOfType.Add(behaviour);
+            return behavioursOfType;
         }
 
         private void CreateProperties()
