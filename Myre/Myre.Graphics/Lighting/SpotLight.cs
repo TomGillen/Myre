@@ -43,9 +43,9 @@ namespace Myre.Graphics.Lighting
         private Property<Vector3> position;
         private Property<Vector3> direction;
         private Property<float> angle;
+        private Property<float> range;
         private Property<Texture2D> mask;
         private Property<int> shadowResolution;
-        private float range;
         private RenderTarget2D shadowMap;
         private Matrix view;
         private Matrix projection;
@@ -74,6 +74,12 @@ namespace Myre.Graphics.Lighting
             set { angle.Value = value; }
         }
 
+        public float Range
+        {
+            get { return range.Value; }
+            set { range.Value = value; }
+        }
+
         public Texture2D Mask
         {
             get { return mask.Value; }
@@ -92,6 +98,7 @@ namespace Myre.Graphics.Lighting
             this.position = context.CreateProperty<Vector3>("position");
             this.direction = context.CreateProperty<Vector3>("direction");
             this.angle = context.CreateProperty<float>("angle");
+            this.range = context.CreateProperty<float>("range");
             this.mask = context.CreateProperty<Texture2D>("mask");
             this.shadowResolution = context.CreateProperty<int>("shadow_resolution");
 
@@ -219,19 +226,19 @@ namespace Myre.Graphics.Lighting
                 geometryLightingMaterial.Parameters["LightFalloffFactor"].SetValue(falloffFactor);
                 quadLightingMaterial.Parameters["LightFalloffFactor"].SetValue(falloffFactor);
 
-                float threshold = renderer.Data.Get("lighting_threshold", 1f / 100f).Value;
-                float adaptedLuminance = renderer.Data.Get<float>("adaptedluminance", 1).Value;
+                //float threshold = renderer.Data.Get("lighting_threshold", 1f / 100f).Value;
+                //float adaptedLuminance = renderer.Data.Get<float>("adaptedluminance", 1).Value;
 
-                threshold = adaptedLuminance * threshold;
+                //threshold = adaptedLuminance * threshold;
 
                 foreach (var light in Behaviours)
                 {
                     light.Direction = Vector3.Normalize(light.Direction);
 
-                    var luminance = Math.Max(light.Colour.X, Math.Max(light.Colour.Y, light.Colour.Z));
-                    light.range = (float)Math.Sqrt(luminance * falloffFactor / threshold);
+                    //var luminance = Math.Max(light.Colour.X, Math.Max(light.Colour.Y, light.Colour.Z));
+                    //light.range = (float)Math.Sqrt(luminance * falloffFactor / threshold);
 
-                    var bounds = new BoundingSphere(light.Position, light.range);
+                    var bounds = new BoundingSphere(light.Position, light.Range);
                     if (!bounds.Intersects(frustum))
                         continue;
 
@@ -282,12 +289,12 @@ namespace Myre.Graphics.Lighting
                     light.Position,
                     light.Position + light.Direction,
                     light.Direction == Vector3.Up || light.Direction == Vector3.Down ? Vector3.Right : Vector3.Up);
-                light.projection = Matrix.CreatePerspectiveFieldOfView(light.Angle, 1, 1, light.range);
+                light.projection = Matrix.CreatePerspectiveFieldOfView(light.Angle, 1, 1, light.Range);
 
                 shadowView.Camera.View = light.view;
                 shadowView.Camera.Projection = light.projection;
                 shadowView.Camera.NearClip = 1;
-                shadowView.Camera.FarClip = light.range;
+                shadowView.Camera.FarClip = light.Range;
                 shadowView.Viewport = new Viewport(0, 0, light.ShadowResolution, light.ShadowResolution);
                 shadowView.SetMetadata(renderer.Data);
 
@@ -400,20 +407,19 @@ namespace Myre.Graphics.Lighting
                         var inverseView = metadata.Get<Matrix>("inverseview").Value;
                         var cameraToLightProjection = inverseView * light.view * light.projection;
                         material.Parameters["CameraViewToLightProjection"].SetValue(cameraToLightProjection);
-                        material.Parameters["LightFarClip"].SetValue(light.range);
                     }
 
                     material.Parameters["LightPosition"].SetValue(position);
                     material.Parameters["LightDirection"].SetValue(-direction);
                     material.Parameters["Angle"].SetValue(angle);
-                    material.Parameters["Range"].SetValue(light.range);
+                    material.Parameters["Range"].SetValue(light.Range);
                     material.Parameters["Colour"].SetValue(light.Colour);
                     material.Parameters["EnableProjectiveTexturing"].SetValue(light.Mask != null);
                     material.Parameters["Mask"].SetValue(light.Mask);
                     material.Parameters["EnableShadows"].SetValue(light.ShadowResolution > 0);
                     material.Parameters["ShadowMapSize"].SetValue(new Vector2(light.ShadowResolution, light.ShadowResolution));
                     material.Parameters["ShadowMap"].SetValue(light.shadowMap);
-                    material.Parameters["LightFarClip"].SetValue(light.range);
+                    material.Parameters["LightFarClip"].SetValue(light.Range);
 
                     var nearPlane = new Plane(light.Direction, Vector3.Dot(light.Direction, light.Position));
                     nearPlane.Normalize();
@@ -421,7 +427,7 @@ namespace Myre.Graphics.Lighting
                     material.Parameters["LightNearPlane"].SetValue(new Vector4(nearPlane.Normal, nearPlane.D));
                 }
 
-                var world = Matrix.CreateScale(light.range / geometry.Meshes[0].BoundingSphere.Radius)
+                var world = Matrix.CreateScale(light.Range / geometry.Meshes[0].BoundingSphere.Radius)
                             * Matrix.CreateTranslation(light.Position);
                 metadata.Set<Matrix>("world", world);
                 Matrix.Multiply(ref world, ref metadata.Get<Matrix>("view").Value, out metadata.Get<Matrix>("worldview").Value);

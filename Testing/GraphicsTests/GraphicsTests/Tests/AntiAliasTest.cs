@@ -40,7 +40,7 @@ namespace GraphicsTests.Tests
         {
             scene = kernel.Get<TestScene>();
 
-            var toneMap = kernel.Get<ToneMapPhase>();
+            var toneMap = kernel.Get<ToneMapComponent>();
             var renderer = scene.Scene.GetService<Renderer>();
             renderer.StartPlan()
                 .Then<GeometryBufferComponent>()

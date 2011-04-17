@@ -30,6 +30,9 @@ namespace GraphicsTests
         Box<Vector2> resolution;
         SpriteBatch sb;
         Effect basic;
+        Property<Matrix> hebeTransform;
+        bool paused;
+        KeyboardState previousKeyboard;
 
         Vector3 cameraPosition;
         Vector3 cameraRotation;
@@ -90,6 +93,7 @@ namespace GraphicsTests
             var pointLight = kernel.Get<EntityDescription>();
             pointLight.AddProperty<Vector3>("position", new Vector3(0, 10, 0));
             pointLight.AddProperty<Vector3>("colour", new Vector3(0, 5, 0));
+            pointLight.AddProperty<float>("range", 200);
             pointLight.AddBehaviour<PointLight>();
             //scene.Add(pointLight.Create());
 
@@ -107,11 +111,12 @@ namespace GraphicsTests
 
             var spotLight = kernel.Get<EntityDescription>();
             spotLight.AddProperty<Vector3>("position", new Vector3(-180, 250, 0));
-            spotLight.AddProperty<Vector3>("colour", new Vector3(700));
+            spotLight.AddProperty<Vector3>("colour", new Vector3(10));
             spotLight.AddProperty<Vector3>("direction", new Vector3(0, -1, 0));
             spotLight.AddProperty<float>("angle", MathHelper.PiOver2);
+            spotLight.AddProperty<float>("range", 500);
             spotLight.AddProperty<Texture2D>("mask", null);//content.Load<Texture2D>("Chrysanthemum"));
-            spotLight.AddProperty<int>("shadow_resolution", 1024);
+            spotLight.AddProperty<int>("shadow_resolution", 512);
             spotLight.AddBehaviour<SpotLight>();
             var spotLightEntity = spotLight.Create();
             this.spotLight = spotLightEntity.GetBehaviour<SpotLight>();
@@ -119,7 +124,7 @@ namespace GraphicsTests
 
             var ambientLight = kernel.Get<EntityDescription>();
             ambientLight.AddProperty<Vector3>("sky_colour", new Vector3(0.04f));
-            ambientLight.AddProperty<Vector3>("ground_colour", new Vector3(0.02f, 0.02f, 0.03f));
+            ambientLight.AddProperty<Vector3>("ground_colour", new Vector3(0.04f, 0.05f, 0.04f));
             ambientLight.AddProperty<Vector3>("up", Vector3.Up);
             ambientLight.AddBehaviour<AmbientLight>();
             scene.Add(ambientLight.Create());
@@ -158,6 +163,10 @@ namespace GraphicsTests
             hebeEntity.AddBehaviour<ModelInstance>();
             scene.Add(hebeEntity.Create());
 
+            var lightBlocker = hebeEntity.Create();
+            hebeTransform = lightBlocker.GetProperty<Matrix>("transform");
+            scene.Add(lightBlocker);
+
             var sponza = content.Load<ModelData>(@"Sponza");
             var sponzaEntity = kernel.Get<EntityDescription>();
             sponzaEntity.AddProperty<ModelData>("model", sponza);
@@ -195,8 +204,8 @@ namespace GraphicsTests
             cameraScript.AddWaypoint(27, new Vector3(-105, 50, -7), new Vector3(-80, 50, -100));
             cameraScript.AddWaypoint(32, new Vector3(100, 50, -7), new Vector3(150, 40, 0));
             cameraScript.AddWaypoint(34, new Vector3(100, 50, -7), new Vector3(150, 40, 100));
-            cameraScript.AddWaypoint(36, new Vector3(100, 50, -7), new Vector3(0, 40, 0));
-            cameraScript.AddWaypoint(1000, new Vector3(100, 50, -7), new Vector3(0, 40, 0));
+            cameraScript.AddWaypoint(36, new Vector3(100, 50, -7), new Vector3(0, 60, 0));
+            //cameraScript.AddWaypoint(1000, new Vector3(100, 50, -7), new Vector3(0, 60, 0));
             cameraScript.Initialise();
         }
 
@@ -236,12 +245,20 @@ namespace GraphicsTests
                 camera.View = Matrix.Invert(rotation * Matrix.CreateTranslation(cameraPosition));
 
                 Mouse.SetPosition((int)resolution.Value.X / 2, (int)resolution.Value.Y / 2);
+                //camera.View = Matrix.CreateLookAt(new Vector3(0, 60, -7), new Vector3(50, 30, -50), Vector3.Up);
             }
             else
             {
-                cameraScript.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
+                if (keyboard.IsKeyDown(Keys.Space) && previousKeyboard.IsKeyUp(Keys.Space))
+                    paused = !paused;
+
+                if (!paused)
+                    cameraScript.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
+
                 cameraPosition = cameraScript.Position;
             }
+
+            previousKeyboard = keyboard;
 
             //camera.View = spotLight.view;
             //camera.Projection = spotLight.projection;
@@ -277,6 +294,11 @@ namespace GraphicsTests
             //    100,
             //    (float)Math.Sin(-totalTime + 5) * 50);
             //spotLight.Direction = Vector3.Normalize(-spotLight.Position);
+
+            hebeTransform.Value = Matrix.CreateRotationX(MathHelper.PiOver2)
+                                * Matrix.CreateScale(0.1f)
+                                * Matrix.CreateRotationY((float)gameTime.TotalGameTime.TotalSeconds)
+                                * Matrix.CreateTranslation(new Vector3(-180, 230, 0));
 
             scene.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
         }

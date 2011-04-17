@@ -43,6 +43,7 @@ namespace Myre.UI.InputDevices
             for (int i = 0; i < touches.Count; i++)
             {
                 var t = touches[i];
+                Current = t;
 
                 ui.FindControls(t.Position, buffer);
                 current.AddRange(buffer);

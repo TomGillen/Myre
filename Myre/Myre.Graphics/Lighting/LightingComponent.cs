@@ -14,41 +14,6 @@ namespace Myre.Graphics.Lighting
     public class LightingComponent
        : RendererComponent
     {
-        //protected override void SpecifyResources(IList<Input> inputs, IList<RendererComponent.Resource> outputs, out RenderTargetInfo? outputTarget)
-        //{
-        //    inputs.Add(new Input() { Name = "gbuffer_depth" });
-        //    inputs.Add(new Input() { Name = "gbuffer_normals" });
-        //    inputs.Add(new Input() { Name = "gbuffer_diffuse" });
-        //    inputs.Add(new Input() { Name = "gbuffer_depth_downsample" });
-
-        //    outputs.Add(new Resource()
-        //    {
-        //        Name = "lightbuffer",
-        //        IsLeftSet = true,
-        //        Finaliser = null
-        //    });
-
-        //    outputs.Add(new Resource()
-        //    {
-        //        Name = "previouslightbuffer",
-        //        IsLeftSet = false,
-        //        Finaliser = null
-        //    });
-
-        //    outputs.Add(new Resource() { Name = "ssao" });
-
-        //    outputTarget = new RenderTargetInfo()
-        //    {
-        //        SurfaceFormat = SurfaceFormat.HdrBlendable,
-        //        DepthFormat = DepthFormat.Depth24Stencil8
-        //    };
-        //}
-
-        //protected internal override bool ValidateInput(RenderTargetInfo? previousRenderTarget)
-        //{
-        //    return true;
-        //}
-
         Quad quad;
         Material restoreDepth;
         Material markGeometry;
@@ -102,8 +67,8 @@ namespace Myre.Graphics.Lighting
             // create debug dettings
             var settings = renderer.Settings;
 
-            settings.Add("lighting_attenuationscale", "Scales the rate at which lights attenuate over distance.", 100);
-            settings.Add("lighting_threshold", "The fraction of the average scene luminance at which the rage of a light is cut off.", 0.05f);
+            //settings.Add("lighting_attenuationscale", "Scales the rate at which lights attenuate over distance.", 100);
+            //settings.Add("lighting_threshold", "The fraction of the average scene luminance at which the rage of a light is cut off.", 0.05f);
             settings.Add("debuglights", "Shows light debug information", false);
 
             // define inputs

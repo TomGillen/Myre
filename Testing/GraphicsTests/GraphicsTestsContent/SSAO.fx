@@ -114,7 +114,7 @@ float4 HighQualitySsaoPS(in float2 in_TexCoord : TEXCOORD0) : COLOR0
 
 	ao /= NUM_SAMPLES;
 	ao = 1 - ao;
-	return float4(0, 0, 0, ao);
+	return ao; //float4(0, 0, 0, ao);
 }
 
 float4 LowQualitySsaoPS(in float2 in_TexCoord : TEXCOORD0) : COLOR0
@@ -151,7 +151,7 @@ float4 LowQualitySsaoPS(in float2 in_TexCoord : TEXCOORD0) : COLOR0
 	ao /= (float)(iterations * 4.0);
 	ao = 1 - ao;
 
-	return float4(0, 0, 0, ao);
+	return ao;// float4(0, 0, 0, ao);
 }
 
 float4 SsgiPS(in float2 in_TexCoord : TEXCOORD0) : COLOR0

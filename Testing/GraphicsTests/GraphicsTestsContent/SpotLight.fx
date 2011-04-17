@@ -80,7 +80,8 @@ float4 CalculateLighting(float2 texCoord, float3 viewPosition)
 		float3 diffuse = GammaToLinear(sampledDiffuse.xyz);
 		float specularPower = sampledDiffuse.w * 255;
 
-		float attenuation = saturate(LightFalloffFactor / (distance * distance));
+		float attenuation = 1 - saturate(distance / Range); //saturate(LightFalloffFactor / (distance * distance));
+		attenuation *= attenuation;
 
 		float3 V = normalize(CameraPosition - viewPosition);
 		float3 R = normalize(reflect(-L, normal));
