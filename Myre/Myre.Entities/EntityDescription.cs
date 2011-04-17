@@ -73,7 +73,7 @@ namespace Myre.Entities
         private List<PropertyData> properties;
 
         private Queue<Entity> pool;
-        internal uint Version;
+        private uint version;
 
         /// <summary>
         /// Gets a list of behaviours in this instance.
@@ -286,7 +286,7 @@ namespace Myre.Entities
             if (pool.Count > 0)
                 e = InitialisePooledEntity();
             else
-                e = new Entity(CreateProperties(), CreateBehaviours(), new EntityVersion(this, Version));
+                e = new Entity(CreateProperties(), CreateBehaviours(), new EntityVersion(this, version));
 
             return e;
         }
@@ -298,7 +298,7 @@ namespace Myre.Entities
         /// <returns><c>true</c> if the entity was recycled; else <c>false</c>.</returns>
         public bool Recycle(Entity entity)
         {
-            if (entity.Version.Creator != this || entity.Version.Version != Version)
+            if (entity.Version.Creator != this || entity.Version.Version != version)
                 return false;
 
             pool.Enqueue(entity);
@@ -318,7 +318,7 @@ namespace Myre.Entities
         {
             unchecked
             {
-                Version++;
+                version++;
             }
 
             pool.Clear();
