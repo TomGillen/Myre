@@ -113,31 +113,6 @@ namespace Myre.Entities
         }
 
         /// <summary>
-        /// Adds all the properties and behaviours from the specified entity.
-        /// </summary>
-        /// <param name="entity">The entity.</param>
-        public void AddFrom(Entity entity, bool serialisePropertyValues = true, bool serialiseBehaviourValues = true)
-        {
-            foreach (var item in entity.Behaviours)
-            {
-                AddBehaviour(new BehaviourData()
-                {
-                    Name = item.Name,
-                    Type = item.GetType()
-                });
-            }
-
-            foreach (var item in entity.Properties)
-            {
-                AddProperty(new PropertyData()
-                {
-                    Name = item.Name,
-                    DataType = item.Type
-                });
-            }
-        }
-
-        /// <summary>
         /// Adds all the properties and behaviours from the specified entity description.
         /// </summary>
         /// <param name="entity">The entity.</param>
@@ -227,6 +202,7 @@ namespace Myre.Entities
             return RemoveBehaviour(typeof(T), name);
         }
 
+        #region properties
         /// <summary>
         /// Adds the property, provided that such a property does not already exist.
         /// </summary>
@@ -297,6 +273,7 @@ namespace Myre.Entities
 
             return false;
         }
+        #endregion
 
         /// <summary>
         /// Creates a new entity with the properties and behaviours described by this instance.
@@ -331,7 +308,7 @@ namespace Myre.Entities
         private Entity InitialisePooledEntity()
         {
             var entity = pool.Dequeue();
-            foreach (var item in entity.Properties)
+            foreach (IProperty item in entity.Properties)
                 item.Clear();
 
             return entity;
