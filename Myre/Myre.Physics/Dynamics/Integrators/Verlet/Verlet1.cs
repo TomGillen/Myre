@@ -8,8 +8,8 @@ namespace Myre.Physics.Dynamics.Integrators
     public class Verlet1
         : Verlet<float>
     {
-        public Verlet1(string position, string velocity, string acceleration, string velocityBias)
-            : base(position, velocity, acceleration, velocityBias, new Arithmetic1())
+        public Verlet1(IntegratorProperties properties)
+            : base(properties, new Arithmetic1())
         {
         }
     }

@@ -14,28 +14,27 @@ namespace Myre.Physics.Dynamics.Integrators
         protected Property<T> acceleration;
         protected Property<T> velocityBias;
 
-        private readonly string positionName;
-        private readonly string velocityName;
-        private readonly string accelerationName;
-        private readonly string velocityBiasName;
+        private readonly IntegratorProperties propertyNames;
 
         protected readonly Arithmetic<T> Arithmetic;
 
         protected Integrator(string position, string velocity, string acceleration, string velocityBias, Arithmetic<T> arithmetic)
+            :this(new IntegratorProperties(position, velocity, acceleration, velocityBias), arithmetic)
         {
-            this.positionName = position;
-            this.velocityName = velocity;
-            this.accelerationName = acceleration;
-            this.velocityBiasName = velocityBias;
+        }
+
+        protected Integrator(IntegratorProperties names, Arithmetic<T> arithmetic)
+        {
+            propertyNames = names;
             this.Arithmetic = arithmetic;
         }
 
         public override void CreateProperties(Entity.InitialisationContext context)
         {
-            position = context.CreateProperty<T>(positionName);
-            velocity = context.CreateProperty<T>(velocityName);
-            acceleration = context.CreateProperty<T>(accelerationName);
-            velocityBias = context.GetProperty<T>(velocityBiasName);
+            position = context.CreateProperty<T>(propertyNames.PositionName);
+            velocity = context.CreateProperty<T>(propertyNames.VelocityName);
+            acceleration = context.CreateProperty<T>(propertyNames.AccelerationName);
+            velocityBias = context.GetProperty<T>(propertyNames.VelocityBiasName);
 
             base.CreateProperties(context);
         }
@@ -78,6 +77,24 @@ namespace Myre.Physics.Dynamics.Integrators
                 foreach (var item in Behaviours)
                     Update(item, elapsedTime);
             }
+        }
+    }
+
+    public struct IntegratorProperties
+    {
+        public static readonly IntegratorProperties PositionIntegratorProperties = new IntegratorProperties(PropertyName.POSITION, PropertyName.LINEAR_VELOCITY, PropertyName.ACCELERATION, PropertyName.LINEAR_VELOCITY_BIAS);
+
+        public readonly string PositionName;
+        public readonly string VelocityName;
+        public readonly string AccelerationName;
+        public readonly string VelocityBiasName;
+
+        public IntegratorProperties(string position, string velocity, string acceleration, string velocityBias)
+        {
+            PositionName = position;
+            VelocityName = velocity;
+            AccelerationName = acceleration;
+            VelocityBiasName = velocityBias;
         }
     }
 }

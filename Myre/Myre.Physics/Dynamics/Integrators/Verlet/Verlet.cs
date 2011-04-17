@@ -20,8 +20,8 @@ namespace Myre.Physics.Dynamics.Integrators
             }
         }
 
-        public Verlet(string position, string velocity, string acceleration, string velocityBias, Arithmetic<T> arithmetic)
-            :base(position, velocity, acceleration, velocityBias, arithmetic)
+        public Verlet(IntegratorProperties properties, Arithmetic<T> arithmetic)
+            : base(properties, arithmetic)
         {
         }
 
