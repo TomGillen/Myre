@@ -91,7 +91,6 @@
     <Compile Include="Dynamics\Integrators\Euler\Euler2.cs" />
     <Compile Include="Dynamics\Integrators\Euler\Euler3.cs" />
     <Compile Include="Dynamics\Integrators\Integrator.cs" />
-    <Compile Include="Dynamics\Integrators\Verlet\PositionVerlet3.cs" />
     <Compile Include="Dynamics\Integrators\Verlet\Verlet.cs" />
     <Compile Include="Dynamics\Integrators\Verlet\Verlet1.cs" />
     <Compile Include="Dynamics\Integrators\Verlet\Verlet2.cs" />

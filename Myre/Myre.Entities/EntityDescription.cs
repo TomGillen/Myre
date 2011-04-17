@@ -148,7 +148,6 @@ namespace Myre.Entities
         /// </summary>
         /// <param name="type">The type.</param>
         /// <param name="name">The name.</param>
-        /// <param name="settings">The settings.</param>
         /// <returns><c>true</c> if the behaviour was added; else <c>false</c>.</returns>
         public bool AddBehaviour(Type type, string name = null)
         {
@@ -160,12 +159,23 @@ namespace Myre.Entities
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="name">The name.</param>
-        /// <param name="settings">The settings.</param>
         /// <returns><c>true</c> if the behaviour was added; else <c>false</c>.</returns>
         public bool AddBehaviour<T>(string name = null)
             where T : Behaviour
         {
             return AddBehaviour(typeof(T), name);
+        }
+
+        /// <summary>
+        /// Adds the behaviour, provided that such a behaviour does not already exist.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="create">A factory function which creates an instance of this behaviour</param>
+        /// <param name="name">the name.</param>
+        /// <returns><c>true</c> if the behaviour was added; else <c>false</c>.</returns>
+        public bool AddBehaviour<T>(Func<T> create, string name = null)
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>
