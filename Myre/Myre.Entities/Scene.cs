@@ -67,7 +67,7 @@ namespace Myre.Entities
         /// Adds the specified entity.
         /// </summary>
         /// <param name="entity">The entity.</param>
-        public void Add(Entity entity)
+        public Entity Add(Entity entity)
         {
             if (entity.Scene != null)
                 throw new InvalidOperationException("Cannot add an entity to a scene if it is in a scene already");
@@ -86,6 +86,8 @@ namespace Myre.Entities
             }
 
             entities.Add(entity);
+
+            return entity;
         }
 
         private Type SearchForDefaultManager(Type behaviourType)

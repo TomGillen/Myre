@@ -5,10 +5,11 @@ using System.Text;
 using Myre.Physics.Dynamics.Integrators.Arithmetic;
 using Myre.Entities;
 using Myre.Entities.Services;
+using Myre.Entities.Behaviours;
 
 namespace Myre.Physics.Dynamics.Integrators
 {
-    public class Euler<T>
+    public abstract class Euler<T>
         :Integrator<T>
     {
         public Euler(string position, string velocity, string acceleration, string velocityBias, Arithmetic<T> arithmetic)
@@ -17,9 +18,15 @@ namespace Myre.Physics.Dynamics.Integrators
 
         }
 
+        public Euler(IntegratorProperties properties, Arithmetic<T> arithmetic)
+            : base(properties, arithmetic)
+        {
+
+        }
+
         protected void Integrate(float deltaTime)
         {
-            velocity.Value = Arithmetic.Add(velocity.Value, acceleration.Value);
+            velocity.Value = Arithmetic.Add(velocity.Value, Arithmetic.Multiply(acceleration.Value, deltaTime));
 
             var v = velocityBias == null ? velocity.Value : Arithmetic.Add(velocity.Value, velocityBias.Value);
             var deltaPosition = Arithmetic.Multiply(v, deltaTime);

@@ -34,7 +34,9 @@ namespace Myre.Physics.Dynamics.Integrators
             position = context.CreateProperty<T>(propertyNames.PositionName);
             velocity = context.CreateProperty<T>(propertyNames.VelocityName);
             acceleration = context.CreateProperty<T>(propertyNames.AccelerationName);
-            velocityBias = context.GetProperty<T>(propertyNames.VelocityBiasName);
+
+            if (propertyNames.VelocityBiasName != null)
+                velocityBias = context.GetProperty<T>(propertyNames.VelocityBiasName);
 
             base.CreateProperties(context);
         }
@@ -82,7 +84,8 @@ namespace Myre.Physics.Dynamics.Integrators
 
     public struct IntegratorProperties
     {
-        public static readonly IntegratorProperties PositionIntegratorProperties = new IntegratorProperties(PropertyName.POSITION, PropertyName.LINEAR_VELOCITY, PropertyName.ACCELERATION, PropertyName.LINEAR_VELOCITY_BIAS);
+        public static readonly IntegratorProperties POSITION = new IntegratorProperties(PropertyName.POSITION, PropertyName.LINEAR_VELOCITY, PropertyName.ACCELERATION, PropertyName.LINEAR_VELOCITY_BIAS);
+        public static readonly IntegratorProperties ROTATION = new IntegratorProperties(PropertyName.ROTATION, PropertyName.ANGULAR_VELOCITY, PropertyName.TORQUE, null);
 
         public readonly string PositionName;
         public readonly string VelocityName;

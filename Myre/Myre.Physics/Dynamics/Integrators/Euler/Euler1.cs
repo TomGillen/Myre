@@ -8,8 +8,8 @@ namespace Myre.Physics.Dynamics.Integrators
     public class Euler1
         : Euler<float>
     {
-        public Euler1(string position, string velocity, string acceleration, string velocityBias)
-            : base(position, velocity, acceleration, velocityBias, new Arithmetic1())
+        public Euler1(IntegratorProperties properties)
+            : base(properties, new Arithmetic1())
         {
         }
     }

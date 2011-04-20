@@ -1,6 +1,7 @@
 ﻿using Myre.Entities;
 using Myre.Entities.Services;
 using Myre.Physics.Dynamics.Integrators.Arithmetic;
+using Myre.Entities.Behaviours;
 
 namespace Myre.Physics.Dynamics.Integrators
 {
@@ -38,6 +39,8 @@ namespace Myre.Physics.Dynamics.Integrators
             var sumPositionVelocityBias = Arithmetic.Add(Arithmetic.Add(position.Value, velocity.Value), (velocityBias == null ? Arithmetic.Zero : velocityBias.Value));
             var accelerationTerm = Arithmetic.Multiply(acceleration.Value, deltaTimeSquare);
             position.Value = Arithmetic.Add(sumPositionVelocityBias, accelerationTerm);
+
+            velocity.Value = Arithmetic.Multiply(velocity.Value, 1 / dT);
 
             acceleration.Value = Arithmetic.Zero;
             if (velocityBias != null)

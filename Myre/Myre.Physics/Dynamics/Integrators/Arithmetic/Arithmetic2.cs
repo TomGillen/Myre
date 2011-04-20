@@ -10,6 +10,8 @@ namespace Myre.Physics.Dynamics.Integrators.Arithmetic
     public class Arithmetic2
         :Arithmetic<Vector2>
     {
+        public static readonly Arithmetic2 Instance = new Arithmetic2();
+
         public Arithmetic2()
             :base(Vector2.Zero)
         {

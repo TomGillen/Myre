@@ -10,6 +10,8 @@ namespace Myre.Physics.Dynamics.Integrators.Arithmetic
     public class Arithmetic1
         :Arithmetic<float>
     {
+        public static readonly Arithmetic1 Instance = new Arithmetic1();
+
         public Arithmetic1()
             :base(0)
         {

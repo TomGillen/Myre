@@ -12,6 +12,7 @@ namespace Myre.Physics
 
         public const String MASS = "mass";
         public const String INVERSE_MASS = "inverse_mass";
+
         public const String INERTIA_TENSOR = "inertia_tensor";
 
         public const String LINEAR_VELOCITY = "linear_velocity";
@@ -20,6 +21,7 @@ namespace Myre.Physics
         public const String TIME_MULTIPLIER = "time_multiplier";
 
         public const String ACCELERATION = "acceleration";
+        public const String TORQUE = "torque";
 
         public const String LINEAR_VELOCITY_BIAS = "linear_velocity_bias";
     }
