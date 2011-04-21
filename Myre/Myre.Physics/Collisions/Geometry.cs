@@ -4,18 +4,23 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
 using System.Collections.ObjectModel;
+using Myre.Entities.Behaviours;
+using Myre.Entities;
 
 namespace Myre.Physics.Collisions
 {
     /// <summary>
     /// Represents a piece of geometry which can be used for collision detection.
     /// </summary>
-    public abstract class Geometry
+    public abstract partial class Geometry
+        : Behaviour
     {
-        private float restitution;
+        private Property<float> frictionCoefficient;
+        private Property<float> restitutionCoefficient;
+
         internal List<Geometry> collidingWith;
 
-        public DynamicPhysics Body { get; set; }
+        public DynamicPhysics Body { get; private set; }
 
         /// <summary>
         /// Gets or sets the restitution coefficient.
@@ -24,20 +29,19 @@ namespace Myre.Physics.Collisions
         /// </summary>
         public float Restitution
         {
-            get { return restitution; }
-            set
-            {
-                if (value < 0 || value > 1)
-                    throw new ArgumentOutOfRangeException("restitution must be between 0 and 1.");
-                restitution = value;
-            }
+            get { return restitutionCoefficient.Value; }
+            set { restitutionCoefficient.Value = value; }
         }
 
         /// <summary>
         /// Gets or sets the friction coefficient.
         /// Higher values indicate a rougher surface.
         /// </summary>
-        public float FrictionCoefficient { get; set; }
+        public float FrictionCoefficient
+        {
+            get { return frictionCoefficient.Value; }
+            set { frictionCoefficient.Value = value; }
+        }
 
         /// <summary>
         /// Gets an axis aligned bounding box for this geometry.
@@ -53,6 +57,30 @@ namespace Myre.Physics.Collisions
         {
             collidingWith = new List<Geometry>();
             CollidingWith = new ReadOnlyCollection<Geometry>(collidingWith);
+        }
+
+        public override void CreateProperties(Entity.InitialisationContext context)
+        {
+            Body = context.GetBehaviour<DynamicPhysics>();
+
+            frictionCoefficient = context.CreateProperty<float>("friction_coefficient");
+            restitutionCoefficient = context.CreateProperty<float>("restitution_coefficient");
+
+            restitutionCoefficient.PropertyChanged += ValidateRestitution;
+            
+            base.CreateProperties(context);
+        }
+
+        public override void Initialise()
+        {
+            base.Initialise();
+        }
+
+        private void ValidateRestitution(Property<float> restitution)
+        {
+            var value = restitution.Value;
+            if (value < 0 || value > 1)
+                throw new ArgumentOutOfRangeException("restitution must be between 0 and 1.");
         }
 
         /// <summary>

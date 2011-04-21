@@ -76,10 +76,11 @@
   <ItemGroup>
     <Compile Include="Collisions\Circle.cs" />
     <Compile Include="Collisions\Collision.cs" />
-    <Compile Include="Collisions\CollisionDetecter.cs" />
+    <Compile Include="Collisions\CollisionDetector.cs" />
     <Compile Include="Collisions\Contact.cs" />
     <Compile Include="Collisions\ContactTester.cs" />
     <Compile Include="Collisions\Geometry.cs" />
+    <Compile Include="Collisions\GeometryManager.cs" />
     <Compile Include="Dynamics\Constraints\Damping.cs" />
     <Compile Include="Dynamics\Constraints\PositionConstraint.cs" />
     <Compile Include="Dynamics\Integrators\Arithmetic\Arithmetic.cs" />
@@ -96,7 +97,6 @@
     <Compile Include="Dynamics\Integrators\Verlet\Verlet2.cs" />
     <Compile Include="Dynamics\Integrators\Verlet\Verlet3.cs" />
     <Compile Include="Dynamics\InverseMassCalculator.cs" />
-    <Compile Include="PhysicsManager.cs" />
     <Compile Include="Collisions\Polygon.cs" />
     <Compile Include="Collisions\Projection.cs" />
     <Compile Include="Collisions\SatResult.cs" />

@@ -6,7 +6,7 @@ using System.Collections.ObjectModel;
 
 namespace Myre.Physics.Collisions
 {
-    public class CollisionDetecter
+    public class CollisionDetector
     {
         private List<Collision> collisions;
         private ReadOnlyCollection<Collision> collisionsWrapper;
@@ -18,7 +18,7 @@ namespace Myre.Physics.Collisions
             get { return collisionsWrapper; }
         }
 
-        public CollisionDetecter()
+        public CollisionDetector()
         {
             collisions = new List<Collision>();
             collisionsWrapper = new ReadOnlyCollection<Collision>(collisions);
@@ -74,6 +74,7 @@ namespace Myre.Physics.Collisions
                         {
                             var collision = Collision.Create(geometry[i], geometry[j]);
                             collisions.Add(collision);
+                            System.Diagnostics.Debug.WriteLine("New broadphase collision");
                         }
                     }
                 }

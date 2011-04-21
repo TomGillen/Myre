@@ -43,7 +43,7 @@ namespace Myre.Physics
             get { return inverseTransform.Value; }
             set { inverseTransform.Value = value; }
         }
-
+        
         public override void CreateProperties(Entity.InitialisationContext context)
         {
             this.position = context.CreateProperty<Vector2>(PropertyName.POSITION);
@@ -51,13 +51,10 @@ namespace Myre.Physics
             this.transform = context.CreateProperty<Matrix>("transform");
             this.inverseTransform = context.CreateProperty<Matrix>("inverse_transform");
 
-            base.CreateProperties(context);
-        }
-
-        public override void Initialise()
-        {
             position.PropertyChanged += _ => isDirty = true;
             rotation.PropertyChanged += _ => isDirty = true;
+            
+            base.CreateProperties(context);
         }
 
         public Vector2 ToWorldCoordinates(Vector2 point)
@@ -79,7 +76,7 @@ namespace Myre.Physics
             var rot = rotation.Value;
 
             Matrix temp1, temp2;
-            Matrix.CreateRotationZ(-rot, out temp1);
+            Matrix.CreateRotationZ(rot, out temp1);
             Matrix.CreateTranslation(ref pos, out temp2);
             Matrix.Multiply(ref temp1, ref temp2, out temp1);
             Matrix.Invert(ref temp1, out temp2);

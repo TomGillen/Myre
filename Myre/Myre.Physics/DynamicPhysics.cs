@@ -10,7 +10,6 @@ using Myre.Entities.Services;
 
 namespace Myre.Physics
 {
-    [DefaultManager(typeof(Manager))]
     public class DynamicPhysics
         : Behaviour
     {
@@ -134,7 +133,7 @@ namespace Myre.Physics
         {
             impulse /= Mass;
             linearVelocity.Value += impulse;
-            angularVelocity.Value += (worldOffset.X * impulse.Y - impulse.Y * worldOffset.X) / InertiaTensor;
+            angularVelocity.Value += (worldOffset.X * impulse.Y - impulse.X * worldOffset.Y) / InertiaTensor;
         }
 
         public void ApplyImpulse(Vector2 impulse)
@@ -153,41 +152,7 @@ namespace Myre.Physics
         {
             impulse /= Mass;
             linearVelocity.Value += impulse;
-            angularVelocityBias += (worldOffset.X * impulse.Y - impulse.Y * worldOffset.X) / InertiaTensor;
-        }
-
-        public class Manager
-            : BehaviourManager<DynamicPhysics>, IProcess
-        {
-            public bool IsComplete { get { return false; } }
-
-            public Manager(IProcessService processes)
-            {
-                processes.Add(this);
-            }
-
-            public void Update(float time)
-            {
-                for (int i = 0; i < Behaviours.Count; i++)
-                {
-                    Integrate(Behaviours[i], time * Behaviours[i].TimeMultiplier);
-                }
-            }
-
-            private void Integrate(DynamicPhysics body, float time)
-            {
-                body.linearVelocity.Value += body.force / body.Mass;
-                body.force = Vector2.Zero;
-
-                body.angularVelocity.Value += body.torque / body.InertiaTensor;
-                body.torque = 0;
-
-                body.position.Value += (body.linearVelocity.Value + body.linearVelocityBias) * time;
-                body.rotation.Value += (body.angularVelocity.Value + body.angularVelocityBias) * time;
-
-                body.linearVelocityBias = Vector2.Zero;
-                body.angularVelocityBias = 0;
-            }
+            angularVelocityBias += (worldOffset.X * impulse.Y - impulse.X * worldOffset.Y) / InertiaTensor;
         }
     }
 }

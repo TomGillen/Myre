@@ -133,7 +133,8 @@ namespace Myre.Physics.Collisions
                     continue;
 
                 var previous = contacts[index];
-                // TODO: warm start contacts
+                contact.normalImpulse = previous.normalImpulse;
+                contact.tangentImpulse = previous.tangentImpulse;
 
                 newContacts[i] = contact;
             }
@@ -144,7 +145,7 @@ namespace Myre.Physics.Collisions
             newContacts = tmp;
         }
 
-        public void Prepare(PhysicsManager physics)
+        public void Prepare(float allowedPenetration, float biasFactor, float inverseDT)
         {
             frictionCoefficient = (a.FrictionCoefficient + b.FrictionCoefficient) * 0.5f;
             restitutionCoefficient = (a.Restitution + b.Restitution) * 0.5f;
@@ -153,7 +154,7 @@ namespace Myre.Physics.Collisions
             {
                 var contact = contacts[i];
 
-                // copy + paste from farseer.. which is based on Box2D, and I cba to write yet another veriation
+                // copy + paste from farseer.. which is based on Box2D, and I cba to write yet another variation
 
                 //calculate contact offset from body position
                 var aPos = a.Body.Position;
@@ -181,14 +182,14 @@ namespace Myre.Physics.Collisions
 
                 Vector2.Dot(ref r1, ref r1, out float1);
                 Vector2.Dot(ref r2, ref r2, out float2);
-                kTangent += invMassSum
+                kTangent = invMassSum
                     + (float1 - rt1 * rt1) / a.Body.InertiaTensor
                     + (float2 - rt2 * rt2) / b.Body.InertiaTensor;
                 contact.massTangent = 1f / kTangent;
 
                 //calc velocity bias
-                max = Math.Max(0, penetrationDepth - physics.AllowedPenetration);
-                contact.normalVelocityBias = physics.BiasFactor * physics.inverseDT * max;
+                max = Math.Max(0, penetrationDepth - allowedPenetration);
+                contact.normalVelocityBias = biasFactor * inverseDT * max;
 
                 //calc bounce velocity
                 vec1 = a.Body.GetVelocityAtOffset(r1);
@@ -224,7 +225,7 @@ namespace Myre.Physics.Collisions
             {
                 var contact = contacts[i];
 
-                // copy + paste from farseer.. which is based on Box2D, and I cba to write yet another veriation
+                // copy + paste from farseer.. which is based on Box2D, and I cba to write yet another variation
 
                 #region INLINE: Vector2.Subtract(ref contact.Position, ref geometryA.body.position, out r1);
 
