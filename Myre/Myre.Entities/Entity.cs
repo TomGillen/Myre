@@ -164,7 +164,7 @@ namespace Myre.Entities
 
                 type = type.BaseType;
             }
-            while (type != typeof(Behaviour));
+            while (type != typeof(Behaviour).BaseType);
         }
 
         private List<Behaviour> LazyGetCategoryList(Type type, Dictionary<Type, List<Behaviour>> catagorised)

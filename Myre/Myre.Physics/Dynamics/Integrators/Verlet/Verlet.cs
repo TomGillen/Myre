@@ -26,7 +26,7 @@ namespace Myre.Physics.Dynamics.Integrators
         {
         }
 
-        protected void Integrate(float dT, float deltaTimeSquare)
+        public void Integrate(float dT, float deltaTimeSquare)
         {
             //const float timeRatio = 1;
 

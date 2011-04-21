@@ -24,7 +24,7 @@ namespace Myre.Physics.Dynamics.Integrators
 
         }
 
-        protected void Integrate(float deltaTime)
+        public void Integrate(float deltaTime)
         {
             velocity.Value = Arithmetic.Add(velocity.Value, Arithmetic.Multiply(acceleration.Value, deltaTime));
 
