@@ -21,6 +21,8 @@ namespace Myre.Physics.Dynamics.Integrators
             }
         }
 
+        private T previousVelocity;
+
         public Verlet(IntegratorProperties properties, Arithmetic<T> arithmetic)
             : base(properties, arithmetic)
         {
@@ -28,19 +30,19 @@ namespace Myre.Physics.Dynamics.Integrators
 
         public void Integrate(float dT, float deltaTimeSquare)
         {
-            //const float timeRatio = 1;
-
             //velocity.Value = position.Value - previousPosition;
-            velocity.Value = Arithmetic.Subtract(position, previousPosition);
+            var velocityChange = Arithmetic.Multiply(Arithmetic.Subtract(velocity, previousVelocity), dT);
+            velocity.Value = Arithmetic.Add(Arithmetic.Subtract(position, previousPosition), velocityChange);
 
             previousPosition = position.Value;
             
-            //position.Value = (position.Value + velocity.Value + velocityBias.Value) * timeRatio + acceleration.Value * deltaTimeSquare;
+            //position.Value = (position.Value + velocity.Value + velocityBias.Value) + acceleration.Value * deltaTimeSquare;
             var sumPositionVelocityBias = Arithmetic.Add(Arithmetic.Add(position.Value, velocity.Value), (velocityBias == null ? Arithmetic.Zero : velocityBias.Value));
             var accelerationTerm = Arithmetic.Multiply(acceleration.Value, deltaTimeSquare);
             position.Value = Arithmetic.Add(sumPositionVelocityBias, accelerationTerm);
 
-            velocity.Value = Arithmetic.Multiply(velocity.Value, 1 / dT);
+            velocity.Value = Arithmetic.Subtract(position, previousPosition);
+            previousVelocity = velocity.Value;
 
             acceleration.Value = Arithmetic.Zero;
             if (velocityBias != null)
