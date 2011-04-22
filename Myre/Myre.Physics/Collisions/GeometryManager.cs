@@ -5,6 +5,7 @@ using System.Text;
 using Myre.Entities.Behaviours;
 using Myre.Entities.Services;
 using Myre.Entities;
+using System.Collections.ObjectModel;
 
 namespace Myre.Physics.Collisions
 {
@@ -20,6 +21,17 @@ namespace Myre.Physics.Collisions
             public float BiasFactor { get; set; }
             public int Iterations { get; set; }
 
+            public ReadOnlyCollection<Collision> Collisions
+            {
+                get { return collisionDetector.Collisions; }
+            }
+
+            public ReadOnlyCollection<Geometry> Geometry
+            {
+                get;
+                private set;
+            }
+
             bool IProcess.IsComplete
             {
                 get { return false; }
@@ -29,10 +41,11 @@ namespace Myre.Physics.Collisions
             {
                 scene.GetService<ProcessService>().Add(this);
                 collisionDetector = new CollisionDetector();
+                Geometry = new ReadOnlyCollection<Geometry>(Behaviours);
 
-                AllowedPenetration = 2f;
-                BiasFactor = 0.1f;
-                Iterations = 10;
+                AllowedPenetration = 1f;
+                BiasFactor = 0.05f;
+                Iterations = 15;
             }
 
             public override void Add(Geometry behaviour)
@@ -58,7 +71,10 @@ namespace Myre.Physics.Collisions
                 for (int i = 0; i < Iterations; i++)
                 {
                     for (int j = 0; j < collisionDetector.Collisions.Count; j++)
+                    {
+                        //System.Diagnostics.Debug.WriteLine("Collision:{0}", j);
                         collisionDetector.Collisions[j].Iterate();
+                    }
                 }
             }
         }

@@ -80,7 +80,7 @@ namespace Myre.Physics.Collisions
                 contacts.Clear();
                 return;
             }
-
+            
             SatResult result = r.Value;
             normal = result.NormalAxis;
             penetrationDepth = result.Penetration;
@@ -170,10 +170,18 @@ namespace Myre.Physics.Collisions
                 float invMassSum = (1f / a.Body.Mass) + (1f / b.Body.Mass);
                 Vector2.Dot(ref r1, ref r1, out float1);
                 Vector2.Dot(ref r2, ref r2, out float2);
-                kNormal = invMassSum 
-                    + (float1 - rn1 * rn1) / a.Body.InertiaTensor 
+                kNormal = invMassSum
+                    + (float1 - rn1 * rn1) / a.Body.InertiaTensor
                     + (float2 - rn2 * rn2) / b.Body.InertiaTensor;
                 contact.massNormal = 1f / kNormal;
+
+                //float rnA = r1.X * normal.Y - r1.Y * normal.X;
+                //float rnB = r2.X * normal.Y - r2.Y * normal.X;
+                //rnA *= rnA;
+                //rnB *= rnB;
+
+                //float kNormal = invMassSum + rnA / A.Body.InertiaTensor + rnB / B.Body.InertiaTensor;
+                //contact.massNormal = 1f / kNormal;
 
                 //calculate mass tangent
                 tangent = normal.Perpendicular();
@@ -186,6 +194,14 @@ namespace Myre.Physics.Collisions
                     + (float1 - rt1 * rt1) / a.Body.InertiaTensor
                     + (float2 - rt2 * rt2) / b.Body.InertiaTensor;
                 contact.massTangent = 1f / kTangent;
+
+                //float rtA = r1.X * tangent.Y - r1.Y * tangent.X;
+                //float rtB = r2.X * tangent.Y - r2.Y * tangent.X;
+                //rtA *= rtA;
+                //rtB *= rtB;
+
+                //float kTangent = invMassSum + rnA / A.Body.InertiaTensor + rnB / B.Body.InertiaTensor;
+                //contact.massTangent = 1f / kTangent;
 
                 //calc velocity bias
                 max = Math.Max(0, penetrationDepth - allowedPenetration);
@@ -384,7 +400,10 @@ namespace Myre.Physics.Collisions
                 a.Body.ApplyImpulseAtOffset(impulse, r1);
 
                 contacts[i] = contact;
+
+                //System.Diagnostics.Debug.WriteLine(string.Format("Contact {0}: point:{4}, normal:{1}, penetration:{2}, impulse:{3}", i, normal, penetrationDepth, contact.normalImpulse, contact.Position));
             }
+            //System.Diagnostics.Debug.WriteLine("");
         }
 
         public void Dispose()

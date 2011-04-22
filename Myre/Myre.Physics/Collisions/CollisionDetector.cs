@@ -68,13 +68,17 @@ namespace Myre.Physics.Collisions
                     var a = geometry[i];
                     var b = geometry[j];
 
+                    if (a.Body.Mass == float.PositiveInfinity && b.Body.Mass == float.PositiveInfinity
+                        && a.Body.InertiaTensor == float.PositiveInfinity && b.Body.InertiaTensor == float.PositiveInfinity)
+                        continue;
+
                     if (a.Bounds.Intersects(b.Bounds))
                     {
                         if (!a.collidingWith.Contains(b))
                         {
                             var collision = Collision.Create(geometry[i], geometry[j]);
                             collisions.Add(collision);
-                            System.Diagnostics.Debug.WriteLine("New broadphase collision");
+                            //System.Diagnostics.Debug.WriteLine("New broadphase collision");
                         }
                     }
                 }
