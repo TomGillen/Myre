@@ -28,6 +28,16 @@ namespace Myre.Physics.Collisions
         public Vector2 Normal { get { return normal; } }
         public float PenetrationDepth { get { return penetrationDepth; } }
 
+        public bool IsDead
+        {
+            get { return contacts.Count == 0; }
+        }
+
+        public bool IsActive
+        {
+            get { return !(a.Body.Sleeping && b.Body.Sleeping); }
+        }
+
         #region temp variables
         Vector2 r1, r2;
         float rn1, rn2;
@@ -72,6 +82,9 @@ namespace Myre.Physics.Collisions
 
         public void FindContacts(SatTester tester, int maxContacts = 8)
         {
+            if (!IsActive)
+                return;
+
             // perform SAT collision detection
             SatResult? r = tester.FindIntersection(a, b);
 
@@ -145,8 +158,33 @@ namespace Myre.Physics.Collisions
             newContacts = tmp;
         }
 
+        //public bool ShouldActivateBody(out DynamicPhysics body)
+        //{
+        //    body = null;
+
+        //    if (contacts.Count == 0)
+        //        return false;
+
+        //    if (a.Body.Sleeping && !b.Body.Sleeping)
+        //    {
+        //        body = b.Body;
+        //        return true;
+        //    }
+
+        //    if (!a.Body.Sleeping && b.Body.Sleeping)
+        //    {
+        //        body = a.Body;
+        //        return true;
+        //    }
+
+        //    return false;
+        //}
+
         public void Prepare(float allowedPenetration, float biasFactor, float inverseDT)
         {
+            if (!IsActive)
+                return;
+            
             frictionCoefficient = (a.FrictionCoefficient + b.FrictionCoefficient) * 0.5f;
             restitutionCoefficient = (a.Restitution + b.Restitution) * 0.5f;
 
@@ -234,6 +272,9 @@ namespace Myre.Physics.Collisions
 
         public void Iterate()
         {
+            if (!IsActive)
+                return;
+
             var aPos = a.Body.Position;
             var bPos = b.Body.Position;
 

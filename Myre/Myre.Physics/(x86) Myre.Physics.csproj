@@ -102,7 +102,8 @@
     <Compile Include="Collisions\SatResult.cs" />
     <Compile Include="Collisions\SatTester.cs" />
     <Compile Include="DynamicPhysics.cs" />
-    <Compile Include="PropertyName.cs" />
+    <Compile Include="PhysicsEngine.cs" />
+    <Compile Include="PhysicsProperties.cs" />
     <Compile Include="Transform.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

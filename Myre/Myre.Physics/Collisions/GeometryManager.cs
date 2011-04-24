@@ -13,13 +13,9 @@ namespace Myre.Physics.Collisions
     public partial class Geometry
     {
         public class Manager
-            : BehaviourManager<Geometry>, IProcess
+            : BehaviourManager<Geometry>, ICollisionResolver
         {
             private CollisionDetector collisionDetector;
-
-            public float AllowedPenetration { get; set; }
-            public float BiasFactor { get; set; }
-            public int Iterations { get; set; }
 
             public ReadOnlyCollection<Collision> Collisions
             {
@@ -32,20 +28,10 @@ namespace Myre.Physics.Collisions
                 private set;
             }
 
-            bool IProcess.IsComplete
-            {
-                get { return false; }
-            }
-
             public Manager(Scene scene)
             {
-                scene.GetService<ProcessService>().Add(this);
                 collisionDetector = new CollisionDetector();
                 Geometry = new ReadOnlyCollection<Geometry>(Behaviours);
-
-                AllowedPenetration = 1f;
-                BiasFactor = 0.05f;
-                Iterations = 15;
             }
 
             public override void Add(Geometry behaviour)
@@ -60,21 +46,18 @@ namespace Myre.Physics.Collisions
                 return base.Remove(behaviour);
             }
 
-            public void Update(float time)
+            public void Update(float time, float allowedPenetration, float biasFactor, int iterations)
             {
                 collisionDetector.Update();
 
                 var inverseDT = 1f / time;
                 for (int i = 0; i < collisionDetector.Collisions.Count; i++)
-                    collisionDetector.Collisions[i].Prepare(AllowedPenetration, BiasFactor, inverseDT);
+                    collisionDetector.Collisions[i].Prepare(allowedPenetration, biasFactor, inverseDT);
 
-                for (int i = 0; i < Iterations; i++)
+                for (int i = 0; i < iterations; i++)
                 {
                     for (int j = 0; j < collisionDetector.Collisions.Count; j++)
-                    {
-                        //System.Diagnostics.Debug.WriteLine("Collision:{0}", j);
                         collisionDetector.Collisions[j].Iterate();
-                    }
                 }
             }
         }

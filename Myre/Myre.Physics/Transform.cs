@@ -46,8 +46,8 @@ namespace Myre.Physics
         
         public override void CreateProperties(Entity.InitialisationContext context)
         {
-            this.position = context.CreateProperty<Vector2>(PropertyName.POSITION);
-            this.rotation = context.CreateProperty<float>(PropertyName.ROTATION);
+            this.position = context.CreateProperty<Vector2>(PhysicsProperties.POSITION);
+            this.rotation = context.CreateProperty<float>(PhysicsProperties.ROTATION);
             this.transform = context.CreateProperty<Matrix>("transform");
             this.inverseTransform = context.CreateProperty<Matrix>("inverse_transform");
 

@@ -84,8 +84,8 @@ namespace Myre.Physics.Dynamics.Integrators
 
     public struct IntegratorProperties
     {
-        public static readonly IntegratorProperties POSITION = new IntegratorProperties(PropertyName.POSITION, PropertyName.LINEAR_VELOCITY, PropertyName.ACCELERATION, PropertyName.LINEAR_VELOCITY_BIAS);
-        public static readonly IntegratorProperties ROTATION = new IntegratorProperties(PropertyName.ROTATION, PropertyName.ANGULAR_VELOCITY, PropertyName.TORQUE, null);
+        public static readonly IntegratorProperties POSITION = new IntegratorProperties(PhysicsProperties.POSITION, PhysicsProperties.LINEAR_VELOCITY, PhysicsProperties.LINEAR_ACCELERATION, PhysicsProperties.LINEAR_VELOCITY_BIAS);
+        public static readonly IntegratorProperties ROTATION = new IntegratorProperties(PhysicsProperties.ROTATION, PhysicsProperties.ANGULAR_VELOCITY, PhysicsProperties.ANGULAR_ACCELERATION, PhysicsProperties.ANGULAR_VELOCITY_BIAS);
 
         public readonly string PositionName;
         public readonly string VelocityName;

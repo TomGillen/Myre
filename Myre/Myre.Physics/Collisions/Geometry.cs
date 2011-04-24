@@ -17,6 +17,8 @@ namespace Myre.Physics.Collisions
     {
         private Property<float> frictionCoefficient;
         private Property<float> restitutionCoefficient;
+        private Property<bool> sleeping;
+        private bool wasSleeping;
 
         internal List<Geometry> collidingWith;
 
@@ -65,14 +67,17 @@ namespace Myre.Physics.Collisions
 
             frictionCoefficient = context.CreateProperty<float>("friction_coefficient");
             restitutionCoefficient = context.CreateProperty<float>("restitution_coefficient");
+            sleeping = context.CreateProperty<bool>("sleeping");
 
             restitutionCoefficient.PropertyChanged += ValidateRestitution;
+            sleeping.PropertyChanged += WakeUp;
             
             base.CreateProperties(context);
         }
 
         public override void Initialise()
         {
+            wasSleeping = sleeping.Value;
             base.Initialise();
         }
 
@@ -81,6 +86,18 @@ namespace Myre.Physics.Collisions
             var value = restitution.Value;
             if (value < 0 || value > 1)
                 throw new ArgumentOutOfRangeException("restitution must be between 0 and 1.");
+        }
+
+        private void WakeUp(Property<bool> sleeping)
+        {
+            if (wasSleeping && !sleeping.Value && !Body.IsStatic)
+            {
+                wasSleeping = false;
+                for (int i = 0; i < CollidingWith.Count; i++)
+                    CollidingWith[i].sleeping.Value = false;
+            }
+            else
+                wasSleeping = sleeping.Value;
         }
 
         /// <summary>

@@ -48,8 +48,8 @@ namespace Myre.Physics.Collisions
             var prefix = Name != null ? Name + "_" : string.Empty;
             radius = context.CreateProperty<float>(prefix + "radius");
             centre = context.CreateProperty<Vector2>(prefix + "centre");
-            transform = context.CreateProperty<Matrix>("transform");
-
+            transform = context.CreateProperty<Matrix>("transform", Matrix.Identity);
+            
             radius.PropertyChanged += _ => UpdateBounds();
             centre.PropertyChanged += _ => UpdateBounds();
             transform.PropertyChanged += _ => UpdateBounds();
@@ -57,10 +57,19 @@ namespace Myre.Physics.Collisions
             base.CreateProperties(context);
         }
 
+        public override void Initialise()
+        {
+            var transform = Owner.GetBehaviour<Transform>();
+            if (transform != null)
+                transform.CalculateTransform();
+            
+            base.Initialise();
+        }
+
         private void UpdateBounds()
         {
             transformedCentre = Vector2.Transform(centre.Value, transform.Value);
-            transformedRadius = radius.Value * transform.Value.M11;
+            transformedRadius = radius.Value;// *transform.Value.M11;
 
             Vector3 c = new Vector3(transformedCentre, 0);
             Vector3 extents = new Vector3(transformedRadius, transformedRadius, 0);
