@@ -21,7 +21,7 @@ namespace Myre.Physics.Dynamics.Integrators.Arithmetic
         /// <param name="a"></param>
         /// <param name="b"></param>
         /// <returns></returns>
-        public abstract T Add(T a, T b);
+        public abstract void Add(ref T a, ref T b, out T result);
 
         /// <summary>
         /// a - b
@@ -29,7 +29,7 @@ namespace Myre.Physics.Dynamics.Integrators.Arithmetic
         /// <param name="a"></param>
         /// <param name="b"></param>
         /// <param name="result"></param>
-        public abstract T Subtract(Property<T> a, T b);
+        public abstract void Subtract(ref T a, ref T b, out T result);
 
         /// <summary>
         /// a * b
@@ -37,6 +37,6 @@ namespace Myre.Physics.Dynamics.Integrators.Arithmetic
         /// <param name="a"></param>
         /// <param name="b"></param>
         /// <returns></returns>
-        public abstract T Multiply(T a, float b);
+        public abstract void Multiply(ref T a, float b, out T result);
     }
 }

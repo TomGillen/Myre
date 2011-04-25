@@ -7,33 +7,30 @@ using Myre.Entities;
 
 namespace Myre.Physics.Dynamics.Integrators.Arithmetic
 {
-    public class Arithmetic1
-        :Arithmetic<float>
+    public sealed class Arithmetic1
+        : Arithmetic<float>
     {
         public static readonly Arithmetic1 Instance = new Arithmetic1();
 
         public Arithmetic1()
-            :base(0)
+            : base(0)
         {
 
         }
 
-        public override float Add(float a, float b)
+        public override void Add(ref float a, ref float b, out float result)
         {
-            var r = a + b;
-            return r;
+            result = a + b;
         }
 
-        public override float Subtract(Property<float> a, float b)
+        public override void Subtract(ref float a, ref float b, out float result)
         {
-            var r = a.Value - b;
-            return r;
+            result = a - b;
         }
 
-        public override float Multiply(float a, float b)
+        public override void Multiply(ref float a, float b, out float result)
         {
-            var r = a * b;
-            return r;
+            result = a * b;
         }
     }
 }

@@ -7,8 +7,8 @@ using Myre.Entities;
 
 namespace Myre.Physics.Dynamics.Integrators.Arithmetic
 {
-    public class Arithmetic3
-        :Arithmetic<Vector3>
+    public sealed class Arithmetic3
+        : Arithmetic<Vector3>
     {
         public static readonly Arithmetic3 Instance = new Arithmetic3();
 
@@ -17,22 +17,25 @@ namespace Myre.Physics.Dynamics.Integrators.Arithmetic
         {
         }
 
-        public override Vector3 Add(Vector3 a, Vector3 b)
+        public override void Add(ref Vector3 a, ref Vector3 b, out Vector3 result)
         {
-            var r = a + b;
-            return r;
+            result.X = a.X + b.X;
+            result.Y = a.Y + b.Y;
+            result.Z = a.Z + b.Z;
         }
 
-        public override Vector3 Subtract(Property<Vector3> a, Vector3 b)
+        public override void Subtract(ref Vector3 a, ref Vector3 b, out Vector3 result)
         {
-            var r = a.Value - b;
-            return r;
+            result.X = a.X - b.X;
+            result.Y = a.Y - b.Y;
+            result.Z = a.Z - b.Z;
         }
 
-        public override Vector3 Multiply(Vector3 a, float b)
+        public override void Multiply(ref Vector3 a, float b, out Vector3 result)
         {
-            var r = a * b;
-            return r;
+            result.X = a.X * b;
+            result.Y = a.Y * b;
+            result.Z = a.Z * b;
         }
     }
 }

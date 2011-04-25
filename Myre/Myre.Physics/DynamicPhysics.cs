@@ -203,7 +203,18 @@ namespace Myre.Physics
             {
             }
 
-            public void Update(float time, float linearThreshold, float angularThreshold)
+            public void Update()
+            {
+                for (int i = 0; i < Behaviours.Count; i++)
+                {
+                    var body = Behaviours[i];
+
+                    body.linearAcceleration.Value = body.force / body.Mass;
+                    body.angularAcceleration.Value = body.torque / body.InertiaTensor;
+                }
+            }
+
+            public void UpdateActivityStatus(float time, float linearThreshold, float angularThreshold)
             {
                 for (int i = 0; i < Behaviours.Count; i++)
                 {

@@ -10,7 +10,7 @@ using Myre.Entities.Behaviours;
 namespace Myre.Physics.Dynamics.Integrators
 {
     public abstract class Euler<T>
-        :Integrator<T>
+        : Integrator<T>
     {
         public Euler(string position, string velocity, string acceleration, string velocityBias, Arithmetic<T> arithmetic)
             :base(position, velocity, acceleration, velocityBias, arithmetic)
@@ -24,35 +24,47 @@ namespace Myre.Physics.Dynamics.Integrators
 
         }
 
-        public void Integrate(float deltaTime)
+        public void IntegrateVelocity(float elapsedTime)
         {
-            velocity.Value = Arithmetic.Add(velocity.Value, Arithmetic.Multiply(acceleration.Value, deltaTime));
+            T velocity = this.velocity.Value;
+            T acceleration = this.acceleration.Value;
 
-            var v = velocityBias == null ? velocity.Value : Arithmetic.Add(velocity.Value, velocityBias.Value);
-            var deltaPosition = Arithmetic.Multiply(v, deltaTime);
+            Arithmetic.Multiply(ref acceleration, elapsedTime, out acceleration);
+            Arithmetic.Add(ref velocity, ref acceleration, out velocity);
 
-            position.Value = Arithmetic.Add(position.Value, deltaPosition);
+            this.velocity.Value = velocity;
+        }
 
-            acceleration.Value = Arithmetic.Zero;
-            if (velocityBias != null)
-                velocityBias.Value = Arithmetic.Zero;
+        public void IntegratePosition(float elapsedTime)
+        {
+            T position = this.position.Value;
+            T velocity = this.velocity.Value;
+
+            if (this.velocityBias != null)
+            {
+                T bias = this.velocityBias.Value;
+                Arithmetic.Add(ref velocity, ref bias, out velocity);
+            }
+
+            Arithmetic.Multiply(ref velocity, elapsedTime, out velocity);
+            Arithmetic.Add(ref position, ref velocity, out position);
+
+            this.position.Value = position;
         }
 
         public class Manager
-            : Integrator<T>.Manager<Euler<T>>
+            : BehaviourManager<Euler<T>>, IIntegrator
         {
-            public Manager(Scene scene, NinjectGame game)
-                : base(scene.GetService<ProcessService>(), game, true)
+            public void UpdateVelocity(float elapsedTime)
             {
+                for (int i = 0; i < Behaviours.Count; i++)
+                    Behaviours[i].IntegrateVelocity(elapsedTime);
             }
 
-            protected override void PrepareUpdate(float elapsedTime)
+            public void UpdatePosition(float elapsedTime)
             {
-            }
-
-            protected override void Update(Euler<T> behaviour, float elapsedTime)
-            {
-                behaviour.Integrate(elapsedTime);
+                for (int i = 0; i < Behaviours.Count; i++)
+                    Behaviours[i].IntegratePosition(elapsedTime);
             }
         }
     }

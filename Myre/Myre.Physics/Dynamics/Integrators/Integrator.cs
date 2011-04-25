@@ -51,35 +51,35 @@ namespace Myre.Physics.Dynamics.Integrators
             SetPosition(position.Value);
         }
 
-        public abstract class Manager<B>
-            : BehaviourManager<B>, IProcess
-            where B : Behaviour
-        {
-            public bool IsComplete
-            {
-                get { return false; }
-            }
+        //public abstract class Manager<B>
+        //    : BehaviourManager<B>, IProcess
+        //    where B : Behaviour
+        //{
+        //    public bool IsComplete
+        //    {
+        //        get { return false; }
+        //    }
 
-            public Manager([SceneService]ProcessService process, NinjectGame game, bool requireFixedTimestep)
-            {
-                if (requireFixedTimestep && !game.IsFixedTimeStep)
-                    throw new InvalidOperationException("Integrator requires a fixed time step");
+        //    public Manager([SceneService]ProcessService process, NinjectGame game, bool requireFixedTimestep)
+        //    {
+        //        if (requireFixedTimestep && !game.IsFixedTimeStep)
+        //            throw new InvalidOperationException("Integrator requires a fixed time step");
 
-                process.Add(this);
-            }
+        //        process.Add(this);
+        //    }
 
-            protected abstract void PrepareUpdate(float elapsedTime);
+        //    protected abstract void PrepareUpdate(float elapsedTime);
 
-            protected abstract void Update(B behaviour, float elapsedTime);
+        //    protected abstract void Update(B behaviour, float elapsedTime);
 
-            public void Update(float elapsedTime)
-            {
-                PrepareUpdate(elapsedTime);
+        //    public void Update(float elapsedTime)
+        //    {
+        //        PrepareUpdate(elapsedTime);
 
-                foreach (var item in Behaviours)
-                    Update(item, elapsedTime);
-            }
-        }
+        //        foreach (var item in Behaviours)
+        //            Update(item, elapsedTime);
+        //    }
+        //}
     }
 
     public struct IntegratorProperties

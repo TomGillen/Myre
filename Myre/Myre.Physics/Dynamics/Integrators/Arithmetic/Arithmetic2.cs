@@ -7,32 +7,32 @@ using Myre.Entities;
 
 namespace Myre.Physics.Dynamics.Integrators.Arithmetic
 {
-    public class Arithmetic2
-        :Arithmetic<Vector2>
+    public sealed class Arithmetic2
+        : Arithmetic<Vector2>
     {
         public static readonly Arithmetic2 Instance = new Arithmetic2();
 
         public Arithmetic2()
-            :base(Vector2.Zero)
+            : base(Vector2.Zero)
         {
         }
 
-        public override Vector2 Add(Vector2 a, Vector2 b)
+        public override void Add(ref Vector2 a, ref Vector2 b, out Vector2 result)
         {
-            var r = a + b;
-            return r;
+            result.X = a.X + b.X;
+            result.Y = a.Y + b.Y;
         }
 
-        public override Vector2 Subtract(Property<Vector2> a, Vector2 b)
+        public override void Subtract(ref Vector2 a, ref Vector2 b, out Vector2 result)
         {
-            var r = a.Value - b;
-            return r;
+            result.X = a.X - b.X;
+            result.Y = a.Y - b.Y;
         }
 
-        public override Vector2 Multiply(Vector2 a, float b)
+        public override void Multiply(ref Vector2 a, float b, out Vector2 result)
         {
-            var r = a * b;
-            return r;
+            result.X = a.X * b;
+            result.Y = a.Y * b;
         }
     }
 }
