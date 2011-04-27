@@ -15,6 +15,11 @@ namespace Myre.Physics
         void Update(float elapsedTime);
     }
 
+    public interface IForceApplier
+    {
+        void CalculateAccelerations();
+    }
+
     public interface IIntegrator
     {
         void UpdateVelocity(float elapsedTime);
@@ -39,6 +44,7 @@ namespace Myre.Physics
         private ReadOnlyCollection<IIntegrator> integrators;
         private ReadOnlyCollection<IActivityManager> activityManagers;
         private ReadOnlyCollection<ICollisionResolver> collisionResolvers;
+        private ReadOnlyCollection<IForceApplier> forceAppliers;
 
         private Box<float> allowedPenetration;
         private Box<float> biasFactor;
@@ -82,6 +88,7 @@ namespace Myre.Physics
             integrators = scene.FindManagers<IIntegrator>();
             activityManagers = scene.FindManagers<IActivityManager>();
             collisionResolvers = scene.FindManagers<ICollisionResolver>();
+            forceAppliers = scene.FindManagers<IForceApplier>();
 
             allowedPenetration = new Box<float>();
             biasFactor = new Box<float>();
@@ -89,9 +96,9 @@ namespace Myre.Physics
             linearVelocitySleepThreshold = new Box<float>();
             angularVelocitySleepThreshold = new Box<float>();
 
-            AllowedPenetration = 2;
-            BiasFactor = 0.1f;
-            Iterations = 15;
+            AllowedPenetration = 1;
+            BiasFactor = 0.2f;
+            Iterations = 10;
             LinearVelocitySleepThreshold = 0.5f;
             AngularVelocitySleepThreshold = MathHelper.TwoPi * 0.025f;
         }
@@ -115,6 +122,9 @@ namespace Myre.Physics
         {
             for (int i = 0; i < forceProviders.Count; i++)
                 forceProviders[i].Update(elapsedTime);
+
+            for (int i = 0; i < forceAppliers.Count; i++)
+                forceAppliers[i].CalculateAccelerations();
 
             for (int i = 0; i < integrators.Count; i++)
                 integrators[i].UpdateVelocity(elapsedTime);

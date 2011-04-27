@@ -27,7 +27,6 @@ namespace Myre.Physics
         private Property<float> angularAcceleration;
         private Property<Vector2> linearAcceleration;
 
-        //TODO: replace force and torque with acceleration changes
         private Vector2 force;
         private float torque;
 
@@ -163,17 +162,27 @@ namespace Myre.Physics
             this.force += force;
         }
 
+        public void ApplyTorque(float torque)
+        {
+            this.torque += torque;
+        }
+
         public void ApplyImpulse(Vector2 impulse, Vector2 worldPosition)
         {
             var pos = position.Value;
             Vector2.Subtract(ref worldPosition, ref pos, out r);
-            ApplyImpulseAtOffset(impulse, r);
+            ApplyImpulseAtOffset(ref impulse, ref r);
         }
 
-        public void ApplyImpulseAtOffset(Vector2 impulse, Vector2 worldOffset)
+        public void ApplyImpulseAtOffset(ref Vector2 impulse, ref Vector2 worldOffset)
         {
-            impulse /= Mass;
-            linearVelocity.Value += impulse;
+            Vector2 l = linearVelocity.Value;
+            Vector2 v;
+
+            Vector2.Multiply(ref impulse, 1f / mass.Value, out v);
+            Vector2.Add(ref l, ref v, out l);
+            linearVelocity.Value = l;
+
             angularVelocity.Value += (worldOffset.X * impulse.Y - impulse.X * worldOffset.Y) / InertiaTensor;
         }
 
@@ -182,14 +191,14 @@ namespace Myre.Physics
             linearVelocity.Value += impulse / Mass;
         }
 
-        internal void ApplyBiasImpulse(Vector2 impulse, Vector2 worldPosition)
+        internal void ApplyBiasImpulse(ref Vector2 impulse, ref Vector2 worldPosition)
         {
             var pos = position.Value;
             Vector2.Subtract(ref worldPosition, ref pos, out r);
-            ApplyImpulseAtOffset(impulse, r);
+            ApplyBiasImpulseAtOffset(ref impulse, ref r);
         }
 
-        internal void ApplyBiasImpulseAtOffset(Vector2 impulse, Vector2 worldOffset)
+        internal void ApplyBiasImpulseAtOffset(ref Vector2 impulse, ref Vector2 worldOffset)
         {
             impulse /= Mass;
             linearVelocityBias.Value += impulse;
@@ -197,7 +206,7 @@ namespace Myre.Physics
         }
 
         public class Manager
-            : BehaviourManager<DynamicPhysics>, IActivityManager, IIntegrator
+            : BehaviourManager<DynamicPhysics>, IActivityManager, IIntegrator, IForceApplier
         {
             public Manager()
             {
@@ -265,9 +274,6 @@ namespace Myre.Physics
                 {
                     item.LinearVelocity += item.LinearAcceleration * elapsedTime;
                     item.AngularVelocity += item.AngularAcceleration * elapsedTime;
-
-                    item.LinearAcceleration = Vector2.Zero;
-                    item.AngularAcceleration = 0;
                 }
             }
 
@@ -280,6 +286,22 @@ namespace Myre.Physics
 
                     item.linearVelocityBias.Value = Vector2.Zero;
                     item.angularVelocityBias.Value = 0;
+                }
+            }
+
+            #endregion
+
+            #region IForceApplier Members
+
+            public void CalculateAccelerations()
+            {
+                foreach (var item in Behaviours)
+                {
+                    item.LinearAcceleration = item.force / item.Mass;
+                    item.AngularAcceleration = item.torque / item.InertiaTensor;
+                    
+                    item.force = Vector2.Zero;
+                    item.torque = 0;
                 }
             }
 

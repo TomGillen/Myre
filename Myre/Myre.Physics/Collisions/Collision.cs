@@ -259,10 +259,10 @@ namespace Myre.Physics.Collisions
                 Vector2.Multiply(ref tangent, contact.tangentImpulse, out vec2);
                 Vector2.Add(ref vec1, ref vec2, out impulse);
 
-                b.Body.ApplyImpulseAtOffset(impulse, r2);
+                b.Body.ApplyImpulseAtOffset(ref impulse, ref r2);
 
                 Vector2.Multiply(ref impulse, -1, out impulse);
-                a.Body.ApplyImpulseAtOffset(impulse, r1);
+                a.Body.ApplyImpulseAtOffset(ref impulse, ref r1);
 
                 contact.normalImpulseBias = 0;
 
@@ -331,7 +331,7 @@ namespace Myre.Physics.Collisions
 
                 #endregion
 
-                b.Body.ApplyImpulseAtOffset(impulse, r2);
+                b.Body.ApplyImpulseAtOffset(ref impulse, ref r2);
 
                 #region INLINE: Vector2.Multiply(ref impulse, -1, out impulse);
 
@@ -340,7 +340,7 @@ namespace Myre.Physics.Collisions
 
                 #endregion
 
-                a.Body.ApplyImpulseAtOffset(impulse, r1);
+                a.Body.ApplyImpulseAtOffset(ref impulse, ref r1);
 
                 //calc velocity bias difference (bias preserves momentum)
                 vec1 = a.Body.GetVelocityBiasAtOffset(r1);
@@ -373,7 +373,7 @@ namespace Myre.Physics.Collisions
                 #endregion
 
                 //apply bias impulse
-                b.Body.ApplyBiasImpulseAtOffset(impulseBias, r2);
+                b.Body.ApplyBiasImpulseAtOffset(ref impulseBias, ref r2);
 
                 #region INLINE: Vector2.Multiply(ref impulseBias, -1, out impulseBias);
 
@@ -382,7 +382,7 @@ namespace Myre.Physics.Collisions
 
                 #endregion
 
-                a.Body.ApplyBiasImpulseAtOffset(impulseBias, r1);
+                a.Body.ApplyBiasImpulseAtOffset(ref impulseBias, ref r1);
 
                 //calc relative velocity at contact.
                 vec1 = a.Body.GetVelocityAtOffset(r1);
@@ -429,7 +429,7 @@ namespace Myre.Physics.Collisions
                 #endregion
 
                 //apply impulse
-                b.Body.ApplyImpulseAtOffset(impulse, r2);
+                b.Body.ApplyImpulseAtOffset(ref impulse, ref r2);
 
                 #region INLINE: Vector2.Multiply(ref impulse, -1, out impulse);
 
@@ -438,7 +438,7 @@ namespace Myre.Physics.Collisions
 
                 #endregion
 
-                a.Body.ApplyImpulseAtOffset(impulse, r1);
+                a.Body.ApplyImpulseAtOffset(ref impulse, ref r1);
 
                 contacts[i] = contact;
 
