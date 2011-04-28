@@ -116,7 +116,7 @@ namespace Myre.Entities
         /// <summary>
         /// Resets this instance, clearing all property and behaviour deta.
         /// </summary>
-        public void Reset()
+        public virtual void Reset()
         {
             behaviours.Clear();
             properties.Clear();
@@ -306,7 +306,7 @@ namespace Myre.Entities
         /// Creates a new entity with the properties and behaviours described by this instance.
         /// </summary>
         /// <returns></returns>
-        public Entity Create()
+        public virtual Entity Create()
         {
             Entity e;
 
@@ -323,7 +323,7 @@ namespace Myre.Entities
         /// </summary>
         /// <param name="entity">The entity.</param>
         /// <returns><c>true</c> if the entity was recycled; else <c>false</c>.</returns>
-        public bool Recycle(Entity entity)
+        public virtual bool Recycle(Entity entity)
         {
             if (entity.Version.Creator != this || entity.Version.Version != version)
                 return false;

@@ -136,6 +136,7 @@ namespace Myre.Debugging
 #if WINDOWS
             ConsoleTraceListener cts = new ConsoleTraceListener(this);
             Listener = cts;
+            Trace.Listeners.Add(cts);
 
             Engine.AddCommand(cts.RegexFilter, "AddFilter", "Console.Trace.AddFilter");
             Engine.AddCommand(cts.RegexFilter, "ListFilters", "Console.Trace.ListFilters");
