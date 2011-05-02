@@ -6,23 +6,23 @@ using Microsoft.Xna.Framework;
 namespace Myre
 {
     /// <summary>
-    /// Specifies the type of timing a pulsor uses.
+    /// Specifies the type of timing a pulser uses.
     /// </summary>
     public enum PulserType
     {
         /// <summary>
-        /// If more time has elapsed than the threashold since the last pulse, then the pulsor pulses and then resets the timer.
+        /// If more time has elapsed than the threshold since the last pulse, then the pulser pulses and then resets the timer.
         /// </summary>
         Simple,
 
         /// <summary>
-        /// The pulsor will ensure that it pulses the correct number of times in a perticular time interval.
-        /// e.g. If the pulsor has a frequency of 30Hz, and it is not updated for 0.5 seconds, then its next update will pulse 15 times.
+        /// The pulser will ensure that it pulses the correct number of times in a particular time interval.
+        /// e.g. If the pulser has a frequency of 30Hz, and it is not updated for 0.5 seconds, then its next update will pulse 15 times.
         /// </summary>
         Reliable,
 
         /// <summary>
-        /// Same as reliable, except that the pulsor toggles between on and off at each 'pulse'.
+        /// Same as reliable, except that the pulser toggles between on and off at each 'pulse'.
         /// </summary>
         SquareWave
     }
@@ -47,7 +47,7 @@ namespace Myre
 
         /// <summary>
         /// Gets or sets the delay.
-        /// This is the time after the pulsor is started or restarted, before it begins pulsing.
+        /// This is the time after the pulser is started or restarted, before it begins pulsing.
         /// </summary>
         /// <value>The delay.</value>
         public TimeSpan Delay { get; private set; }
@@ -61,7 +61,7 @@ namespace Myre
         public bool IsSignalled { get; private set; }
 
         /// <summary>
-        /// Occurs when the pulsor is triggered.
+        /// Occurs when the pulser is triggered.
         /// </summary>
         public event Action Signalled;
 
