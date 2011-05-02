@@ -20,7 +20,7 @@ namespace Myre.Extensions
         }
 
         /// <summary>
-        /// Appends the specified spritebatch onto this instance.
+        /// Appends the specified stringbuilder onto this instance.
         /// </summary>
         /// <param name="sb">The sb.</param>
         /// <param name="stringBuilder">The string builder.</param>
@@ -30,7 +30,7 @@ namespace Myre.Extensions
         }
 
         /// <summary>
-        /// Appends the specified spritebatch onto this instance.
+        /// Appends the specified stringbuilder onto this instance.
         /// </summary>
         /// <param name="sb">The sb.</param>
         /// <param name="stringBuilder">The string builder.</param>
