@@ -129,12 +129,12 @@ namespace GraphicsTests.Tests
         {
             scene = kernel.Get<TestScene>();
 
-            var sunEntity = kernel.Get<EntityDescription>();
-            sunEntity.AddProperty<Vector3>("direction", Vector3.Down);
-            sunEntity.AddProperty<Vector3>("colour", Vector3.One);
-            sunEntity.AddProperty<int>("shadowresolution", 1024);
-            sunEntity.AddBehaviour<SunLight>();
-            light = sunEntity.Create();
+            //var sun = kernel.Get<EntityDescription>();
+            //sun.AddProperty<Vector3>("direction", Vector3.Down);
+            //sun.AddProperty<Vector3>("colour", Vector3.One);
+            //sun.AddProperty<int>("shadowresolution", 1024);
+            //sun.AddBehaviour<SunLight>();
+            //light = sun.Create();
             //scene.Scene.Add(light);
 
             var toneMap = kernel.Get<ToneMapComponent>();

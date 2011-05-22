@@ -51,17 +51,20 @@ namespace GraphicsTests.Tests
             camera.View = Matrix.CreateLookAt(cameraPosition, new Vector3(0, 25, 0), Vector3.Up);
             camera.Projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(60), 16f / 9f, camera.NearClip, camera.FarClip);
 
-            var cameraEntity = kernel.Get<EntityDescription>();
-            cameraEntity.AddProperty<Camera>("camera", camera);
-            cameraEntity.AddProperty<Viewport>("viewport", new Viewport() { Width = device.PresentationParameters.BackBufferWidth, Height = device.PresentationParameters.BackBufferHeight });
-            cameraEntity.AddBehaviour<View>();
-            scene.Add(cameraEntity.Create());
+            var cameraDescription = kernel.Get<EntityDescription>();
+            cameraDescription.AddProperty<Viewport>("viewport");
+            cameraDescription.AddBehaviour<View>();
+            var cameraEntity = cameraDescription.Create();
+            cameraEntity.GetProperty<Camera>("camera").Value = camera;
+            cameraEntity.GetProperty<Viewport>("viewport").Value = new Viewport() { Width = device.PresentationParameters.BackBufferWidth, Height = device.PresentationParameters.BackBufferHeight };
+            scene.Add(cameraEntity);
 
             var particleEntityDesc = kernel.Get<EntityDescription>();
-            particleEntityDesc.AddProperty("position", Vector3.Zero);
+            particleEntityDesc.AddProperty<Vector3>("position");
             particleEntityDesc.AddBehaviour<EllipsoidParticleEmitter>();
             var entity = particleEntityDesc.Create();
             emitter = entity.GetBehaviour<EllipsoidParticleEmitter>();
+            entity.GetProperty<Vector3>("position").Value = Vector3.Zero;
             scene.Add(entity);
 
             var white = new Texture2D(device, 1, 1);

@@ -17,13 +17,18 @@ namespace GraphicsTests
         public static Entity Create(IKernel kernel, ContentManager content, Vector3 position)
         {
             var particleEntityDesc = kernel.Get<EntityDescription>();
-            particleEntityDesc.AddProperty("position", position);
-            particleEntityDesc.AddProperty("colour", Vector3.Normalize(new Vector3(5, 2, 2)) * 2);
-            particleEntityDesc.AddProperty("range", 70f);
+            particleEntityDesc.AddProperty<Vector3>("position");
+            particleEntityDesc.AddProperty<Vector3>("colour");
+            particleEntityDesc.AddProperty<float>("range");
             particleEntityDesc.AddBehaviour<EllipsoidParticleEmitter>();
             particleEntityDesc.AddBehaviour<PointLight>();
             
             var particleEntity = particleEntityDesc.Create();
+
+            particleEntity.GetProperty<Vector3>("position").Value = position;
+            particleEntity.GetProperty<Vector3>("colour").Value = Vector3.Normalize(new Vector3(5, 2, 2)) * 2;
+            particleEntity.GetProperty<float>("range").Value = 70f;
+
             var emitter = particleEntity.GetBehaviour<EllipsoidParticleEmitter>();
 
             emitter.BlendState = BlendState.Additive;

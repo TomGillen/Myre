@@ -64,11 +64,14 @@ namespace GraphicsTests
             camera.View = Matrix.CreateLookAt(cameraPosition, new Vector3(0, 50, 0), Vector3.Up);
             camera.Projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(60), 16f / 9f, camera.NearClip, camera.FarClip);
 
-            var cameraEntity = kernel.Get<EntityDescription>();
-            cameraEntity.AddProperty<Camera>("camera", camera);
-            cameraEntity.AddProperty<Viewport>("viewport", new Viewport() { Width = device.PresentationParameters.BackBufferWidth, Height = device.PresentationParameters.BackBufferHeight });
-            cameraEntity.AddBehaviour<View>();
-            scene.Add(cameraEntity.Create());
+            var cameraDesc = kernel.Get<EntityDescription>();
+            cameraDesc.AddProperty<Camera>("camera");
+            cameraDesc.AddProperty<Viewport>("viewport");
+            cameraDesc.AddBehaviour<View>();
+            var cameraEntity = cameraDesc.Create();
+            cameraEntity.GetProperty<Camera>("camera").Value = camera;
+            cameraEntity.GetProperty<Viewport>("viewport").Value = new Viewport() { Width = device.PresentationParameters.BackBufferWidth, Height = device.PresentationParameters.BackBufferHeight };
+            scene.Add(cameraEntity);
 
             //var skyboxEntity = kernel.Get<EntityDescription>();
             //skyboxEntity.AddProperty<TextureCube>("texture", content.Load<TextureCube>("GraceCathedral"));
@@ -91,9 +94,9 @@ namespace GraphicsTests
             //scene.Add(sun2);
 
             var pointLight = kernel.Get<EntityDescription>();
-            pointLight.AddProperty<Vector3>("position", new Vector3(0, 10, 0));
-            pointLight.AddProperty<Vector3>("colour", new Vector3(0, 5, 0));
-            pointLight.AddProperty<float>("range", 200);
+            pointLight.AddProperty<Vector3>("position");
+            pointLight.AddProperty<Vector3>("colour");
+            pointLight.AddProperty<float>("range");
             pointLight.AddBehaviour<PointLight>();
             //scene.Add(pointLight.Create());
 
@@ -104,30 +107,45 @@ namespace GraphicsTests
                 var entity = pointLight.Create();
                 scene.Add(entity);
 
+                entity.GetProperty<Vector3>("position").Value = new Vector3(0, 10, 0);
+                entity.GetProperty<Vector3>("colour").Value = new Vector3(0, 5, 0);
+                entity.GetProperty<float>("range").Value = 200;
+
                 var light = entity.GetBehaviour<PointLight>();
                 light.Colour = Vector3.Normalize(new Vector3(0.1f + (float)rng.NextDouble(), 0.1f + (float)rng.NextDouble(), 0.1f + (float)rng.NextDouble())) * 10;
                 lights.Add(light);
             }
 
             var spotLight = kernel.Get<EntityDescription>();
-            spotLight.AddProperty<Vector3>("position", new Vector3(-180, 250, 0));
-            spotLight.AddProperty<Vector3>("colour", new Vector3(10));
-            spotLight.AddProperty<Vector3>("direction", new Vector3(0, -1, 0));
-            spotLight.AddProperty<float>("angle", MathHelper.PiOver2);
-            spotLight.AddProperty<float>("range", 500);
-            spotLight.AddProperty<Texture2D>("mask", null);//content.Load<Texture2D>("Chrysanthemum"));
-            spotLight.AddProperty<int>("shadow_resolution", 512);
+            spotLight.AddProperty<Vector3>("position");
+            spotLight.AddProperty<Vector3>("colour");
+            spotLight.AddProperty<Vector3>("direction");
+            spotLight.AddProperty<float>("angle");
+            spotLight.AddProperty<float>("range");
+            spotLight.AddProperty<Texture2D>("mask");
+            spotLight.AddProperty<int>("shadow_resolution");
             spotLight.AddBehaviour<SpotLight>();
             var spotLightEntity = spotLight.Create();
+            spotLightEntity.GetProperty<Vector3>("position").Value = new Vector3(-180, 250, 0);
+            spotLightEntity.GetProperty<Vector3>("colour").Value = new Vector3(10);
+            spotLightEntity.GetProperty<Vector3>("direction").Value = new Vector3(0, -1, 0);
+            spotLightEntity.GetProperty<float>("angle").Value = MathHelper.PiOver2;
+            spotLightEntity.GetProperty<float>("range").Value = 500;
+            spotLightEntity.GetProperty<Texture2D>("mask").Value = null; //content.Load<Texture2D>("Chrysanthemum"));
+            spotLightEntity.GetProperty<int>("shadow_resolution").Value = 512; //content.Load<Texture2D>("Chrysanthemum"));
             this.spotLight = spotLightEntity.GetBehaviour<SpotLight>();
             scene.Add(spotLightEntity);
 
             var ambientLight = kernel.Get<EntityDescription>();
-            ambientLight.AddProperty<Vector3>("sky_colour", new Vector3(0.04f));
-            ambientLight.AddProperty<Vector3>("ground_colour", new Vector3(0.04f, 0.05f, 0.04f));
-            ambientLight.AddProperty<Vector3>("up", Vector3.Up);
+            ambientLight.AddProperty<Vector3>("sky_colour");
+            ambientLight.AddProperty<Vector3>("ground_colour");
+            ambientLight.AddProperty<Vector3>("up");
             ambientLight.AddBehaviour<AmbientLight>();
-            scene.Add(ambientLight.Create());
+            var ambientLightEntity = ambientLight.Create();
+            ambientLightEntity.GetProperty<Vector3>("sky_colour").Value = new Vector3(0.04f);
+            ambientLightEntity.GetProperty<Vector3>("ground_colour").Value = new Vector3(0.04f, 0.05f, 0.04f);
+            ambientLightEntity.GetProperty<Vector3>("up").Value = Vector3.Up;
+            scene.Add(ambientLightEntity);
 
             //var floor = content.Load<ModelData>(@"Models\Ground");
             //var floorEntity = kernel.Get<EntityDescription>();
@@ -137,13 +155,18 @@ namespace GraphicsTests
             //floorEntity.AddBehaviour<ModelInstance>();
             //scene.Add(floorEntity.Create());
 
-            var lizard = content.Load<ModelData>(@"Models\lizard");
-            var lizardEntity = kernel.Get<EntityDescription>();
-            lizardEntity.AddProperty<ModelData>("model", lizard);
-            lizardEntity.AddProperty<Matrix>("transform", Matrix.CreateScale(50 / 700f) * Matrix.CreateTranslation(150, 0, 0));
-            lizardEntity.AddProperty<bool>("is_static", true);
-            lizardEntity.AddBehaviour<ModelInstance>();
-            scene.Add(lizardEntity.Create());
+            var lizardModel = content.Load<ModelData>(@"Models\lizard");
+            var lizard = kernel.Get<EntityDescription>();
+            lizard.AddProperty<ModelData>("model");
+            lizard.AddProperty<Matrix>("transform");
+            lizard.AddProperty<bool>("is_static");
+            var lizardEntity = lizard.Create();
+            lizardEntity.GetProperty<ModelData>("model").Value = lizardModel;
+            lizardEntity.GetProperty<Matrix>("transform").Value = Matrix.CreateScale(50 / 700f) * Matrix.CreateTranslation(150, 0, 0);
+            lizardEntity.GetProperty<bool>("is_static").Value = true;
+            lizard.AddBehaviour<ModelInstance>();
+
+            scene.Add(lizardEntity);
 
             //var ship1 = content.Load<ModelData>(@"Models\Ship1");
             //var ship1Entity = kernel.Get<EntityDescription>();
@@ -153,27 +176,40 @@ namespace GraphicsTests
             //ship1Entity.AddBehaviour<ModelInstance>();
             //scene.Add(ship1Entity.Create());
 
-            var hebe = content.Load<ModelData>(@"Models\Hebe2");
-            var hebeEntity = kernel.Get<EntityDescription>();
-            hebeEntity.AddProperty<ModelData>("model", hebe);
-            hebeEntity.AddProperty<Matrix>("transform", Matrix.CreateScale(25 / hebe.Meshes[0].BoundingSphere.Radius)
-                                                        * Matrix.CreateRotationY(MathHelper.PiOver2)
-                                                        * Matrix.CreateTranslation(-150, 20, 0));
-            hebeEntity.AddProperty<bool>("is_static", true);
-            hebeEntity.AddBehaviour<ModelInstance>();
-            scene.Add(hebeEntity.Create());
+            var hebeModel = content.Load<ModelData>(@"Models\Hebe2");
+            var hebe = kernel.Get<EntityDescription>();
+            hebe.AddProperty<ModelData>("model");
+            hebe.AddProperty<Matrix>("transform");
+            hebe.AddProperty<bool>("is_static");
+            hebe.AddBehaviour<ModelInstance>();
+            var hebeEntity = hebe.Create();
+            hebeEntity.GetProperty<ModelData>("model").Value = hebeModel;
+            hebeEntity.GetProperty<Matrix>("transform").Value = Matrix.CreateScale(25 / hebeModel.Meshes[0].BoundingSphere.Radius)
+                                                                    * Matrix.CreateRotationY(MathHelper.PiOver2)
+                                                                    * Matrix.CreateTranslation(-150, 20, 0);
+            hebeEntity.GetProperty<bool>("is_static").Value = true;
+            scene.Add(hebeEntity);
 
-            var lightBlocker = hebeEntity.Create();
+            var lightBlocker = hebe.Create();
             hebeTransform = lightBlocker.GetProperty<Matrix>("transform");
+            lightBlocker.GetProperty<ModelData>("model").Value = hebeModel;
+            lightBlocker.GetProperty<Matrix>("transform").Value = Matrix.CreateScale(25 / hebeModel.Meshes[0].BoundingSphere.Radius)
+                                                                    * Matrix.CreateRotationY(MathHelper.PiOver2)
+                                                                    * Matrix.CreateTranslation(-150, 20, 0);
+            lightBlocker.GetProperty<bool>("is_static").Value = true;
             scene.Add(lightBlocker);
 
-            var sponza = content.Load<ModelData>(@"Sponza");
-            var sponzaEntity = kernel.Get<EntityDescription>();
-            sponzaEntity.AddProperty<ModelData>("model", sponza);
-            sponzaEntity.AddProperty<Matrix>("transform", Matrix.Identity * Matrix.CreateScale(1));
-            sponzaEntity.AddProperty<bool>("is_static", true);
-            sponzaEntity.AddBehaviour<ModelInstance>();
-            scene.Add(sponzaEntity.Create());
+            var sponzaModel = content.Load<ModelData>(@"Sponza");
+            var sponza = kernel.Get<EntityDescription>();
+            sponza.AddProperty<ModelData>("model");
+            sponza.AddProperty<Matrix>("transform");
+            sponza.AddProperty<bool>("is_static");
+            sponza.AddBehaviour<ModelInstance>();
+            var sponzaEntity = sponza.Create();
+            sponzaEntity.GetProperty<ModelData>("model").Value = sponzaModel;
+            sponzaEntity.GetProperty<Matrix>("transform").Value = Matrix.Identity * Matrix.CreateScale(1);
+            sponzaEntity.GetProperty<bool>("is_static").Value = true;
+            scene.Add(sponzaEntity);
 
             var renderer = scene.GetService<Renderer>();
             resolution = renderer.Data.Get<Vector2>("resolution");

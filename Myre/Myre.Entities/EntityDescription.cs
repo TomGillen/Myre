@@ -191,7 +191,7 @@ namespace Myre.Entities
             {
                 Name = name,
                 Type = typeof(T),
-                Factory = create,
+                Factory = (a) => create(a),
             });
         }
 
