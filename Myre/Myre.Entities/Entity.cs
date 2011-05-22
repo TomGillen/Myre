@@ -337,7 +337,11 @@ namespace Myre.Entities
             where T : Behaviour
         {
             //return GetBehaviours(typeof(T)) as T[];
-            return GetBehaviours(typeof(T)).Cast<T>().ToArray();
+            var v = GetBehaviours(typeof(T));
+            if (v != null)
+                return v.Cast<T>().ToArray();
+            else
+                return new T[0];
         }
     }
 }
