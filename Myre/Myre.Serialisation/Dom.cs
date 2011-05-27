@@ -9,19 +9,19 @@ namespace Myre.Serialisation
     public partial class Dom
     {
         #region nodes
-        public class Node
+        public partial class Node
         {
             public Type Type;
         }
 
-        public class ListNode
+        public partial class ListNode
             : Node
         {
             public Type ElementType;
             public List<Node> Children;
         }
 
-        public class DictionaryNode
+        public partial class DictionaryNode
             : Node
         {
             public Type KeyType;
@@ -29,13 +29,13 @@ namespace Myre.Serialisation
             public Dictionary<Node, Node> Children;
         }
 
-        public class LiteralNode
+        public partial class LiteralNode
             : Node
         {
             public string Value;
         }
 
-        public class ObjectNode
+        public partial class ObjectNode
             : Node
         {
             public Dictionary<string, Node> Children;
