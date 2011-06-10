@@ -63,8 +63,6 @@ namespace Myre.Physics.Collisions
 
         public override void CreateProperties(Entity.InitialisationContext context)
         {
-            Body = context.GetBehaviour<DynamicPhysics>();
-
             frictionCoefficient = context.CreateProperty<float>("friction_coefficient");
             restitutionCoefficient = context.CreateProperty<float>("restitution_coefficient");
             sleeping = context.CreateProperty<bool>("sleeping");
@@ -77,6 +75,8 @@ namespace Myre.Physics.Collisions
 
         public override void Initialise()
         {
+            Body = Owner.GetBehaviour<DynamicPhysics>();
+
             wasSleeping = sleeping.Value;
             base.Initialise();
         }

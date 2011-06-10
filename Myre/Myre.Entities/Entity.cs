@@ -58,26 +58,6 @@ namespace Myre.Entities
                 return property;
             }
 
-            public Property<T> GetProperty<T>(string name)
-            {
-                CheckFrozen();
-                return entity.GetProperty<T>(name);
-            }
-
-            public T GetBehaviour<T>(string name = null)
-                where T : Behaviour
-            {
-                CheckFrozen();
-                return entity.GetBehaviour<T>(name);
-            }
-
-            public T[] GetBehaviours<T>()
-                where T : Behaviour
-            {
-                CheckFrozen();
-                return entity.GetBehaviours<T>();
-            }
-
             private void CheckFrozen()
             {
                 if (frozen)

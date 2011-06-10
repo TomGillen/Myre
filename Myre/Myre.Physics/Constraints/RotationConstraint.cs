@@ -20,8 +20,6 @@ namespace Myre.Physics.Constraints
 
         public override void CreateProperties(Myre.Entities.Entity.InitialisationContext context)
         {
-            this.body = context.GetBehaviour<DynamicPhysics>();
-
             if (body == null)
                 throw new Exception("VelocityConstraint requires that the entity contain a DynamicPhysics behaviour.");
 
@@ -30,6 +28,13 @@ namespace Myre.Physics.Constraints
             this.damping = context.CreateProperty<float>("rotation_constraint_damping");
 
             base.CreateProperties(context);
+        }
+
+        public override void Initialise()
+        {
+            this.body = Owner.GetBehaviour<DynamicPhysics>();
+
+            base.Initialise();
         }
 
         public class Manager

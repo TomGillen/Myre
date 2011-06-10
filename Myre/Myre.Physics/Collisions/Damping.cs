@@ -30,14 +30,13 @@ namespace Myre.Physics.Dynamics.Constraints
             acceleration = context.CreateProperty<Vector3>("acceleration");
             inverseMass = context.CreateProperty<float>(InverseMassCalculator.INVERSE_MASS);
 
-            if (context.GetBehaviour<InverseMassCalculator>() == null)
-                throw new InvalidOperationException("Inverse mass calculator must be attached");
-
             base.CreateProperties(context);
         }
 
         public override void Initialise()
         {
+            if (Owner.GetBehaviour<InverseMassCalculator>() == null)
+                throw new InvalidOperationException("Inverse mass calculator must be attached");
             damping = Owner.GetProperty<float>("damping");
 
             base.Initialise();

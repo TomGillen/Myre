@@ -58,8 +58,6 @@ namespace Myre.Physics.Collisions
 
         public override void CreateProperties(Entity.InitialisationContext context)
         {
-            transformBehaviour = context.GetBehaviour<Transform>();
-
             var prefix = Name != null ? Name + "_" : string.Empty;
             transformProperty = context.CreateProperty<Matrix>("transform", Matrix.Identity);
             verticesProperty = context.CreateProperty<Vector2[]>(prefix + "vertices");
@@ -82,6 +80,8 @@ namespace Myre.Physics.Collisions
 
         public override void Initialise()
         {
+            transformBehaviour = Owner.GetBehaviour<Transform>();
+
             ReadVertices(verticesProperty);
             base.Initialise();
         }
