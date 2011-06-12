@@ -24,6 +24,12 @@ namespace Myre.Serialisation.Tests
             public NonParsable Bar;
         }
 
+        class TwoStrings
+        {
+            public string A;
+            public string B;
+        }
+
         [TestMethod]
         public void SaveLiteral()
         {
@@ -40,7 +46,7 @@ namespace Myre.Serialisation.Tests
             Dom dom = Dom.Serialise(foo);
             
             string output = dom.Save();
-            string expected = "NonParsable {\n  A: Int32 \"5\",\n  B: Single \"5\",\n  C: String \"hello \\\"world\\\"!\",\n  D: null\n}";
+            string expected = "SaveTest+NonParsable {\n  A: Int32 \"5\",\n  B: Single \"5\",\n  C: String \"hello \\\"world\\\"!\",\n  D: null\n}";
 
             Assert.AreEqual(expected, output);
         }
@@ -81,7 +87,7 @@ namespace Myre.Serialisation.Tests
             Dom dom = Dom.Serialise(value);
 
             string output = dom.Save();
-            string expected = "CompositeType {\n  Foo: String \"foobar\",\n  Bar: NonParsable {\n    A: Int32 \"5\",\n    B: Single \"10\",\n    C: String \"hello \\\"world\\\"!\",\n    D: null\n  }\n}";
+            string expected = "SaveTest+CompositeType {\n  Foo: String \"foobar\",\n  Bar: SaveTest+NonParsable {\n    A: Int32 \"5\",\n    B: Single \"10\",\n    C: String \"hello \\\"world\\\"!\",\n    D: null\n  }\n}";
             
             Assert.AreEqual(expected, output);
         }
@@ -99,10 +105,34 @@ namespace Myre.Serialisation.Tests
             Dom dom = Dom.Serialise(dictionary);
 
             string output = dom.Save();
-            string expected = "Dictionary<CompositeType,CompositeType> [\n  CompositeType {\n    Foo: String \"foobar\",\n    Bar: NonParsable {\n      A: Int32 \"5\",\n      B: Single \"10\",\n      C: String \"hello \\\"world\\\"!\",\n      D: null\n    }\n  }: CompositeType {\n    Foo: String \"foobar\",\n    Bar: NonParsable {\n      A: Int32 \"5\",\n      B: Single \"10\",\n      C: String \"hello \\\"world\\\"!\",\n      D: null\n    }\n  }\n]";
+            string expected = "Dictionary<SaveTest+CompositeType,SaveTest+CompositeType> [\n  SaveTest+CompositeType {\n    Foo: String \"foobar\",\n    Bar: SaveTest+NonParsable {\n      A: Int32 \"5\",\n      B: Single \"10\",\n      C: String \"hello \\\"world\\\"!\",\n      D: null\n    }\n  }: SaveTest+CompositeType {\n    Foo: String \"foobar\",\n    Bar: SaveTest+NonParsable {\n      A: Int32 \"5\",\n      B: Single \"10\",\n      C: String \"hello \\\"world\\\"!\",\n      D: null\n    }\n  }\n]";
 
-            Debug.WriteLine(output);
-            Debug.WriteLine(expected);
+            Assert.AreEqual(expected, output);
+        }
+
+        [TestMethod]
+        public void SaveArray()
+        {
+            int[] value = new int[] { 1, 2, 3, 4 };
+
+            Dom dom = Dom.Serialise(value);
+
+            string output = dom.Save();
+            string expected = "Int32[] [\n  Int32 \"1\",\n  Int32 \"2\",\n  Int32 \"3\",\n  Int32 \"4\"\n]";
+
+            Assert.AreEqual(expected, output);
+        }
+
+        [TestMethod]
+        public void SaveSharedResources()
+        {
+            string foo = "Foo";
+            TwoStrings value = new TwoStrings() { A = foo, B = foo };
+
+            Dom dom = Dom.Serialise(value);
+
+            string output = dom.Save();
+            string expected = "R[\n  0: String \"Foo\"\n]\nSaveTest+TwoStrings {\n  A: #0,\n  B: #0\n}";
 
             Assert.AreEqual(expected, output);
         }

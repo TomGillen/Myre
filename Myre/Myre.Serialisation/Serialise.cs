@@ -5,6 +5,7 @@ using System.Text;
 using System.Reflection;
 using System.Collections;
 using Myre.Serialisation;
+using Ninject;
 
 namespace Myre.Serialisation
 {
@@ -19,13 +20,55 @@ namespace Myre.Serialisation
         private static Dictionary<Type, bool> parsable = new Dictionary<Type, bool>();
         private static Dictionary<Type, FieldsAndProperties> properties = new Dictionary<Type, FieldsAndProperties>();
 
-        public static Dom Serialise<T>(T value)
+        private Dictionary<object, Node> referenceTypeNodes = new Dictionary<object, Node>();
+        private Dictionary<int, Node> sharedReferences = new Dictionary<int, Node>();
+
+        public static Dom Serialise(object value)
         {
-            var root = SerialiseObject(value);
-            return new Dom(root);
+            return Serialise(value, new StandardKernel());
         }
 
-        private static Node SerialiseObject(object value)
+        public static Dom Serialise(object value, IKernel kernel)
+        {
+            var dom = new Dom(kernel);
+            dom.Root = SerialiseObject(dom, value);
+            dom.referenceTypeNodes.Clear();
+            return dom;
+        }
+
+        private static NodeReference SerialiseObject(Dom dom, object item)
+        {
+            if (item == null)
+                return new NodeReference(dom, null);
+
+            Node node;
+            if (item.GetType().IsValueType)
+            {
+                node = Dom.CreateNode(dom, item);
+                return new NodeReference(dom, node);
+            }
+            else
+            {
+                if (dom.referenceTypeNodes.TryGetValue(item, out node))
+                {
+                    if (node.SharedReferenceID == null)
+                    {
+                        node.SharedReferenceID = dom.sharedReferences.Count;
+                        dom.sharedReferences.Add(node.SharedReferenceID.Value, node);
+                    }
+
+                    return new NodeReference(dom, node);
+                }
+                else
+                {
+                    node = Dom.CreateNode(dom, item);
+                    dom.referenceTypeNodes[item] = node;
+                    return new NodeReference(dom, node);
+                }
+            }
+        }
+
+        private static Node CreateNode(Dom dom, object value)
         {
             if (value == null)
                 return null;
@@ -39,12 +82,12 @@ namespace Myre.Serialisation
                 return CreateLiteral(value);
 
             if (value is IList)
-                return CreateList(value as IList, type);
+                return CreateList(value as IList, type, dom);
 
             if (value is IDictionary)
-                return CreateDictionary(value as IDictionary, type);
+                return CreateDictionary(value as IDictionary, type, dom);
 
-            return CreateObject(value, type);
+            return CreateObject(value, type, dom);
         }
 
         private static Node CreateLiteral(object value)
@@ -52,75 +95,59 @@ namespace Myre.Serialisation
             return new LiteralNode()
             {
                 Type = value.GetType(),
-                Value = string.Format("\"{0}\"", value.ToString().Escape())
+                Value = value.ToString().Escape()
             };
         }
 
-        private static Node CreateList(IList list, Type type)
-        {
-            var genericParameters = (from i in type.GetInterfaces()
-                                     where i.FullName.StartsWith(typeof(IList<>).FullName)
-                                     select i.GetGenericArguments().First()).ToArray();
-
-            var elementType = genericParameters.Length == 1 ? genericParameters[0] : typeof(object);
-            
+        private static Node CreateList(IList list, Type type, Dom dom)
+        {            
             var node = new ListNode();
             node.Type = type;
-            node.ElementType = elementType;
-            node.Children = new List<Node>();
+            node.Children = new List<NodeReference>();
 
             foreach (var item in list)
             {
-                var serialisedItem = SerialiseObject(item);
+                var serialisedItem = SerialiseObject(dom, item);
                 node.Children.Add(serialisedItem);
             }
 
             return node;
         }
 
-        private static Node CreateDictionary(IDictionary dictionary, Type type)
+        private static Node CreateDictionary(IDictionary dictionary, Type type, Dom dom)
         {
-            var genericParameters = (from i in type.GetInterfaces()
-                                     where i.FullName.StartsWith(typeof(IDictionary<,>).FullName)
-                                     let args = i.GetGenericArguments()
-                                     select new { Key = args[0], Value = args[1] }).ToArray();
-
-            var types = genericParameters.Length == 1 ? genericParameters[0] : new { Key = typeof(object), Value = typeof(object) };
-
             var node = new DictionaryNode();
             node.Type = type;
-            node.KeyType = types.Key;
-            node.ValueType = types.Value;
-            node.Children = new Dictionary<Node, Node>();
+            node.Children = new Dictionary<NodeReference, NodeReference>();
 
             foreach (DictionaryEntry item in dictionary)
             {
-                var serialisedKey = SerialiseObject(item.Key);
-                var serialisedValue = SerialiseObject(item.Value);
+                var serialisedKey = SerialiseObject(dom, item.Key);
+                var serialisedValue = SerialiseObject(dom, item.Value);
                 node.Children.Add(serialisedKey, serialisedValue);
             }
 
             return node;
         }
 
-        private static Node CreateObject(object value, Type type)
+        private static Node CreateObject(object value, Type type, Dom dom)
         {
             var fap = GetFieldsAndProperties(type);
             var node = new ObjectNode();
             node.Type = type;
-            node.Children = new Dictionary<string,Node>();
+            node.Children = new Dictionary<string, NodeReference>();
 
             foreach (var field in fap.Fields)
             {
                 var fieldValue = field.GetValue(value);
-                var serialisedValue = SerialiseObject(fieldValue);
+                var serialisedValue = SerialiseObject(dom, fieldValue);
                 node.Children.Add(field.Name, serialisedValue);
             }
 
             foreach (var property in fap.Properties)
             {
                 var fieldValue = property.GetValue(value, null);
-                var serialisedValue = SerialiseObject(fieldValue);
+                var serialisedValue = SerialiseObject(dom, fieldValue);
                 node.Children.Add(property.Name, serialisedValue);
             }
 

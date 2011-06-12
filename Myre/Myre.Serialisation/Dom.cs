@@ -3,50 +3,100 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using Ninject;
 
 namespace Myre.Serialisation
 {
+    /// <summary>
+    /// A document object model which can describe a serialised object.
+    /// </summary>
     public partial class Dom
     {
+        public struct NodeReference
+        {
+            private Dom dom;
+            private int? id;
+            private Node node;
+
+            public NodeReference(Dom dom, Node node)
+            {
+                this.dom = dom;
+                this.node = node;
+                this.id = null;
+            }
+
+            public NodeReference(Dom dom, int id)
+            {
+                this.dom = dom;
+                this.node = null;
+                this.id = id;
+            }
+
+            public Node GetNode()
+            {
+                if (node == null && id != null)
+                    node = dom.sharedReferences[id.Value];
+
+                return node;
+            }
+
+            public void Write(Stream stream, int indent)
+            {
+                if (id == null && node != null && node.SharedReferenceID != null)
+                    id = node.SharedReferenceID;
+
+                if (id != null)
+                    Dom.Write(stream, string.Format("#{0}", id.Value));
+                else
+                    GetNode().Write(stream, indent);
+            }
+        }
+
         #region nodes
-        public partial class Node
+        public abstract partial class Node
         {
             public Type Type;
+            public int? SharedReferenceID;
         }
 
-        public partial class ListNode
+        public sealed partial class ListNode
             : Node
         {
-            public Type ElementType;
-            public List<Node> Children;
+            public List<NodeReference> Children;
         }
 
-        public partial class DictionaryNode
+        public sealed partial class DictionaryNode
             : Node
         {
-            public Type KeyType;
-            public Type ValueType;
-            public Dictionary<Node, Node> Children;
+            public Dictionary<NodeReference, NodeReference> Children;
         }
 
-        public partial class LiteralNode
+        public sealed partial class LiteralNode
             : Node
         {
             public string Value;
         }
 
-        public partial class ObjectNode
+        public sealed partial class ObjectNode
             : Node
         {
-            public Dictionary<string, Node> Children;
+            public Dictionary<string, NodeReference> Children;
         }
         #endregion
 
-        public Node Root { get; private set; }
+        /// <summary>
+        /// Gets the root DOM node.
+        /// </summary>
+        public NodeReference Root { get; private set; }
 
-        public Dom(Node root)
+        /// <summary>
+        /// Gets the kernel used to instantiate new objects during deserialisation.
+        /// </summary>
+        public IKernel Kernel { get; private set; }
+
+        private Dom(IKernel kernel)
         {
-            this.Root = root;
+            this.Kernel = kernel;
         }
     }
 }
