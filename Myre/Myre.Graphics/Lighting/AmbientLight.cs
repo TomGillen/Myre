@@ -61,8 +61,7 @@ namespace Myre.Graphics.Lighting
 
             public Manager(
                 ContentManager content,
-                GraphicsDevice device,
-                [SceneService] Renderer renderer)
+                GraphicsDevice device)
             {                
                 lightingMaterial = new Material(content.Load<Effect>("AmbientLight"));
                 quad = new Quad(device);

@@ -15,7 +15,6 @@ using Myre.UI.InputDevices;
 using Microsoft.Xna.Framework.Input;
 using Myre.UI.Text;
 using Microsoft.Xna.Framework;
-using Myre.Entities.Ninject;
 using Ninject.Planning.Bindings.Resolvers;
 using Myre.Debugging;
 
@@ -51,8 +50,7 @@ namespace GraphicsTests
             {
                 index++;
 
-                var testKernel = new StandardKernel(new EntityNinjectModule());
-                testKernel.Components.Add<IBindingResolver, ConditionalBindingResolver>();
+                var testKernel = new StandardKernel();
                 testKernel.Bind<GraphicsDevice>().ToConstant(device);
                 testKernel.Bind<ContentManager>().ToConstant(new ContentManager(services));
                 testKernel.Bind<Game>().ToConstant(game);

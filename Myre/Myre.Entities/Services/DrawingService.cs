@@ -57,6 +57,14 @@ namespace Myre.Entities.Services
         }
 
         /// <summary>
+        /// Initialises the service
+        /// </summary>
+        /// <param name="scene">The scene to which this service belongs to.</param>
+        public void Initialise(Scene scene)
+        {
+        }
+
+        /// <summary>
         /// Updates the service for a single frame.
         /// </summary>
         /// <param name="elapsedTime">The number of seconds which have elapsed since the previous frame.</param>

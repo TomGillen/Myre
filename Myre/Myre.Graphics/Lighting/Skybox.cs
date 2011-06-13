@@ -69,8 +69,7 @@ namespace Myre.Graphics.Lighting
 
             public Manager(
                 GraphicsDevice device, 
-                ContentManager content,
-                [SceneService] Renderer renderer)
+                ContentManager content)
             {
                 //var declaration = new VertexDeclaration(new VertexElement(0, VertexElementFormat.Vector3, VertexElementUsage.Position, 0));
 

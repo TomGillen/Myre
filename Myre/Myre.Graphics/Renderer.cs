@@ -61,21 +61,27 @@ namespace Myre.Graphics
             set { plan = value; }
         }
 
-        public Renderer(IKernel kernel, GraphicsDevice device, ContentManager content, Scene scene)
+        public Renderer(IKernel kernel, GraphicsDevice device, ContentManager content)
         {
             this.kernel = kernel;
             this.device = device;
-            this.scene = scene;
             this.data = new RendererMetadata();
             this.settings = new RendererSettings(this);
             this.viewResults = new Queue<RenderPlan.Output>();
             this.quad = new Quad(device);
             //this.colourCorrection = content.Load<Effect>("Gamma");
             this.spriteBatch = new SpriteBatch(device);
+        }
+
+        public override void Initialise(Scene scene)
+        {
+            this.scene = scene;
 
             this.views = from manager in scene.FindManagers<View.Manager>()
                          from view in manager.Views
                          select view;
+
+            base.Initialise(scene);
         }
 
         public override void Update(float elapsedTime)

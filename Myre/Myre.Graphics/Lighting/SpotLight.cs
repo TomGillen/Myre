@@ -137,8 +137,7 @@ namespace Myre.Graphics.Lighting
             public Manager(
                 IKernel kernel,
                 ContentManager content,
-                GraphicsDevice device,
-                [SceneService] Renderer renderer)
+                GraphicsDevice device)
             {            
                 var effect = content.Load<Effect>("SpotLight");
                 geometryLightingMaterial = new Material(effect.Clone(), "Geometry");

@@ -91,8 +91,7 @@ namespace Myre.Graphics.Geometry
             private Octree octree;
 
             public Manager(
-                GraphicsDevice device,
-                [SceneService] Renderer renderer)
+                GraphicsDevice device)
             {
                 this.device = device;
                 this.meshInstancePool = new Pool<MeshInstance>();

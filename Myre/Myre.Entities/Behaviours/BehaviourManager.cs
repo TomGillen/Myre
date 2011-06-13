@@ -19,50 +19,13 @@ namespace Myre.Entities.Behaviours
     public interface IBehaviourManager
         : IDisposableObject
     {
-        ///// <summary>
-        ///// Gets the type this manager manages.
-        ///// </summary>
-        //Type BehaviourType { get; }
-
-        ///// <summary>
-        ///// Adds a behaviour to this manager.
-        ///// </summary>
-        ///// <param name="behaviour">The behaviour the manager should begin to manage.</param>
-        //void Add(Behaviour behaviour);
-
-        ///// <summary>
-        ///// Removes a behaviour from this manager.
-        ///// </summary>
-        ///// <param name="behaviour">The behaviour this manager should stop managing.</param>
-        ///// <returns><c>true</c> if the behaviour was removed; else <c>false</c>.</returns>
-        //bool Remove(Behaviour behaviour);
+        void Initialise(Scene scene);
     }
 
     public static class BehaviourManagerExtensions
     {
         //private static Dictionary<Type, Dictionary<Type, MethodInfo>> managerMethods = new Dictionary<Type, Dictionary<Type, MethodInfo>>();
         private static Dictionary<Type, Type[]> managedTypes = new Dictionary<Type, Type[]>();
-
-        //public static void Add(this IBehaviourManager manager, Behaviour behaviour)
-        //{
-        //    var behaviourType = behaviour.GetType();
-        //    var managerType = manager.GetType();
-
-        //    Dictionary<Type, MethodInfo> methods = null;
-        //    if (!managerMethods.TryGetValue(managerType, out methods))
-        //    {
-        //        var types = manager.GetManagedTypes();
-        //        foreach (var type in types)
-        //        {
-        //            var add = managerType.GetMethod("Add", new Type[] { type });
-        //            var remove = managerType.GetMethod("Remove", new Type[] { type });
-        //        }
-        //    }
-        //}
-
-        //public static void Remove(this IBehaviourManager manager, Behaviour behaviour)
-        //{
-        //}
 
         public static IEnumerable<Type> GetManagedTypes(this IBehaviourManager manager)
         {
@@ -146,6 +109,10 @@ namespace Myre.Entities.Behaviours
             Behaviours = new List<T>();
         }
 
+        public virtual void Initialise(Scene scene)
+        {
+        }
+
         /// <summary>
         /// Adds a behaviour to this manager.
         /// </summary>
@@ -166,27 +133,6 @@ namespace Myre.Entities.Behaviours
         {
             return Behaviours.Remove(behaviour);
         }
-
-        ///// <summary>
-        ///// Adds a behaviour to this manager.
-        ///// </summary>
-        ///// <param name="behaviour">The behaviour the manager should begin to manage.</param>
-        //void IBehaviourManager.Add(Behaviour behaviour)
-        //{
-        //    Add(behaviour as T);
-        //}
-
-        ///// <summary>
-        ///// Removes a behaviour from this manager.
-        ///// </summary>
-        ///// <param name="behaviour">The behaviour this manager should stop managing.</param>
-        ///// <returns>
-        ///// 	<c>true</c> if the behaviour was removed; else <c>false</c>.
-        ///// </returns>
-        //bool IBehaviourManager.Remove(Behaviour behaviour)
-        //{
-        //    return Remove(behaviour as T);
-        //}
 
         /// <summary>
         /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.

@@ -77,8 +77,7 @@ namespace Myre.Graphics.Lighting
 
             public Manager(
                 ContentManager content,
-                GraphicsDevice device,
-                [SceneService] Renderer renderer)
+                GraphicsDevice device)
             {
                 var effect = content.Load<Effect>("PointLight");
                 geometryLightingMaterial = new Material(effect.Clone(), "Geometry");

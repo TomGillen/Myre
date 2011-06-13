@@ -8,6 +8,7 @@ using Ninject.Parameters;
 using Myre.Entities.Behaviours;
 using Myre;
 using System.Collections.ObjectModel;
+using Ninject.Extensions.ChildKernel;
 
 namespace Myre.Entities
 {
@@ -22,8 +23,6 @@ namespace Myre.Entities
         private ServiceContainer services;
         private BehaviourManagerContainer managers;
         private List<Entity> entities;
-        private IKernel kernel;
-        private IParameter self;
 
         /// <summary>
         /// Gets a value indicating whether this instance is disposed.
@@ -50,24 +49,38 @@ namespace Myre.Entities
         public IEnumerable<IBehaviourManager> Managers { get { return managers; } }
 
         /// <summary>
+        /// Gets the Ninject kernel used to instantiate services and behaviour managers.
+        /// </summary>
+        public IKernel Kernel { get; private set; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="Scene"/> class.
         /// </summary>
-        /// <param name="kernel">The kernel.</param>
+        public Scene()
+            : this(null)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Scene"/> class.
+        /// </summary>
+        /// <param name="kernel">The kernel used to instantiate services and behaviours. <c>null</c> for NinjectKernel.Instance.</param>
         public Scene(IKernel kernel)
         {
             this.services = new ServiceContainer();
             this.managers = new BehaviourManagerContainer();
             this.entities = new List<Entity>();
-            this.kernel = kernel;
-            this.self = new Parameter("scene", this, true);
+            this.Kernel = kernel ?? NinjectKernel.Instance; //new ChildKernel(kernel ?? NinjectKernel.Instance);
             this.Entities = new ReadOnlyCollection<Entity>(entities);
+
+            //this.Kernel.Bind<Scene>().ToConstant(this);
         }
 
         /// <summary>
         /// Adds the specified entity.
         /// </summary>
         /// <param name="entity">The entity.</param>
-        public Entity Add(Entity entity)
+        public void Add(Entity entity)
         {
             if (entity.Scene != null)
                 throw new InvalidOperationException("Cannot add an entity to a scene if it is in a scene already");
@@ -86,8 +99,6 @@ namespace Myre.Entities
             }
 
             entities.Add(entity);
-
-            return entity;
         }
 
         private Type SearchForDefaultManager(Type behaviourType)
@@ -148,7 +159,7 @@ namespace Myre.Entities
             if (managers.TryGet(managerType, out manager))
                 return manager;
 
-            manager = kernel.Get(managerType, self) as IBehaviourManager;
+            manager = Kernel.Get(managerType) as IBehaviourManager;
 
             var behaviourTypes = manager.GetManagedTypes();
             foreach (var type in behaviourTypes)
@@ -160,12 +171,14 @@ namespace Myre.Entities
             managers.Add(manager);
             AddBehavioursToManager(behaviourTypes);
 
+            manager.Initialise(this);
+
             return manager;
         }
 
         private void AddBehavioursToManager(IEnumerable<Type> behaviourTypes)
         {
-            var behavioursToBeAdded =
+            var behavioursToBeAdded = 
                 from behaviourType in behaviourTypes
                 let handler = managers.GetByBehaviour(behaviourType)
                 from entity in entities
@@ -195,7 +208,7 @@ namespace Myre.Entities
         }
 
         /// <summary>
-        /// Gets the service of the specified type from this sene, or creates one
+        /// Gets the service of the specified type from this scene, or creates one
         /// if one does not already exist.
         /// </summary>
         /// <param name="serviceType">Type of the service.</param>
@@ -209,8 +222,10 @@ namespace Myre.Entities
             if (!typeof(IService).IsAssignableFrom(serviceType))
                 throw new ArgumentException("serviceType is not an IService.");
 
-            service = kernel.Get(serviceType, self) as IService;
+            service = Kernel.Get(serviceType) as IService;
             services.Add(service);
+
+            service.Initialise(this);
 
             return service;
         }

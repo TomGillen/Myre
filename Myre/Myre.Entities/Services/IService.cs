@@ -27,6 +27,12 @@ namespace Myre.Entities.Services
         int DrawOrder { get; }
 
         /// <summary>
+        /// Initialises the service
+        /// </summary>
+        /// <param name="scene">The scene to which this service belongs to.</param>
+        void Initialise(Scene scene);
+
+        /// <summary>
         /// Updates the service for a single frame.
         /// </summary>
         /// <param name="elapsedTime">The number of seconds which have elapsed since the previous frame.</param>
@@ -61,6 +67,14 @@ namespace Myre.Entities.Services
         /// </summary>
         /// <value></value>
         public bool IsDisposed { get; private set; }
+
+        /// <summary>
+        /// Initialises the service
+        /// </summary>
+        /// <param name="scene">The scene to which this service belongs to.</param>
+        public virtual void Initialise(Scene scene)
+        {
+        }
 
         /// <summary>
         /// Updates the service for a single frame.

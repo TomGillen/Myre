@@ -145,9 +145,16 @@ namespace Myre.Graphics.Particles
         {
             public bool IsComplete { get { return false; } }
 
-            public Manager([SceneService] ProcessService processes)
+            public Manager()
             {
+            }
+
+            public override void Initialise(Scene scene)
+            {
+                var processes = scene.GetService<ProcessService>();
                 processes.Add(this);
+
+                base.Initialise(scene);
             }
 
             public void Update(float elapsedTime)

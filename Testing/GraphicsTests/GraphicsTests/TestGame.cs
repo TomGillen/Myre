@@ -19,7 +19,6 @@ using Myre.Graphics.Geometry;
 using Myre.Collections;
 using Myre.Entities;
 using Myre.Graphics;
-using Myre.Entities.Ninject;
 using Ninject.Planning.Bindings.Resolvers;
 using System.Diagnostics;
 using Microsoft.Xna.Framework.Graphics.PackedVector;
@@ -33,7 +32,7 @@ namespace GraphicsTests
     /// <summary>
     /// This is the main type for your game
     /// </summary>
-    public class TestGame : NinjectGame
+    public class TestGame : Game
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
@@ -47,9 +46,10 @@ namespace GraphicsTests
 
         public bool DisplayUI { get; set; }
         public InputActor Player { get; set; }
+        public IKernel Kernel { get; private set; }
 
         public TestGame()
-            : base(new EntityNinjectModule())
+            : base()
         {
             graphics = new GraphicsDeviceManager(this);
             graphics.PreparingDeviceSettings += new EventHandler<PreparingDeviceSettingsEventArgs>(graphics_PreparingDeviceSettings);
@@ -65,7 +65,8 @@ namespace GraphicsTests
             //TargetElapsedTime = TimeSpan.FromSeconds(1f / 30f);
             DisplayUI = true;
 
-            Kernel.Components.Add<IBindingResolver, ConditionalBindingResolver>();
+            Kernel = NinjectKernel.Instance;
+            NinjectKernel.BindGame(this);
 
             previousKeyboard = Keyboard.GetState();
 
