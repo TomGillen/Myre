@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
+using Myre.Entities;
 
 namespace Myre.Physics.Collisions
 {
@@ -13,62 +14,105 @@ namespace Myre.Physics.Collisions
         private Vector2[] worldVertices;
         private Vector2[] localAxes;
         private Vector2[] worldAxes;
-        private Matrix transform;
-        private bool transformDirty;
         private Vector2[] localBounds;
         private Vector2[] worldBounds;
         private BoundingBox bounds;
 
+        private Property<Matrix> transformProperty;
+        private Property<Vector2[]> verticesProperty;
+        private Transform transformBehaviour;
+
         public Matrix Transform
         {
-            get { return transform; }
-            set
-            {
-                if (transform != value)
-                {
-                    transform = value;
-                    transformDirty = true;
-                    RecalculateBounds();
-                }
-            }
+            get { return transformProperty.Value; }
+            set { transformProperty.Value = value; }
         }
 
         public Vector2[] WorldVertices
         {
-            get 
-            {
-                if (transformDirty)
-                    ApplyTransform();
-                return worldVertices; 
-            }
+            get { return worldVertices; }
         }
 
         public Vector2[] LocalVertices
         {
-            get 
-            {
-                if (transformDirty)
-                    ApplyTransform();
-                return localVertices; 
-            }
+            get { return localVertices; }
         }
 
         public override BoundingBox Bounds
         {
-            get { return bounds; }
+            get 
+            {
+                if (transformBehaviour != null)
+                    transformBehaviour.CalculateTransform();
+
+                return bounds; 
+            }
         }
 
-        public Polygon(Vector2[] vertices)
+        public Polygon()
         {
-            this.localVertices = vertices;
-            this.worldVertices = new Vector2[localVertices.Length];
-
-            CalculateAxes();
-            SetupBounds();
-            Transform = Matrix.Identity;
+            localBounds = new Vector2[4];
+            worldBounds = new Vector2[4];
+            CreateArrays(0);
         }
 
-        private void SetupBounds()
+        public override void CreateProperties(Entity.InitialisationContext context)
+        {
+            var prefix = Name != null ? Name + "_" : string.Empty;
+            transformProperty = context.CreateProperty<Matrix>("transform", Matrix.Identity);
+            verticesProperty = context.CreateProperty<Vector2[]>(prefix + "vertices");
+
+            transformProperty.PropertyChanged += p => ApplyTransform();
+            verticesProperty.PropertyChanged += p => ReadVertices(p);
+            
+            base.CreateProperties(context);
+        }
+
+        private void ReadVertices(Property<Vector2[]> p)
+        {
+            if (localVertices.Length != p.Value.Length)
+                CreateArrays(p.Value.Length);
+
+            Array.Copy(p.Value, localVertices, p.Value.Length);
+            InitialiseLocalData();
+            ApplyTransform();
+        }
+
+        public override void Initialise()
+        {
+            transformBehaviour = Owner.GetBehaviour<Transform>();
+
+            ReadVertices(verticesProperty);
+            base.Initialise();
+        }
+
+        private void CreateArrays(int size)
+        {
+            this.localVertices = new Vector2[size];
+            this.worldVertices = new Vector2[size];
+            this.localAxes = new Vector2[size];
+            this.worldAxes = new Vector2[size];
+        }
+
+        private void InitialiseLocalData()
+        {
+            CalculateAxes();
+            CalculateLocalBounds();
+        }
+
+        private void CalculateAxes()
+        {
+            for (int i = 0; i < worldAxes.Length; i++)
+            {
+                var start = localVertices[i];
+                var end = localVertices[(i + 1) % localVertices.Length];
+
+                var r = end - start;
+                worldAxes[i] = localAxes[i] = new Vector2(-r.Y, r.X);
+            }
+        }
+
+        private void CalculateLocalBounds()
         {
             bounds.Min = new Vector3(float.MaxValue, float.MaxValue, 0);
             bounds.Max = new Vector3(float.MinValue, float.MinValue, 0);
@@ -85,17 +129,24 @@ namespace Myre.Physics.Collisions
                     bounds.Max.Y = v.Y;
             }
 
-            localBounds = new Vector2[4];
-            worldBounds = new Vector2[4];
-
             localBounds[0] = worldBounds[0] = new Vector2(bounds.Min.X, bounds.Min.Y);
             localBounds[1] = worldBounds[1] = new Vector2(bounds.Max.X, bounds.Min.Y);
             localBounds[2] = worldBounds[2] = new Vector2(bounds.Max.X, bounds.Max.Y);
             localBounds[3] = worldBounds[3] = new Vector2(bounds.Min.X, bounds.Max.Y);
         }
 
-        private void RecalculateBounds()
+        private void ApplyTransform()
         {
+            var transform = transformProperty.Value;
+            Vector2.Transform(localVertices, ref transform, worldVertices);
+            Vector2.TransformNormal(localAxes, ref transform, worldAxes);
+
+            CalculateWorldBounds();
+        }
+
+        private void CalculateWorldBounds()
+        {
+            var transform = transformProperty.Value;
             Vector2.Transform(localBounds, ref transform, worldBounds);
             bounds.Min = new Vector3(float.MaxValue, float.MaxValue, 0);
             bounds.Max = new Vector3(float.MinValue, float.MinValue, 0);
@@ -113,50 +164,18 @@ namespace Myre.Physics.Collisions
             }
         }
 
-        private void ApplyTransform()
-        {
-            Vector2.Transform(localVertices, ref transform, worldVertices);
-            Vector2.TransformNormal(localAxes, ref transform, worldAxes);
-
-            transformDirty = false;
-        }
-
-        private void CalculateAxes()
-        {
-            worldAxes = new Vector2[localVertices.Length];
-            localAxes = new Vector2[localVertices.Length];
-
-            for (int i = 0; i < worldAxes.Length; i++)
-            {
-                var start = localVertices[i];
-                var end = localVertices[(i + 1) % localVertices.Length];
-
-                var r = end - start;
-                worldAxes[i] = localAxes[i] = new Vector2(-r.Y, r.X);
-            }
-        }
-
         public override Vector2[] GetAxes(Geometry otherObject)
         {
-            if (transformDirty)
-                ApplyTransform();
-
             return worldAxes;
         }
 
         public override Vector2[] GetVertices(Vector2 axis)
         {
-            if (transformDirty)
-                ApplyTransform();
-
             return worldVertices;
         }
 
         public override Vector2 GetClosestVertex(Vector2 point)
         {
-            if (transformDirty)
-                ApplyTransform();
-
             // TODO: more directed search for closest vertex on a polygon
             Vector2 closest = worldVertices[0];
             float distance = (closest - point).LengthSquared();
@@ -178,8 +197,6 @@ namespace Myre.Physics.Collisions
 
         public override Projection Project(Vector2 axis)
         {
-            if (transformDirty)
-                ApplyTransform();
             return Projection.Create(axis, worldVertices);
         }
 
@@ -187,9 +204,6 @@ namespace Myre.Physics.Collisions
         // http://local.wasp.uwa.edu.au/~pbourke/geometry/insidepoly/
         public override bool Contains(Vector2 p)
         {
-            if (transformDirty)
-                ApplyTransform();
-
             int counter = 0;
             int i;
             double xinters;

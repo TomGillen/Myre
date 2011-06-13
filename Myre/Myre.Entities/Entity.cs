@@ -58,26 +58,6 @@ namespace Myre.Entities
                 return property;
             }
 
-            public Property<T> GetProperty<T>(string name)
-            {
-                CheckFrozen();
-                return entity.GetProperty<T>(name);
-            }
-
-            public T GetBehaviour<T>(string name = null)
-                where T : Behaviour
-            {
-                CheckFrozen();
-                return entity.GetBehaviour<T>(name);
-            }
-
-            public T[] GetBehaviours<T>()
-                where T : Behaviour
-            {
-                CheckFrozen();
-                return entity.GetBehaviours<T>();
-            }
-
             private void CheckFrozen()
             {
                 if (frozen)
@@ -151,14 +131,24 @@ namespace Myre.Entities
             // create initialisation context
             this.initialisationContext = new InitialisationContext(this);
 
-            // allow behaviours to add their own properites
+            // allow behaviours to add their own properties
             CreateProperties();
         }
 
         private void CatagoriseBehaviour(Dictionary<Type, List<Behaviour>> catagorised, Behaviour behaviour)
         {
             Type type = behaviour.GetType();
+            do
+            {
+                LazyGetCategoryList(type, catagorised).Add(behaviour);
 
+                type = type.BaseType;
+            }
+            while (type != typeof(Behaviour).BaseType);
+        }
+
+        private List<Behaviour> LazyGetCategoryList(Type type, Dictionary<Type, List<Behaviour>> catagorised)
+        {
             List<Behaviour> behavioursOfType;
             if (!catagorised.TryGetValue(type, out behavioursOfType))
             {
@@ -166,7 +156,7 @@ namespace Myre.Entities
                 catagorised.Add(type, behavioursOfType);
             }
 
-            behavioursOfType.Add(behaviour);
+            return behavioursOfType;
         }
 
         private void CreateProperties()
@@ -326,7 +316,12 @@ namespace Myre.Entities
         public T[] GetBehaviours<T>()
             where T : Behaviour
         {
-            return GetBehaviours(typeof(T)) as T[];
+            //return GetBehaviours(typeof(T)) as T[];
+            var v = GetBehaviours(typeof(T));
+            if (v != null)
+                return v.Cast<T>().ToArray();
+            else
+                return new T[0];
         }
     }
 }

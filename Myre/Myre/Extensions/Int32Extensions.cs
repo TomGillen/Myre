@@ -23,7 +23,7 @@ namespace Myre.Extensions
         /// Determines if the specified bit is set to true in this Int32.
         /// </summary>
         /// <param name="n"></param>
-        /// <param name="bit">The number of </param>
+        /// <param name="bit">The index of the bit, zero indicates the least significant bit</param>
         /// <returns></returns>
         public static bool IsBitSet(this int n, int bit)
         {

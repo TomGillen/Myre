@@ -6,9 +6,11 @@ using Myre.Extensions;
 using Myre.Entities;
 using Microsoft.Xna.Framework;
 using Myre.Entities.Behaviours;
+using Myre.Entities.Services;
 
 namespace Myre.Physics
 {
+    [DefaultManager(typeof(Manager))]
     public class Transform
         : Behaviour
     {
@@ -16,6 +18,7 @@ namespace Myre.Physics
         private Property<float> rotation;
         private Property<Matrix> transform;
         private Property<Matrix> inverseTransform;
+        private bool isDirty;
 
         public Vector2 Position
         {
@@ -40,21 +43,18 @@ namespace Myre.Physics
             get { return inverseTransform.Value; }
             set { inverseTransform.Value = value; }
         }
-
+        
         public override void CreateProperties(Entity.InitialisationContext context)
         {
-            this.position = context.CreateProperty<Vector2>("position");
-            this.rotation = context.CreateProperty<float>("rotation");
-            this.transform = context.CreateProperty<Matrix>("transform_matrix");
-            this.inverseTransform = context.CreateProperty<Matrix>("inverse_transform_matrix");
+            this.position = context.CreateProperty<Vector2>(PhysicsProperties.POSITION);
+            this.rotation = context.CreateProperty<float>(PhysicsProperties.ROTATION);
+            this.transform = context.CreateProperty<Matrix>("transform");
+            this.inverseTransform = context.CreateProperty<Matrix>("inverse_transform");
 
+            position.PropertyChanged += _ => isDirty = true;
+            rotation.PropertyChanged += _ => isDirty = true;
+            
             base.CreateProperties(context);
-        }
-
-        public override void Initialise()
-        {
-            position.PropertyChanged += _ => CalculateTransform();
-            rotation.PropertyChanged += _ => CalculateTransform();
         }
 
         public Vector2 ToWorldCoordinates(Vector2 point)
@@ -67,8 +67,11 @@ namespace Myre.Physics
             return Vector2.Transform(point, inverseTransform.Value);
         }
 
-        private void CalculateTransform()
+        public void CalculateTransform()
         {
+            if (!isDirty)
+                return;
+
             var pos = new Vector3(position.Value, 0);
             var rot = rotation.Value;
 
@@ -80,6 +83,27 @@ namespace Myre.Physics
 
             transform.Value = temp1;
             inverseTransform.Value = temp2;
+            isDirty = false;
+        }
+
+        public class Manager
+            : BehaviourManager<Transform>, IProcess
+        {
+            public bool IsComplete
+            {
+                get { return false; }
+            }
+
+            public Manager(Scene scene)
+            {
+                scene.GetService<ProcessService>().Add(this);
+            }
+
+            public void Update(float time)
+            {
+                for (int i = 0; i < Behaviours.Count; i++)
+                    Behaviours[i].CalculateTransform();
+            }
         }
     }
 }

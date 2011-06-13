@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
+using Myre.Entities;
 
 namespace Myre.Physics.Collisions
 {
@@ -11,9 +12,13 @@ namespace Myre.Physics.Collisions
     {
         private Vector2[] axes;
         private Vector2[] vertices;
-        private float radius;
-        private Vector2 centre;
+        private Property<float> radius;
+        private Property<Vector2> centre;
+        private Property<Matrix> transform;
+        
         private BoundingBox bounds;
+        private float transformedRadius;
+        private Vector2 transformedCentre;
 
         public override BoundingBox Bounds
         {
@@ -22,28 +27,14 @@ namespace Myre.Physics.Collisions
 
         public float Radius 
         {
-            get { return radius; }
-            set
-            {
-                if (radius != value)
-                {
-                    radius = value;
-                    UpdateBounds();
-                }
-            }
+            get { return radius.Value; }
+            set { radius.Value = value; }
         }
 
         public Vector2 Centre 
         {
-            get { return centre; }
-            set
-            {
-                if (centre != value)
-                {
-                    centre = value;
-                    UpdateBounds();
-                }
-            }
+            get { return centre.Value; }
+            set { centre.Value = value; }
         }
 
         public Circle()
@@ -52,10 +43,36 @@ namespace Myre.Physics.Collisions
             vertices = new Vector2[2];
         }
 
+        public override void CreateProperties(Entity.InitialisationContext context)
+        {
+            var prefix = Name != null ? Name + "_" : string.Empty;
+            radius = context.CreateProperty<float>(prefix + "radius");
+            centre = context.CreateProperty<Vector2>(prefix + "centre");
+            transform = context.CreateProperty<Matrix>("transform", Matrix.Identity);
+            
+            radius.PropertyChanged += _ => UpdateBounds();
+            centre.PropertyChanged += _ => UpdateBounds();
+            transform.PropertyChanged += _ => UpdateBounds();
+            
+            base.CreateProperties(context);
+        }
+
+        public override void Initialise()
+        {
+            var transform = Owner.GetBehaviour<Transform>();
+            if (transform != null)
+                transform.CalculateTransform();
+            
+            base.Initialise();
+        }
+
         private void UpdateBounds()
         {
-            Vector3 c = new Vector3(centre, 0);
-            Vector3 extents = new Vector3(radius, radius, 0);
+            transformedCentre = Vector2.Transform(centre.Value, transform.Value);
+            transformedRadius = radius.Value;// *transform.Value.M11;
+
+            Vector3 c = new Vector3(transformedCentre, 0);
+            Vector3 extents = new Vector3(transformedRadius, transformedRadius, 0);
             bounds.Min = c - extents;
             bounds.Max = c + extents;
         }
@@ -63,15 +80,15 @@ namespace Myre.Physics.Collisions
         public override Projection Project(Vector2 axis)
         {
             Vector2 axisNormalised = Vector2.Normalize(axis);
-            Vector2 minIntersection = axisNormalised * -Radius + Centre;
-            Vector2 maxIntersection = axisNormalised * Radius + Centre;
+            Vector2 minIntersection = axisNormalised * -transformedRadius + transformedCentre;
+            Vector2 maxIntersection = axisNormalised * transformedRadius + transformedCentre;
 
             return new Projection(Vector2.Dot(axis, minIntersection), Vector2.Dot(axis, maxIntersection), minIntersection, maxIntersection);
         }
 
         public override Vector2[] GetAxes(Geometry otherObject)
         {
-            axes[0] = otherObject.GetClosestVertex(Centre) - Centre;
+            axes[0] = otherObject.GetClosestVertex(transformedCentre) - transformedCentre;
             if (axes[0] == Vector2.Zero)
                 axes[0] = Vector2.UnitY;
 
@@ -80,24 +97,24 @@ namespace Myre.Physics.Collisions
 
         public override Vector2[] GetVertices(Vector2 axis)
         {
-            vertices[0] = Centre + axis * Radius;
-            vertices[1] = Centre - axis * Radius;
+            vertices[0] = transformedCentre + axis * transformedRadius;
+            vertices[1] = transformedCentre - axis * transformedRadius;
 
             return vertices;
         }
 
         public override Vector2 GetClosestVertex(Vector2 point)
         {
-            Vector2 r = point - Centre;
-            r *= Radius / r.Length();
+            Vector2 r = point - transformedCentre;
+            r *= transformedRadius / r.Length();
 
-            return Centre + r;
+            return transformedCentre + r;
         }
 
         public override bool Contains(Vector2 point)
         {
-            Vector2 r = point - Centre;
-            return r.LengthSquared() < (Radius * Radius);
+            Vector2 r = point - transformedCentre;
+            return r.LengthSquared() < (transformedRadius * transformedRadius);
         }
     }
 }

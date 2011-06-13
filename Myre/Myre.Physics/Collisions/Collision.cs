@@ -28,6 +28,16 @@ namespace Myre.Physics.Collisions
         public Vector2 Normal { get { return normal; } }
         public float PenetrationDepth { get { return penetrationDepth; } }
 
+        public bool IsDead
+        {
+            get { return contacts.Count == 0; }
+        }
+
+        public bool IsActive
+        {
+            get { return !(a.Body.Sleeping && b.Body.Sleeping); }
+        }
+
         #region temp variables
         Vector2 r1, r2;
         float rn1, rn2;
@@ -72,6 +82,9 @@ namespace Myre.Physics.Collisions
 
         public void FindContacts(SatTester tester, int maxContacts = 8)
         {
+            if (!IsActive)
+                return;
+
             // perform SAT collision detection
             SatResult? r = tester.FindIntersection(a, b);
 
@@ -80,7 +93,7 @@ namespace Myre.Physics.Collisions
                 contacts.Clear();
                 return;
             }
-
+            
             SatResult result = r.Value;
             normal = result.NormalAxis;
             penetrationDepth = result.Penetration;
@@ -133,7 +146,8 @@ namespace Myre.Physics.Collisions
                     continue;
 
                 var previous = contacts[index];
-                // TODO: warm start contacts
+                contact.normalImpulse = previous.normalImpulse;
+                contact.tangentImpulse = previous.tangentImpulse;
 
                 newContacts[i] = contact;
             }
@@ -144,8 +158,33 @@ namespace Myre.Physics.Collisions
             newContacts = tmp;
         }
 
-        public void Prepare(PhysicsManager physics)
+        //public bool ShouldActivateBody(out DynamicPhysics body)
+        //{
+        //    body = null;
+
+        //    if (contacts.Count == 0)
+        //        return false;
+
+        //    if (a.Body.Sleeping && !b.Body.Sleeping)
+        //    {
+        //        body = b.Body;
+        //        return true;
+        //    }
+
+        //    if (!a.Body.Sleeping && b.Body.Sleeping)
+        //    {
+        //        body = a.Body;
+        //        return true;
+        //    }
+
+        //    return false;
+        //}
+
+        public void Prepare(float allowedPenetration, float biasFactor, float inverseDT)
         {
+            if (!IsActive)
+                return;
+            
             frictionCoefficient = (a.FrictionCoefficient + b.FrictionCoefficient) * 0.5f;
             restitutionCoefficient = (a.Restitution + b.Restitution) * 0.5f;
 
@@ -153,7 +192,7 @@ namespace Myre.Physics.Collisions
             {
                 var contact = contacts[i];
 
-                // copy + paste from farseer.. which is based on Box2D, and I cba to write yet another veriation
+                // copy + paste from farseer.. which is based on Box2D, and I cba to write yet another variation
 
                 //calculate contact offset from body position
                 var aPos = a.Body.Position;
@@ -169,10 +208,18 @@ namespace Myre.Physics.Collisions
                 float invMassSum = (1f / a.Body.Mass) + (1f / b.Body.Mass);
                 Vector2.Dot(ref r1, ref r1, out float1);
                 Vector2.Dot(ref r2, ref r2, out float2);
-                kNormal = invMassSum 
-                    + (float1 - rn1 * rn1) / a.Body.InertiaTensor 
+                kNormal = invMassSum
+                    + (float1 - rn1 * rn1) / a.Body.InertiaTensor
                     + (float2 - rn2 * rn2) / b.Body.InertiaTensor;
                 contact.massNormal = 1f / kNormal;
+
+                //float rnA = r1.X * normal.Y - r1.Y * normal.X;
+                //float rnB = r2.X * normal.Y - r2.Y * normal.X;
+                //rnA *= rnA;
+                //rnB *= rnB;
+
+                //float kNormal = invMassSum + rnA / A.Body.InertiaTensor + rnB / B.Body.InertiaTensor;
+                //contact.massNormal = 1f / kNormal;
 
                 //calculate mass tangent
                 tangent = normal.Perpendicular();
@@ -181,14 +228,22 @@ namespace Myre.Physics.Collisions
 
                 Vector2.Dot(ref r1, ref r1, out float1);
                 Vector2.Dot(ref r2, ref r2, out float2);
-                kTangent += invMassSum
+                kTangent = invMassSum
                     + (float1 - rt1 * rt1) / a.Body.InertiaTensor
                     + (float2 - rt2 * rt2) / b.Body.InertiaTensor;
                 contact.massTangent = 1f / kTangent;
 
+                //float rtA = r1.X * tangent.Y - r1.Y * tangent.X;
+                //float rtB = r2.X * tangent.Y - r2.Y * tangent.X;
+                //rtA *= rtA;
+                //rtB *= rtB;
+
+                //float kTangent = invMassSum + rnA / A.Body.InertiaTensor + rnB / B.Body.InertiaTensor;
+                //contact.massTangent = 1f / kTangent;
+
                 //calc velocity bias
-                max = Math.Max(0, penetrationDepth - physics.AllowedPenetration);
-                contact.normalVelocityBias = physics.BiasFactor * physics.inverseDT * max;
+                max = Math.Max(0, penetrationDepth - allowedPenetration);
+                contact.normalVelocityBias = biasFactor * inverseDT * max;
 
                 //calc bounce velocity
                 vec1 = a.Body.GetVelocityAtOffset(r1);
@@ -204,10 +259,10 @@ namespace Myre.Physics.Collisions
                 Vector2.Multiply(ref tangent, contact.tangentImpulse, out vec2);
                 Vector2.Add(ref vec1, ref vec2, out impulse);
 
-                b.Body.ApplyImpulseAtOffset(impulse, r2);
+                b.Body.ApplyImpulseAtOffset(ref impulse, ref r2);
 
                 Vector2.Multiply(ref impulse, -1, out impulse);
-                a.Body.ApplyImpulseAtOffset(impulse, r1);
+                a.Body.ApplyImpulseAtOffset(ref impulse, ref r1);
 
                 contact.normalImpulseBias = 0;
 
@@ -217,6 +272,9 @@ namespace Myre.Physics.Collisions
 
         public void Iterate()
         {
+            if (!IsActive)
+                return;
+
             var aPos = a.Body.Position;
             var bPos = b.Body.Position;
 
@@ -224,7 +282,7 @@ namespace Myre.Physics.Collisions
             {
                 var contact = contacts[i];
 
-                // copy + paste from farseer.. which is based on Box2D, and I cba to write yet another veriation
+                // copy + paste from farseer.. which is based on Box2D, and I cba to write yet another variation
 
                 #region INLINE: Vector2.Subtract(ref contact.Position, ref geometryA.body.position, out r1);
 
@@ -273,7 +331,7 @@ namespace Myre.Physics.Collisions
 
                 #endregion
 
-                b.Body.ApplyImpulseAtOffset(impulse, r2);
+                b.Body.ApplyImpulseAtOffset(ref impulse, ref r2);
 
                 #region INLINE: Vector2.Multiply(ref impulse, -1, out impulse);
 
@@ -282,7 +340,7 @@ namespace Myre.Physics.Collisions
 
                 #endregion
 
-                a.Body.ApplyImpulseAtOffset(impulse, r1);
+                a.Body.ApplyImpulseAtOffset(ref impulse, ref r1);
 
                 //calc velocity bias difference (bias preserves momentum)
                 vec1 = a.Body.GetVelocityBiasAtOffset(r1);
@@ -315,7 +373,7 @@ namespace Myre.Physics.Collisions
                 #endregion
 
                 //apply bias impulse
-                b.Body.ApplyBiasImpulseAtOffset(impulseBias, r2);
+                b.Body.ApplyBiasImpulseAtOffset(ref impulseBias, ref r2);
 
                 #region INLINE: Vector2.Multiply(ref impulseBias, -1, out impulseBias);
 
@@ -324,7 +382,7 @@ namespace Myre.Physics.Collisions
 
                 #endregion
 
-                a.Body.ApplyBiasImpulseAtOffset(impulseBias, r1);
+                a.Body.ApplyBiasImpulseAtOffset(ref impulseBias, ref r1);
 
                 //calc relative velocity at contact.
                 vec1 = a.Body.GetVelocityAtOffset(r1);
@@ -371,7 +429,7 @@ namespace Myre.Physics.Collisions
                 #endregion
 
                 //apply impulse
-                b.Body.ApplyImpulseAtOffset(impulse, r2);
+                b.Body.ApplyImpulseAtOffset(ref impulse, ref r2);
 
                 #region INLINE: Vector2.Multiply(ref impulse, -1, out impulse);
 
@@ -380,10 +438,13 @@ namespace Myre.Physics.Collisions
 
                 #endregion
 
-                a.Body.ApplyImpulseAtOffset(impulse, r1);
+                a.Body.ApplyImpulseAtOffset(ref impulse, ref r1);
 
                 contacts[i] = contact;
+
+                //System.Diagnostics.Debug.WriteLine(string.Format("Contact {0}: point:{4}, normal:{1}, penetration:{2}, impulse:{3}", i, normal, penetrationDepth, contact.normalImpulse, contact.Position));
             }
+            //System.Diagnostics.Debug.WriteLine("");
         }
 
         public void Dispose()

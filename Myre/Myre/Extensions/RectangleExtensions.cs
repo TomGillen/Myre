@@ -12,7 +12,7 @@ namespace Myre.Extensions
     public static class RectangleExtensions
     {
         /// <summary>
-        /// Transformes the <see cref="Rectangle"/> with a specified <see cref="Matrix"/>.
+        /// Transforms the <see cref="Rectangle"/> with a specified <see cref="Matrix"/>.
         /// </summary>
         /// <param name="rect">The rectangle to transform.</param>
         /// <param name="m">The matrix with which to do the transformation.</param>
@@ -25,7 +25,7 @@ namespace Myre.Extensions
             Vector2 bottomLeft = new Vector2(rect.X, rect.Y + rect.Height);
             Vector2 bottomRight = new Vector2(rect.X + rect.Width, rect.Y + rect.Height);
 
-            // tranfrom corners
+            // transform corners
             Vector2 newTopLeft, newTopRight, newBottomLeft, newBottomRight;
             Vector2.Transform(ref topLeft, ref m, out newTopLeft);
             Vector2.Transform(ref topRight, ref m, out newTopRight);

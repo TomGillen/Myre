@@ -11,7 +11,7 @@ namespace Myre.Extensions
     public static class IListExtensions
     {
         /// <summary>
-        /// Sorts the list using intersion sort. This is usually slower than List.Sort and Array.Sort, but is stable.
+        /// Sorts the list using insertion sort. This is usually slower than List.Sort and Array.Sort, but is stable.
         /// Worst case O(n^2).
         /// Best case O(n) (already sorted list).
         /// </summary>
@@ -40,7 +40,7 @@ namespace Myre.Extensions
         }
 
         /// <summary>
-        /// Sorts the list using intersion sort. This is usually slower than List.Sort and Array.Sort, but is stable.
+        /// Sorts the list using insertion sort. This is usually slower than List.Sort and Array.Sort, but is stable.
         /// Worst case O(n^2).
         /// Best case O(n) (already sorted list).
         /// </summary>

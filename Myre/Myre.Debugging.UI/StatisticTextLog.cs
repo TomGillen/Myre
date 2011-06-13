@@ -19,6 +19,17 @@ namespace Myre.Debugging.Statistics
         private Dictionary<string, StatisticText> stats;
         private SpriteFont font;
         private bool autoAdd;
+        private Color textColour;
+
+        public Color TextColour
+        {
+            get { return textColour; }
+            set
+            {
+                textColour = value;
+                UpdatePositions();
+            }
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StatisticTextLog"/> class.
@@ -36,6 +47,7 @@ namespace Myre.Debugging.Statistics
         {
             this.autoAdd = autoAdd;
             this.font = font;
+            this.textColour = Color.White;
             RespectSafeArea = true;
             stats = new Dictionary<string, StatisticText>();
             SetPoint(Points.TopLeft, 0, 0);
@@ -108,7 +120,7 @@ namespace Myre.Debugging.Statistics
                 foreach (var item in Statistic.Statistics)
                 {
                     if (!stats.ContainsKey(item.Key))
-                        AddStatistic(item.Key, TimeSpan.FromSeconds(1));
+                        AddStatistic(item.Key, TimeSpan.FromSeconds(0.5));
                 }
             }
 
@@ -154,6 +166,7 @@ namespace Myre.Debugging.Statistics
 
                 stat.Label.SetPoint(Points.Left, 0, 0);
                 stat.Label.SetPoint(Points.Right, 0, 0);
+                stat.Label.Colour = textColour;
 
                 height += stat.Label.Area.Height;
                 previous = stat.Label;

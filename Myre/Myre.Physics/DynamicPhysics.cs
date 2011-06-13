@@ -21,11 +21,16 @@ namespace Myre.Physics
         private Property<Vector2> linearVelocity;
         private Property<float> angularVelocity;
         private Property<float> timeMultiplier;
+        private Property<bool> sleeping;
+        private Property<Vector2> linearVelocityBias;
+        private Property<float> angularVelocityBias;
+        private Property<float> angularAcceleration;
+        private Property<Vector2> linearAcceleration;
 
         private Vector2 force;
         private float torque;
-        private Vector2 linearVelocityBias;
-        private float angularVelocityBias;
+
+        private float timeTillSleep;
 
         #region temp
         private Vector2 r;
@@ -67,31 +72,57 @@ namespace Myre.Physics
             set { angularVelocity.Value = value; }
         }
 
+        public Vector2 LinearAcceleration
+        {
+            get { return linearAcceleration.Value; }
+            set { linearAcceleration.Value = value; }
+        }
+
+        public float AngularAcceleration
+        {
+            get { return angularAcceleration.Value; }
+            set { angularAcceleration.Value = value; }
+        }
+
         public float TimeMultiplier
         {
             get { return timeMultiplier.Value; }
             set { timeMultiplier.Value = value; }
         }
 
-        public const String POSITION = "position";
-        public const String ROTATION = "rotation";
-        public const String MASS = "mass";
-        public const String INERTIA_TENSOR = "inertia_tensor";
-        public const String LINEAR_VELOCITY = "linear_velocity";
-        public const String ANGULAR_VELOCITY = "angular_velocity";
-        public const String TIME_MULTIPLIER = "time_multiplier";
+        public bool Sleeping
+        {
+            get { return sleeping.Value; }
+            set { sleeping.Value = value; }
+        }
+
+        public bool IsStatic
+        {
+            get { return mass.Value == float.PositiveInfinity && inertiaTensor.Value == float.PositiveInfinity; }
+        }
 
         public override void CreateProperties(Entity.InitialisationContext context)
         {
-            this.position = context.CreateProperty<Vector2>(POSITION);
-            this.rotation = context.CreateProperty<float>(ROTATION);
-            this.mass = context.CreateProperty<float>(MASS);
-            this.inertiaTensor = context.CreateProperty<float>(INERTIA_TENSOR);
-            this.linearVelocity = context.CreateProperty<Vector2>(LINEAR_VELOCITY);
-            this.angularVelocity = context.CreateProperty<float>(ANGULAR_VELOCITY);
-            this.timeMultiplier = context.CreateProperty<float>(TIME_MULTIPLIER);
+            this.position = context.CreateProperty<Vector2>(PhysicsProperties.POSITION);
+            this.rotation = context.CreateProperty<float>(PhysicsProperties.ROTATION);
+            this.mass = context.CreateProperty<float>(PhysicsProperties.MASS);
+            this.inertiaTensor = context.CreateProperty<float>(PhysicsProperties.INERTIA_TENSOR);
+            this.linearVelocity = context.CreateProperty<Vector2>(PhysicsProperties.LINEAR_VELOCITY);
+            this.angularVelocity = context.CreateProperty<float>(PhysicsProperties.ANGULAR_VELOCITY);
+            this.linearVelocityBias = context.CreateProperty<Vector2>(PhysicsProperties.LINEAR_VELOCITY_BIAS);
+            this.angularVelocityBias = context.CreateProperty<float>(PhysicsProperties.ANGULAR_VELOCITY_BIAS);
+            this.linearAcceleration = context.CreateProperty<Vector2>(PhysicsProperties.LINEAR_ACCELERATION);
+            this.angularAcceleration = context.CreateProperty<float>(PhysicsProperties.ANGULAR_ACCELERATION);
+            this.timeMultiplier = context.CreateProperty<float>(PhysicsProperties.TIME_MULTIPLIER);
+            this.sleeping = context.CreateProperty<bool>(PhysicsProperties.SLEEPING);
 
             base.CreateProperties(context);
+        }
+
+        public override void Initialise()
+        {
+            timeTillSleep = 5;            
+            base.Initialise();
         }
 
         public Vector2 GetVelocityAtOffset(Vector2 worldOffset)
@@ -105,9 +136,9 @@ namespace Myre.Physics
 
         internal Vector2 GetVelocityBiasAtOffset(Vector2 worldOffset)
         {
-            var value = linearVelocityBias;
-            value.X += -angularVelocityBias * worldOffset.Y;
-            value.Y += angularVelocityBias * worldOffset.X;
+            var value = linearVelocityBias.Value;
+            value.X += -angularVelocityBias.Value * worldOffset.Y;
+            value.Y += angularVelocityBias.Value * worldOffset.X;
 
             return value;
         }
@@ -131,18 +162,28 @@ namespace Myre.Physics
             this.force += force;
         }
 
+        public void ApplyTorque(float torque)
+        {
+            this.torque += torque;
+        }
+
         public void ApplyImpulse(Vector2 impulse, Vector2 worldPosition)
         {
             var pos = position.Value;
             Vector2.Subtract(ref worldPosition, ref pos, out r);
-            ApplyImpulseAtOffset(impulse, r);
+            ApplyImpulseAtOffset(ref impulse, ref r);
         }
 
-        public void ApplyImpulseAtOffset(Vector2 impulse, Vector2 worldOffset)
+        public void ApplyImpulseAtOffset(ref Vector2 impulse, ref Vector2 worldOffset)
         {
-            impulse /= Mass;
-            linearVelocity.Value += impulse;
-            angularVelocity.Value += (worldOffset.X * impulse.Y - impulse.Y * worldOffset.X) / InertiaTensor;
+            Vector2 l = linearVelocity.Value;
+            Vector2 v;
+
+            Vector2.Multiply(ref impulse, 1f / mass.Value, out v);
+            Vector2.Add(ref l, ref v, out l);
+            linearVelocity.Value = l;
+
+            angularVelocity.Value += (worldOffset.X * impulse.Y - impulse.X * worldOffset.Y) / InertiaTensor;
         }
 
         public void ApplyImpulse(Vector2 impulse)
@@ -150,52 +191,121 @@ namespace Myre.Physics
             linearVelocity.Value += impulse / Mass;
         }
 
-        internal void ApplyBiasImpulse(Vector2 impulse, Vector2 worldPosition)
+        internal void ApplyBiasImpulse(ref Vector2 impulse, ref Vector2 worldPosition)
         {
             var pos = position.Value;
             Vector2.Subtract(ref worldPosition, ref pos, out r);
-            ApplyImpulseAtOffset(impulse, r);
+            ApplyBiasImpulseAtOffset(ref impulse, ref r);
         }
 
-        internal void ApplyBiasImpulseAtOffset(Vector2 impulse, Vector2 worldOffset)
+        internal void ApplyBiasImpulseAtOffset(ref Vector2 impulse, ref Vector2 worldOffset)
         {
             impulse /= Mass;
-            linearVelocity.Value += impulse;
-            angularVelocityBias += (worldOffset.X * impulse.Y - impulse.Y * worldOffset.X) / InertiaTensor;
+            linearVelocityBias.Value += impulse;
+            angularVelocityBias.Value += (worldOffset.X * impulse.Y - impulse.X * worldOffset.Y) / InertiaTensor;
         }
 
         public class Manager
-            : BehaviourManager<DynamicPhysics>, IProcess
+            : BehaviourManager<DynamicPhysics>, IActivityManager, IIntegrator, IForceApplier
         {
-            public bool IsComplete { get { return false; } }
-
-            public Manager(IProcessService processes)
+            public Manager()
             {
-                processes.Add(this);
             }
 
-            public void Update(float time)
+            public void Update()
             {
                 for (int i = 0; i < Behaviours.Count; i++)
                 {
-                    Integrate(Behaviours[i], time * Behaviours[i].TimeMultiplier);
+                    var body = Behaviours[i];
+
+                    body.linearAcceleration.Value = body.force / body.Mass;
+                    body.angularAcceleration.Value = body.torque / body.InertiaTensor;
                 }
             }
 
-            private void Integrate(DynamicPhysics body, float time)
+            public void UpdateActivityStatus(float time, float linearThreshold, float angularThreshold)
             {
-                body.linearVelocity.Value += body.force / body.Mass;
-                body.force = Vector2.Zero;
+                for (int i = 0; i < Behaviours.Count; i++)
+                {
+                    var body = Behaviours[i];
 
-                body.angularVelocity.Value += body.torque / body.InertiaTensor;
-                body.torque = 0;
+                    var linear = (body.linearVelocity.Value + body.linearVelocityBias.Value).LengthSquared();
+                    var angular = Math.Abs(body.angularVelocity.Value + body.angularVelocityBias.Value);
 
-                body.position.Value += (body.linearVelocity.Value + body.linearVelocityBias) * time;
-                body.rotation.Value += (body.angularVelocity.Value + body.angularVelocityBias) * time;
+                    if (linear <= linearThreshold
+                        && angular <= angularThreshold)
+                    {
+                        body.timeTillSleep -= time;
 
-                body.linearVelocityBias = Vector2.Zero;
-                body.angularVelocityBias = 0;
+                        if (!body.sleeping.Value && body.timeTillSleep <= 0)
+                            body.sleeping.Value = true;
+                    }
+                    else
+                    {
+                        if (body.sleeping.Value)
+                            body.sleeping.Value = false;
+
+                        body.timeTillSleep = 5;
+                    }
+                }
             }
+
+            public void FreezeSleepingObjects()
+            {
+                for (int i = 0; i < Behaviours.Count; i++)
+                {
+                    var body = Behaviours[i];
+
+                    if (body.sleeping.Value)
+                    {
+                        body.linearVelocity.Value = Vector2.Zero;
+                        body.linearVelocityBias.Value = Vector2.Zero;
+                        body.angularVelocity.Value = 0;
+                        body.angularVelocityBias.Value = 0;
+                    }
+                }
+            }
+
+            #region IIntegrator Members
+
+            void IIntegrator.UpdateVelocity(float elapsedTime)
+            {
+                foreach (var item in Behaviours)
+                {
+                    item.LinearVelocity += item.LinearAcceleration * elapsedTime;
+                    item.AngularVelocity += item.AngularAcceleration * elapsedTime;
+                }
+            }
+
+            void IIntegrator.UpdatePosition(float elapsedTime)
+            {
+                foreach (var item in Behaviours)
+                {
+                    item.Position += (item.LinearVelocity + item.linearVelocityBias.Value) * elapsedTime;
+                    item.Rotation += (item.AngularVelocity + item.angularVelocityBias.Value) * elapsedTime;
+
+                    item.linearVelocityBias.Value = Vector2.Zero;
+                    item.angularVelocityBias.Value = 0;
+                }
+            }
+
+            #endregion
+
+            #region IForceApplier Members
+
+            public void CalculateAccelerations()
+            {
+                foreach (var item in Behaviours)
+                {
+                    item.LinearAcceleration = item.force / item.Mass;
+                    item.AngularAcceleration = item.torque / item.InertiaTensor;
+                    
+                    item.force = Vector2.Zero;
+                    item.torque = 0;
+                }
+            }
+
+            #endregion
         }
     }
 }

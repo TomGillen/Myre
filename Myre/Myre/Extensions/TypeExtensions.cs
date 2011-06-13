@@ -13,7 +13,7 @@ namespace Myre.Extensions
         /// <summary>
         /// Searches the Type for the specified attribute, and returns the first instance it finds; else returns null.
         /// </summary>
-        /// <typeparam name="T">The type of attribute to earch for.</typeparam>
+        /// <typeparam name="T">The type of attribute to search for.</typeparam>
         /// <param name="type">The type within which to search.</param>
         /// <returns>The first instance of the attribute found; else null.</returns>
         public static T FindAttribute<T>(this Type type) where T : Attribute

@@ -72,10 +72,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Libraries\x86\Ninject.dll</HintPath>
     </Reference>
-    <Reference Include="protobuf_net, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Libraries\x86\protobuf_net.dll</HintPath>
-    </Reference>
     <Reference Include="System">
       <Private>False</Private>
     </Reference>

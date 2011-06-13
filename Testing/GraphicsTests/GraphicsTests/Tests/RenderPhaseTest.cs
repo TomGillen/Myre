@@ -132,9 +132,12 @@ namespace GraphicsTests
             scene = new Scene(kernel);
             
             var camera = new EntityDescription(kernel);
-            camera.AddProperty<Camera>("camera", null, PropertyCopyBehaviour.New);
-            camera.AddProperty<Viewport>("viewport", new Viewport() { Width = 1280, Height = 720 }, PropertyCopyBehaviour.None);
+            camera.AddProperty<Camera>("camera");
+            camera.AddProperty<Viewport>("viewport");
             camera.AddBehaviour<View>();
+            var cameraEntity = camera.Create();
+            cameraEntity.GetProperty<Camera>("camera").Value = new Camera();
+            cameraEntity.GetProperty<Viewport>("viewport").Value = new Viewport() { Width = 1280, Height = 720 };
             scene.Add(camera.Create());
 
             var renderer = scene.GetService<Renderer>();

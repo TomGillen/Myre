@@ -29,7 +29,7 @@ namespace Myre.Extensions
         }
 
         // I think this code came from an article from Ziggyware.com, modified slightly.
-        // Unfortuneatly, ziggyware is no longer running, so I can't go back and find the source.
+        // Unfortunately, ziggyware is no longer running, so I can't go back and find the source.
         /// <summary>
         /// Parses this string into a Color.
         /// </summary>

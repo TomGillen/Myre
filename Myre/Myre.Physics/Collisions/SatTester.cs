@@ -18,7 +18,6 @@ namespace Myre.Physics.Collisions
             Vector2 deepestPoint = Vector2.Zero;
             float smallestOverlap = float.MaxValue;
             
-
             for (int i = 0; i < totalAxes; i++)
             {
                 Vector2 axis;
@@ -26,6 +25,8 @@ namespace Myre.Physics.Collisions
                     axis = aAxes[i];
                 else
                     axis = bAxes[i - aAxes.Length];
+
+                Vector2.Normalize(ref axis, out axis);
 
                 var aProjection = a.Project(axis);
                 var bProjection = b.Project(axis);

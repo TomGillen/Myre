@@ -238,11 +238,6 @@
       <Importer>FbxImporter</Importer>
       <Processor>ModelProcessor</Processor>
     </Compile>
-    <Compile Include="Models\buddha.fbx">
-      <Name>buddha</Name>
-      <Importer>FbxImporter</Importer>
-      <Processor>MyreModelProcessor</Processor>
-    </Compile>
     <None Include="Shadows.fxh">
       <Name>Shadows</Name>
       <Importer>EffectImporter</Importer>

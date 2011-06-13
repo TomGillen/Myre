@@ -22,6 +22,11 @@ namespace Myre.Entities
         public string Name;
         public Type DataType;
 
+        public override int GetHashCode()
+        {
+            return DataType.GetHashCode();
+        }
+
         public override bool Equals(object obj)
         {
             if (obj is PropertyData)
@@ -44,6 +49,12 @@ namespace Myre.Entities
     {
         public string Name;
         public Type Type;
+        public Func<String, Behaviour> Factory;
+
+        public override int GetHashCode()
+        {
+            return Type.GetHashCode();
+        }
 
         public override bool Equals(object obj)
         {
@@ -73,7 +84,7 @@ namespace Myre.Entities
         private List<PropertyData> properties;
 
         private Queue<Entity> pool;
-        internal uint Version;
+        private uint version;
 
         /// <summary>
         /// Gets a list of behaviours in this instance.
@@ -105,36 +116,11 @@ namespace Myre.Entities
         /// <summary>
         /// Resets this instance, clearing all property and behaviour deta.
         /// </summary>
-        public void Reset()
+        public virtual void Reset()
         {
             behaviours.Clear();
             properties.Clear();
             IncrementVersion();
-        }
-
-        /// <summary>
-        /// Adds all the properties and behaviours from the specified entity.
-        /// </summary>
-        /// <param name="entity">The entity.</param>
-        public void AddFrom(Entity entity, bool serialisePropertyValues = true, bool serialiseBehaviourValues = true)
-        {
-            foreach (var item in entity.Behaviours)
-            {
-                AddBehaviour(new BehaviourData()
-                {
-                    Name = item.Name,
-                    Type = item.GetType()
-                });
-            }
-
-            foreach (var item in entity.Properties)
-            {
-                AddProperty(new PropertyData()
-                {
-                    Name = item.Name,
-                    DataType = item.Type
-                });
-            }
         }
 
         /// <summary>
@@ -173,7 +159,6 @@ namespace Myre.Entities
         /// </summary>
         /// <param name="type">The type.</param>
         /// <param name="name">The name.</param>
-        /// <param name="settings">The settings.</param>
         /// <returns><c>true</c> if the behaviour was added; else <c>false</c>.</returns>
         public bool AddBehaviour(Type type, string name = null)
         {
@@ -185,12 +170,29 @@ namespace Myre.Entities
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="name">The name.</param>
-        /// <param name="settings">The settings.</param>
         /// <returns><c>true</c> if the behaviour was added; else <c>false</c>.</returns>
         public bool AddBehaviour<T>(string name = null)
             where T : Behaviour
         {
             return AddBehaviour(typeof(T), name);
+        }
+
+        /// <summary>
+        /// Adds the behaviour, provided that such a behaviour does not already exist.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="create">A factory function which creates an instance of this behaviour</param>
+        /// <param name="name">the name.</param>
+        /// <returns><c>true</c> if the behaviour was added; else <c>false</c>.</returns>
+        public bool AddBehaviour<T>(Func<String, T> create, string name = null)
+            where T : Behaviour
+        {
+            return AddBehaviour(new BehaviourData()
+            {
+                Name = name,
+                Type = typeof(T),
+                Factory = (a) => create(a),
+            });
         }
 
         /// <summary>
@@ -227,6 +229,7 @@ namespace Myre.Entities
             return RemoveBehaviour(typeof(T), name);
         }
 
+        #region properties
         /// <summary>
         /// Adds the property, provided that such a property does not already exist.
         /// </summary>
@@ -254,7 +257,7 @@ namespace Myre.Entities
         /// <param name="initialValue">The initial value.</param>
         /// <param name="copyBehaviour">The copy behaviour.</param>
         /// <returns><c>true</c> if the behaviour was added; else <c>false</c>.</returns>
-        public bool AddProperty(Type dataType, string name, object initialValue = null)
+        public bool AddProperty(Type dataType, string name)
         {
             var data = new PropertyData()
             {
@@ -273,9 +276,9 @@ namespace Myre.Entities
         /// <param name="initialValue">The initial value.</param>
         /// <param name="copyBehaviour">The copy behaviour.</param>
         /// <returns><c>true</c> if the behaviour was added; else <c>false</c>.</returns>
-        public bool AddProperty<T>(string name, T initialValue = default(T))
+        public bool AddProperty<T>(string name)
         {
-            return AddProperty(typeof(T), name, initialValue);
+            return AddProperty(typeof(T), name);
         }
 
         /// <summary>
@@ -297,19 +300,20 @@ namespace Myre.Entities
 
             return false;
         }
+        #endregion
 
         /// <summary>
         /// Creates a new entity with the properties and behaviours described by this instance.
         /// </summary>
         /// <returns></returns>
-        public Entity Create()
+        public virtual Entity Create()
         {
             Entity e;
 
             if (pool.Count > 0)
                 e = InitialisePooledEntity();
             else
-                e = new Entity(CreateProperties(), CreateBehaviours(), new EntityVersion(this, Version));
+                e = new Entity(CreateProperties(), CreateBehaviours(), new EntityVersion(this, version));
 
             return e;
         }
@@ -319,9 +323,9 @@ namespace Myre.Entities
         /// </summary>
         /// <param name="entity">The entity.</param>
         /// <returns><c>true</c> if the entity was recycled; else <c>false</c>.</returns>
-        public bool Recycle(Entity entity)
+        public virtual bool Recycle(Entity entity)
         {
-            if (entity.Version.Creator != this || entity.Version.Version != Version)
+            if (entity.Version.Creator != this || entity.Version.Version != version)
                 return false;
 
             pool.Enqueue(entity);
@@ -331,7 +335,7 @@ namespace Myre.Entities
         private Entity InitialisePooledEntity()
         {
             var entity = pool.Dequeue();
-            foreach (var item in entity.Properties)
+            foreach (IProperty item in entity.Properties)
                 item.Clear();
 
             return entity;
@@ -341,7 +345,7 @@ namespace Myre.Entities
         {
             unchecked
             {
-                Version++;
+                version++;
             }
 
             pool.Clear();
@@ -374,10 +378,14 @@ namespace Myre.Entities
 
         private Behaviour CreateBehaviourInstance(IKernel kernel, BehaviourData behaviour)
         {
-            var name = new ConstructorArgument("name", behaviour.Name);
-            var instance = kernel.Get(behaviour.Type, name) as Behaviour;
-            instance.Name = behaviour.Name;
+            Behaviour instance;
 
+            if (behaviour.Factory != null)
+                instance = behaviour.Factory(behaviour.Name);
+            else
+                instance = kernel.Get(behaviour.Type, new ConstructorArgument("name", behaviour.Name)) as Behaviour;
+
+            instance.Name = behaviour.Name;
             return instance;
         }
     }
