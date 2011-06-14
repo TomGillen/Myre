@@ -156,6 +156,7 @@ namespace Myre.Serialisation.Tests
             Assert.IsNotNull(output);
             Assert.AreEqual("Foo", output.A);
             Assert.AreEqual("Foo", output.B);
+            Assert.ReferenceEquals(output.A, output.B);
         }
     }
 }

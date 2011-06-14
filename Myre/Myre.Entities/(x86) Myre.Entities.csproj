@@ -66,9 +66,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Libraries\x86\Ninject.dll</HintPath>
     </Reference>
-    <Reference Include="Ninject.Extensions.ChildKernel">
-      <HintPath>..\..\Libraries\x86\Ninject.Extensions.ChildKernel.dll</HintPath>
-    </Reference>
     <Reference Include="System">
       <Private>False</Private>
     </Reference>

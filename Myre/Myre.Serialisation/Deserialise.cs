@@ -12,7 +12,7 @@ namespace Myre.Serialisation
     {
         public abstract partial class Node
         {
-            public abstract object Deserialise(IKernel kernel, Type expectedType);
+            public abstract object Deserialise(Dom dom, IKernel kernel, Type expectedType);
         }
 
         public partial class LiteralNode
@@ -20,7 +20,7 @@ namespace Myre.Serialisation
             private MethodInfo parseMethod;
             private static Dictionary<Type, MethodInfo> parseMethods = new Dictionary<Type, MethodInfo>();
 
-            public override object Deserialise(IKernel kernel, Type expectedType)
+            public override object Deserialise(Dom dom, IKernel kernel, Type expectedType)
             {
                 if (Type == typeof(string))
                     return Value;
@@ -44,7 +44,7 @@ namespace Myre.Serialisation
 
         public partial class ListNode
         {
-            public override object Deserialise(IKernel kernel, Type expectedType)
+            public override object Deserialise(Dom dom, IKernel kernel, Type expectedType)
             {
                 var type = Type ?? expectedType;
 
@@ -54,7 +54,7 @@ namespace Myre.Serialisation
 
                     for (int i = 0; i < Children.Count; i++)
                     {
-                        var child = Children[i].GetNode().Deserialise(kernel, type.GetElementType());
+                        var child = Children[i].GetNode().Deserialise(dom, kernel, type.GetElementType());
                         instance.SetValue(child, i);
                     }
 
@@ -67,7 +67,7 @@ namespace Myre.Serialisation
                     IList list = instance as IList;
                     foreach (var item in Children)
                     {
-                        var child = DeserialiseNode(item.GetNode(), kernel, typeof(object));
+                        var child = DeserialiseNode(dom, item.GetNode(), kernel, typeof(object));
                         list.Add(child);
                     }
 
@@ -78,7 +78,7 @@ namespace Myre.Serialisation
 
         public partial class DictionaryNode
         {
-            public override object Deserialise(IKernel kernel, Type expectedType)
+            public override object Deserialise(Dom dom, IKernel kernel, Type expectedType)
             {
                 var type = Type ?? expectedType;
                 var instance = CreateInstance(type, kernel);
@@ -86,8 +86,8 @@ namespace Myre.Serialisation
                 IDictionary dictionary = instance as IDictionary;
                 foreach (var item in Children)
                 {
-                    var key = DeserialiseNode(item.Key.GetNode(), kernel, typeof(object));
-                    var value = DeserialiseNode(item.Value.GetNode(), kernel, typeof(object));
+                    var key = DeserialiseNode(dom, item.Key.GetNode(), kernel, typeof(object));
+                    var value = DeserialiseNode(dom, item.Value.GetNode(), kernel, typeof(object));
                     dictionary.Add(key, value);
                 }
 
@@ -118,7 +118,7 @@ namespace Myre.Serialisation
                 }
             }
 
-            public override object Deserialise(IKernel kernel, Type expectedType)
+            public override object Deserialise(Dom dom, IKernel kernel, Type expectedType)
             {
                 var type = Type ?? expectedType;
                 var instance = CreateInstance(type, kernel);
@@ -133,7 +133,7 @@ namespace Myre.Serialisation
                     if (!field.IsValid)
                         continue;
 
-                    var value = DeserialiseNode(item.Value.GetNode(), kernel, field.Type);
+                    var value = DeserialiseNode(dom, item.Value.GetNode(), kernel, field.Type);
                     field.Set(instance, value);
                 }
 
@@ -167,6 +167,8 @@ namespace Myre.Serialisation
             }
         }
 
+        private Dictionary<int, object> sharedInstances = new Dictionary<int, object>();
+
         /// <summary>
         /// Deserialises the object described by this DOM instance into the type <typeparamref name="T"/>.
         /// </summary>
@@ -174,10 +176,10 @@ namespace Myre.Serialisation
         /// <returns>The runtime object described by this DOM.</returns>
         public T Deserialise<T>()
         {
-            return (T)DeserialiseNode(Root.GetNode(), Kernel, typeof(T));
+            return (T)DeserialiseNode(this, Root.GetNode(), Kernel, typeof(T));
         }
 
-        private static object DeserialiseNode(Node node, IKernel kernel, Type expectedType)
+        private static object CreateInstance(Dom dom, Node node, IKernel kernel, Type expectedType)
         {
             if (typeof(ICustomSerialisable).IsAssignableFrom(node.Type))
             {
@@ -187,7 +189,7 @@ namespace Myre.Serialisation
                 return instance;
             }
             else
-                return node.Deserialise(kernel, expectedType);
+                return node.Deserialise(dom, kernel, expectedType);
         }
 
         private static object CreateInstance(Type type, IKernel kernel)
@@ -196,6 +198,22 @@ namespace Myre.Serialisation
                 return Activator.CreateInstance(type);
             else
                 return kernel.Get(type);
+        }
+
+        private static object DeserialiseNode(Dom dom, Node node, IKernel kernel, Type expectedType)
+        {
+            if (node.SharedReferenceID == null)
+                return CreateInstance(dom, node, kernel, expectedType);
+
+            var id = node.SharedReferenceID.Value;
+            object value;
+            if (!dom.sharedInstances.TryGetValue(id, out value))
+            {
+                value = CreateInstance(dom, node, kernel, expectedType);
+                dom.sharedInstances[id] = value;
+            }
+
+            return value;
         }
     }
 }
