@@ -8,7 +8,7 @@ using Myre.Graphics.PostProcessing;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework;
 
-namespace Myre.Graphics.Lighting
+namespace Myre.Graphics.Deferred
 {
     public class Ssao
         : RendererComponent

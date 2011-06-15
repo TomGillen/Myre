@@ -13,7 +13,6 @@ using Myre.Graphics.PostProcessing;
 
 namespace Myre.Graphics.Lighting
 {
-    [DefaultManager(typeof(Manager))]
     public class AmbientLight
         : Behaviour
     {
@@ -46,56 +45,6 @@ namespace Myre.Graphics.Lighting
             this.up = context.CreateProperty<Vector3>("up");
 
             base.CreateProperties(context);
-        }
-
-        public class Manager
-            : BehaviourManager<AmbientLight>, ILightProvider
-        {
-            private Material lightingMaterial;
-            private Quad quad;
-
-            public bool ModifiesStencil
-            {
-                get { return false; }
-            }
-
-            public Manager(
-                ContentManager content,
-                GraphicsDevice device)
-            {                
-                lightingMaterial = new Material(content.Load<Effect>("AmbientLight"));
-                quad = new Quad(device);
-            }
-
-            public bool PrepareDraw(Renderer renderer)
-            {
-                return true;
-            }
-
-            public void Draw(Renderer renderer)
-            {
-                var metadata = renderer.Data;
-                var view = metadata.Get<Matrix>("view").Value;
-                var ssao = metadata.Get<Texture2D>("ssao").Value;
-
-                if (ssao != null)
-                    lightingMaterial.CurrentTechnique = lightingMaterial.Techniques["AmbientSSAO"];
-                else
-                    lightingMaterial.CurrentTechnique = lightingMaterial.Techniques["Ambient"];
-
-                foreach (var light in Behaviours)
-                {
-                    lightingMaterial.Parameters["Up"].SetValue(Vector3.TransformNormal(light.Up, view));
-                    lightingMaterial.Parameters["SkyColour"].SetValue(light.SkyColour);
-                    lightingMaterial.Parameters["GroundColour"].SetValue(light.GroundColour);
-
-                    quad.Draw(lightingMaterial, metadata);
-                }
-            }
-
-            public void DrawDebug(Renderer renderer)
-            {
-            }
         }
     }
 }

@@ -11,7 +11,7 @@ using Myre.Graphics.PostProcessing;
 using Myre.Graphics.Geometry;
 using Ninject;
 
-namespace Myre.Graphics
+namespace Myre.Graphics.Deferred
 {
     public class AntiAliasComponent
         : RendererComponent

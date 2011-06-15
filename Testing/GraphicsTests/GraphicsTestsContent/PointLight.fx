@@ -4,7 +4,6 @@
 
 float3 Colour;
 float3 LightPosition;
-float LightFalloffFactor;
 float3 CameraPosition : CAMERAPOSITION;
 float Range;
 
@@ -57,7 +56,7 @@ float4 CalculateLighting(float2 texCoord, float3 viewPosition)
 
 	float3 surfaceToLight = LightPosition - viewPosition;
 	float distance = length(surfaceToLight);
-	float attenuation = 1 - saturate(distance / Range); //saturate(LightFalloffFactor / (distance * distance));
+	float attenuation = 1 - saturate(distance / Range);
 	attenuation *= attenuation;
 
 	float3 L = surfaceToLight / distance;

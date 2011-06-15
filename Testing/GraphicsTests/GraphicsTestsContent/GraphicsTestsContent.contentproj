@@ -94,6 +94,11 @@
       <Importer>EffectImporter</Importer>
       <Processor>EffectProcessor</Processor>
     </Compile>
+    <Compile Include="CopyTexture.fx">
+      <Name>CopyTexture</Name>
+      <Importer>EffectImporter</Importer>
+      <Processor>EffectProcessor</Processor>
+    </Compile>
     <None Include="EncodeNormals.fxh">
       <Name>EncodeNormals</Name>
       <Importer>EffectImporter</Importer>

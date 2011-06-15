@@ -46,9 +46,15 @@
   <ItemGroup>
     <Compile Include="Camera.cs" />
     <Compile Include="CreateTargetComponent.cs" />
-    <Compile Include="AntiAliasComponent.cs" />
-    <Compile Include="EdgeDetectComponent.cs" />
-    <Compile Include="GeometryBufferComponent.cs" />
+    <Compile Include="Deferred\AntiAliasComponent.cs" />
+    <Compile Include="Deferred\LightManagers\DeferredAmbientLightManager.cs" />
+    <Compile Include="Deferred\LightManagers\DeferredPointLightManager.cs" />
+    <Compile Include="Deferred\LightManagers\DeferredSkyboxManager.cs" />
+    <Compile Include="Deferred\LightManagers\DeferredSpotLightManager.cs" />
+    <Compile Include="Deferred\LightManagers\DeferredSunLightManager.cs" />
+    <Compile Include="Deferred\ToneMapComponent.cs" />
+    <Compile Include="Deferred\EdgeDetectComponent.cs" />
+    <Compile Include="Deferred\GeometryBufferComponent.cs" />
     <Compile Include="Geometry\BoundingVolume.cs" />
     <Compile Include="Geometry\IBoxIntersectTester.cs" />
     <Compile Include="Geometry\ICullable.cs" />
@@ -61,15 +67,14 @@
     <Compile Include="Geometry\OrientedBoundingBox.cs" />
     <Compile Include="IRenderable.cs" />
     <Compile Include="Lighting\AmbientLight.cs" />
-    <Compile Include="Lighting\GammaCorrectionPhase.cs" />
+    <Compile Include="Deferred\GammaCorrectionPhase.cs" />
     <Compile Include="Lighting\PointLight.cs" />
     <Compile Include="Lighting\Skybox.cs" />
     <Compile Include="Lighting\SpotLight.cs" />
-    <Compile Include="Lighting\Ssao.cs" />
+    <Compile Include="Deferred\Ssao.cs" />
     <Compile Include="Lighting\SunLight.cs" />
-    <Compile Include="Lighting\ILightProvider.cs" />
-    <Compile Include="Lighting\LightingComponent.cs" />
-    <Compile Include="Lighting\ToneMapComponent.cs" />
+    <Compile Include="Deferred\ILightProvider.cs" />
+    <Compile Include="Deferred\LightingComponent.cs" />
     <Compile Include="Materials\Material.cs" />
     <Compile Include="Materials\MaterialParameter.cs" />
     <Compile Include="Materials\MaterialReader.cs" />
@@ -90,12 +95,8 @@
     <Compile Include="RendererComponent.cs" />
     <Compile Include="RenderPlan.cs" />
     <Compile Include="RenderTargetManager.cs" />
-    <Compile Include="RestoreDepthPhase.cs" />
+    <Compile Include="Deferred\RestoreDepthPhase.cs" />
     <Compile Include="View.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Documentation\Materials.txt" />
-    <Content Include="Documentation\RenderPhases.txt" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Myre.Debugging\(360) Myre.Debugging.csproj">

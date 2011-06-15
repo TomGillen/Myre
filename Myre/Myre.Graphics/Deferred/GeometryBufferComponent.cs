@@ -10,7 +10,7 @@ using Myre.Collections;
 using Myre.Graphics.PostProcessing;
 using Myre.Graphics.Geometry;
 
-namespace Myre.Graphics
+namespace Myre.Graphics.Deferred
 {
     public class GeometryBufferComponent
         : RendererComponent
@@ -58,13 +58,6 @@ namespace Myre.Graphics
             quad.Draw(clear, metadata);
             device.DepthStencilState = DepthStencilState.Default;
 
-            //var blend = new BlendState();
-            //blend.ColorBlendFunction = BlendFunction.Add;
-            //blend.ColorSourceBlend = Blend.One;
-            //blend.ColorDestinationBlend = Blend.Zero;
-            //blend.AlphaBlendFunction = BlendFunction.Add;
-            //blend.AlphaSourceBlend = Blend.One;
-            //blend.AlphaDestinationBlend = Blend.Zero;
             device.BlendState = BlendState.Opaque;
 
             foreach (var geometryProvider in renderer.Scene.FindManagers<IGeometryProvider>())

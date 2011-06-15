@@ -8,7 +8,6 @@ using Ninject.Parameters;
 using Myre.Entities.Behaviours;
 using Myre;
 using System.Collections.ObjectModel;
-using Ninject.Extensions.ChildKernel;
 
 namespace Myre.Entities
 {

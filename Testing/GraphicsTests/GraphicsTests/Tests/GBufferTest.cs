@@ -11,6 +11,7 @@ using Microsoft.Xna.Framework;
 using Myre.Graphics.Geometry;
 using System.IO;
 using Myre.Graphics.Lighting;
+using Myre.Graphics.Deferred;
 
 namespace GraphicsTests.Tests
 {

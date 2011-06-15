@@ -11,30 +11,11 @@ using Myre.Collections;
 using Myre.Graphics.PostProcessing;
 using System.Threading;
 
-namespace Myre.Graphics.Lighting
+namespace Myre.Graphics.Deferred
 {
     public class ToneMapComponent
        : RendererComponent
     {
-        //protected override void SpecifyResources(IList<Input> inputs, IList<RendererComponent.Resource> outputs, out RenderTargetInfo? outputTarget)
-        //{
-        //    inputs.Add(new Input() { Name = "lightbuffer" });
-        //    outputs.Add(new Resource() { Name = "luminancemap" });
-        //    outputs.Add(new Resource() { Name = "bloom" });
-        //    outputs.Add(new Resource() { Name = "tonemapped", IsLeftSet = true });
-        //    outputs.Add(new Resource() { Name = "luminance" });
-
-        //    outputTarget = new RenderTargetInfo()
-        //    {
-        //        SurfaceFormat = SurfaceFormat.Rgba64
-        //    };
-        //}
-
-        //protected internal override bool ValidateInput(RenderTargetInfo? previousRenderTarget)
-        //{
-        //    return true;
-        //}
-
         Quad quad;
         Material calculateLuminance;
         Material readLuminance;

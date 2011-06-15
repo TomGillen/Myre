@@ -10,7 +10,7 @@ using Myre.Collections;
 using Myre.Graphics.PostProcessing;
 using Myre.Graphics.Geometry;
 
-namespace Myre.Graphics
+namespace Myre.Graphics.Deferred
 {
     public class EdgeDetectComponent
         : RendererComponent
