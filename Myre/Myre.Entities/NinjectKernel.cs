@@ -41,22 +41,22 @@ namespace Myre.Entities
         {
             // bind the game to a singleton instance
             var thisType = game.GetType();
-            kernel.Bind(thisType).ToConstant(game);
-            kernel.Bind<Game>().ToConstant(game);
+            Instance.Bind(thisType).ToConstant(game);
+            Instance.Bind<Game>().ToConstant(game);
 
             // bind the graphics device
             if (bindGraphicsDevice)
-                kernel.Bind<GraphicsDevice>().ToMethod(c => game.GraphicsDevice);
+                Instance.Bind<GraphicsDevice>().ToMethod(c => game.GraphicsDevice);
 
             // bind the content manager
             if (bindContentManager)
-                kernel.Bind<ContentManager>().ToMethod(c => game.Content);
+                Instance.Bind<ContentManager>().ToMethod(c => game.Content);
 
             // bind services
             if (bindServiceContainer)
             {
-                kernel.Bind<GameServiceContainer>().ToMethod(c => game.Services);
-                kernel.Bind<IServiceProvider>().ToMethod(c => game.Services);
+                Instance.Bind<GameServiceContainer>().ToMethod(c => game.Services);
+                Instance.Bind<IServiceProvider>().ToMethod(c => game.Services);
             }
         }
     }

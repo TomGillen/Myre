@@ -21,11 +21,11 @@ namespace Myre.Graphics.Deferred.LightManagers
         private Model geometry;
 
         private List<PointLight> touchesNearPlane;
-        private List<PointLight> touchesFarPlane;
         private List<PointLight> touchesBothPlanes;
-        private List<PointLight> touchesNeitherPlane;
+        private List<PointLight> doesntTouchNear;
 
         private DepthStencilState depthGreater;
+        private DepthStencilState depthLess;
         private BlendState colourWriteDisable;
         private DepthStencilState stencilWritePass;
         private DepthStencilState stencilCheckPass;
@@ -47,9 +47,8 @@ namespace Myre.Graphics.Deferred.LightManagers
             quad = new Quad(device);
 
             touchesNearPlane = new List<PointLight>();
-            touchesFarPlane = new List<PointLight>();
             touchesBothPlanes = new List<PointLight>();
-            touchesNeitherPlane = new List<PointLight>();
+            doesntTouchNear = new List<PointLight>();
 
             depthGreater = new DepthStencilState()
             {
@@ -58,48 +57,24 @@ namespace Myre.Graphics.Deferred.LightManagers
                 DepthBufferFunction = CompareFunction.GreaterEqual
             };
 
-            stencilWritePass = new DepthStencilState()
+            depthLess = new DepthStencilState()
             {
                 DepthBufferEnable = true,
                 DepthBufferWriteEnable = false,
-                DepthBufferFunction = CompareFunction.LessEqual,
-                StencilEnable = true,
-                TwoSidedStencilMode = true,
-                StencilFunction = CompareFunction.Always,
-                StencilPass = StencilOperation.Increment,
-                CounterClockwiseStencilPass = StencilOperation.Decrement
-            };
-
-            stencilCheckPass = new DepthStencilState()
-            {
-                DepthBufferEnable = false,
-                StencilEnable = true,
-                StencilFunction = CompareFunction.NotEqual,
-                ReferenceStencil = 0
-            };
-
-            colourWriteDisable = new BlendState()
-            {
-                ColorWriteChannels = ColorWriteChannels.None
+                DepthBufferFunction = CompareFunction.LessEqual
             };
         }
 
         public void Prepare(Renderer renderer)
         {
             touchesNearPlane.Clear();
-            touchesFarPlane.Clear();
             touchesBothPlanes.Clear();
-            touchesNeitherPlane.Clear();
+            doesntTouchNear.Clear();
 
             var frustum = renderer.Data.Get<BoundingFrustum>("viewfrustum").Value;
-
-            //float falloffFactor = renderer.Data.Get("lighting_attenuationscale", 100).Value;
-            //geometryLightingMaterial.Parameters["LightFalloffFactor"].SetValue(falloffFactor);
-            //quadLightingMaterial.Parameters["LightFalloffFactor"].SetValue(falloffFactor);
-
+            
             foreach (var light in Behaviours)
             {
-
                 var bounds = new BoundingSphere(light.Position, light.Range);
                 if (!bounds.Intersects(frustum))
                     continue;
@@ -111,10 +86,8 @@ namespace Myre.Graphics.Deferred.LightManagers
                     touchesBothPlanes.Add(light);
                 else if (near)
                     touchesNearPlane.Add(light);
-                else if (far)
-                    touchesFarPlane.Add(light);
                 else
-                    touchesNeitherPlane.Add(light);
+                    doesntTouchNear.Add(light);
             }
         }
 
@@ -124,41 +97,31 @@ namespace Myre.Graphics.Deferred.LightManagers
             var metadata = renderer.Data;
             var device = renderer.Device;
 
+            // set deice for drawing sphere mesh
             var part = geometry.Meshes[0].MeshParts[0];
             device.SetVertexBuffer(part.VertexBuffer);
             device.Indices = part.IndexBuffer;
 
-            DrawGeometryLights(touchesFarPlane, metadata, device);
-
+            // draw lights which touch near plane
+            // back faces, cull those in front of geometry
             device.DepthStencilState = depthGreater;
             device.RasterizerState = RasterizerState.CullClockwise;
             DrawGeometryLights(touchesNearPlane, metadata, device);
-            DrawGeometryLights(touchesNeitherPlane, metadata, device);
 
-            //foreach (var light in touchesNeitherPlane)
-            //{
-            //    device.DepthStencilState = stencilWritePass;
-            //    device.RasterizerState = RasterizerState.CullNone;
-            //    device.BlendState = colourWriteDisable;
-            //    device.Clear(ClearOptions.Stencil, Color.Transparent, 0, 0);
-
-            //    SetupLight(metadata, null, light);
-            //    DrawGeomery(nothingMaterial, metadata, device);
-
-            //    device.DepthStencilState = stencilCheckPass;
-            //    device.RasterizerState = RasterizerState.CullCounterClockwise;
-            //    device.BlendState = BlendState.Additive;
-            //    DrawGeomery(geometryLightingMaterial, metadata, device);
-            //}
-
+            // draw lights which touch both planes
+            // full screen quad
             device.DepthStencilState = DepthStencilState.None;
             device.RasterizerState = RasterizerState.CullCounterClockwise;
-
             foreach (var light in touchesBothPlanes)
             {
                 SetupLight(metadata, quadLightingMaterial, light);
                 quad.Draw(quadLightingMaterial, metadata);
             }
+
+            // draw all other lights
+            // front faces, cull those behind geometry
+            device.DepthStencilState = depthLess;
+            DrawGeometryLights(doesntTouchNear, metadata, device);
         }
 
         private void DrawGeometryLights(List<PointLight> lights, RendererMetadata metadata, GraphicsDevice device)

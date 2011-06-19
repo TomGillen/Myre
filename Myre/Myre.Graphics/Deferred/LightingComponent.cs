@@ -19,31 +19,11 @@ namespace Myre.Graphics.Deferred
         Quad quad;
         Material restoreDepth;
         Material copyTexture;
-        //Material markGeometry;
-        //DepthStencilState markGeometryState;
         ReadOnlyCollection<IDirectLight> directLights;
         ReadOnlyCollection<IIndirectLight> indirectLights;
 
         RenderTarget2D directLightBuffer;
         RenderTarget2D indirectLightBuffer;
-        //RenderTarget2D lightBuffer;
-        //RenderTarget2D previousTarget;
-
-        //public static readonly DepthStencilState CullGeometry = new DepthStencilState()
-        //{
-        //    DepthBufferEnable = false,
-        //    StencilEnable = true,
-        //    ReferenceStencil = 0,
-        //    StencilFunction = CompareFunction.Equal
-        //};
-
-        //public static readonly DepthStencilState CullNonGeometry = new DepthStencilState()
-        //{
-        //    DepthBufferEnable = false,
-        //    StencilEnable = true,
-        //    ReferenceStencil = 0,
-        //    StencilFunction = CompareFunction.NotEqual
-        //};
 
         public LightingComponent(
             GraphicsDevice device,
@@ -54,26 +34,12 @@ namespace Myre.Graphics.Deferred
 
             restoreDepth = new Material(content.Load<Effect>("RestoreDepth"));
             copyTexture =  new Material(content.Load<Effect>("CopyTexture"));
-            //markGeometry = new Material(content.Load<Effect>("MarkGeometry"), null);
-
-            //markGeometryState = new DepthStencilState()
-            //{
-            //    DepthBufferEnable = true,
-            //    DepthBufferWriteEnable = false,
-            //    StencilEnable = true,
-            //    StencilDepthBufferFail = StencilOperation.Replace,
-            //    ReferenceStencil = 1
-            //};
         }
 
         public override void Initialise(Renderer renderer, ResourceContext context)
         {
             // create debug settings
             var settings = renderer.Settings;
-
-            //settings.Add("lighting_attenuationscale", "Scales the rate at which lights attenuate over distance.", 100);
-            //settings.Add("lighting_threshold", "The fraction of the average scene luminance at which the rage of a light is cut off.", 0.05f);
-            //settings.Add("debuglights", "Shows light debug information", false);
 
             // define inputs
             context.DefineInput("gbuffer_depth");
@@ -87,7 +53,6 @@ namespace Myre.Graphics.Deferred
             // define outputs
             context.DefineOutput("lightbuffer", isLeftSet:true, surfaceFormat:SurfaceFormat.HdrBlendable, depthFormat:DepthFormat.Depth24Stencil8);
             context.DefineOutput("directlighting", isLeftSet:false, surfaceFormat: SurfaceFormat.HdrBlendable, depthFormat: DepthFormat.Depth24Stencil8);
-            //context.DefineOutput("previouslightbuffer", isLeftSet:false, surfaceFormat:SurfaceFormat.HdrBlendable, depthFormat:DepthFormat.Depth24Stencil8);
 
             // define default light managers
             var scene = renderer.Scene;
@@ -163,22 +128,5 @@ namespace Myre.Graphics.Deferred
             // output resulting light buffer
             Output("lightbuffer", indirectLightBuffer);
         }
-
-        //private void SwapBuffers(Renderer renderer, GraphicsDevice device, int width, int height)
-        //{
-        //    if (previousTarget != null)
-        //    {
-        //        //RenderTargetManager.RecycleTarget(previousTarget);
-        //        previousTarget = lightBuffer;
-        //    }
-        //    else
-        //    {
-        //        previousTarget = RenderTargetManager.GetTarget(renderer.Device, 1, 1, name:"previous light buffer");
-        //        renderer.Device.SetRenderTarget(previousTarget);
-        //        renderer.Device.Clear(Color.Transparent);
-        //    }
-
-        //    lightBuffer = RenderTargetManager.GetTarget(device, width, height, SurfaceFormat.HdrBlendable, DepthFormat.Depth24Stencil8, 0, false, RenderTargetUsage.DiscardContents, name:"light buffer");
-        //}
     }
 }

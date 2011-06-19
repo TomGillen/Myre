@@ -25,7 +25,7 @@ void PixelShaderFunction(in float2 in_TexCoord : TEXCOORD0,
 	float4 projectedPosition = mul(float4(viewPosition, 1), Projection);
 	
 	out_Colour = float4(0, 0, 0, 1);
-	out_Depth = 0;//projectedPosition.z / projectedPosition.w;
+	out_Depth = projectedPosition.z / projectedPosition.w;
 	//projectedPosition /= projectedPosition.w;
 	//out_Colour = float4(projectedPosition.xy / 2 + 0.5, projectedPosition.z, 1); //float4(viewPosition.xy, -viewPosition.z / farClip, 1);
 }
