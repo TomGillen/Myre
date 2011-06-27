@@ -73,13 +73,14 @@ namespace GraphicsTests
             cameraEntity.GetProperty<Viewport>("viewport").Value = new Viewport() { Width = device.PresentationParameters.BackBufferWidth, Height = device.PresentationParameters.BackBufferHeight };
             scene.Add(cameraEntity);
 
-            //var skyboxEntity = kernel.Get<EntityDescription>();
-            //skyboxEntity.AddProperty<TextureCube>("texture", content.Load<TextureCube>("GraceCathedral"));
-            //skyboxEntity.AddProperty<float>("brightness", 1);
-            //skyboxEntity.AddProperty<bool>("gamma_correct", false);
-            //skyboxEntity.AddBehaviour<Skybox>();
-            //scene.Add(skyboxEntity.Create());
-
+            var skyboxDesc = kernel.Get<EntityDescription>();
+            skyboxDesc.AddBehaviour<Skybox>();
+            var skybox = skyboxDesc.Create();
+            skybox.GetProperty<TextureCube>("texture").Value= content.Load<TextureCube>("StormCubeMap");
+            skybox.GetProperty<float>("brightness").Value = 0.5f;
+            skybox.GetProperty<bool>("gamma_correct").Value = false;
+            scene.Add(skybox);
+            
             //var sunEntity = kernel.Get<EntityDescription>();
             //sunEntity.AddProperty<Vector3>("direction", Vector3.Normalize(new Vector3(-.2f, -1f, .3f)));
             //sunEntity.AddProperty<Vector3>("colour", new Vector3(5f));
@@ -217,15 +218,15 @@ namespace GraphicsTests
             var console = kernel.Get<CommandConsole>();
             renderer.Settings.BindCommandEngine(console.Engine);
 
-            var fire1 = Fire.Create(kernel, content, new Vector3(123.5f, 30f, -55f));
-            var fire2 = Fire.Create(kernel, content, new Vector3(123.5f, 30f, 35f));
-            var fire3 = Fire.Create(kernel, content, new Vector3(-157f, 30f, 35f));
-            var fire4 = Fire.Create(kernel, content, new Vector3(-157f, 30f, -55f));
+            //var fire1 = Fire.Create(kernel, content, new Vector3(123.5f, 30f, -55f));
+            //var fire2 = Fire.Create(kernel, content, new Vector3(123.5f, 30f, 35f));
+            //var fire3 = Fire.Create(kernel, content, new Vector3(-157f, 30f, 35f));
+            //var fire4 = Fire.Create(kernel, content, new Vector3(-157f, 30f, -55f));
 
-            scene.Add(fire1);
-            scene.Add(fire2);
-            scene.Add(fire3);
-            scene.Add(fire4);
+            //scene.Add(fire1);
+            //scene.Add(fire2);
+            //scene.Add(fire3);
+            //scene.Add(fire4);
 
             cameraScript = new CameraScript(camera);
             cameraScript.AddWaypoint(0, new Vector3(218, 160, 104), new Vector3(0, 150, 0));

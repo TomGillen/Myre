@@ -184,11 +184,6 @@
       <Importer>EffectImporter</Importer>
       <Processor>EffectProcessor</Processor>
     </Compile>
-    <Compile Include="Skybox1.fx">
-      <Name>Skybox1</Name>
-      <Importer>EffectImporter</Importer>
-      <Processor>EffectProcessor</Processor>
-    </Compile>
     <Compile Include="Uffizi.dds">
       <Name>Uffizi</Name>
       <Importer>TextureImporter</Importer>
@@ -253,6 +248,12 @@
       <Importer>FbxImporter</Importer>
       <Processor>MyreModelProcessor</Processor>
       <ProcessorParameters_AllowNullDiffuseTexture>False</ProcessorParameters_AllowNullDiffuseTexture>
+    </Compile>
+    <Compile Include="StormCubeMap.dds">
+      <Name>StormCubeMap</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <ProcessorParameters_PremultiplyAlpha>False</ProcessorParameters_PremultiplyAlpha>
     </Compile>
     <None Include="ToneMapFunctions.fxh">
       <Name>ToneMapFunctions</Name>

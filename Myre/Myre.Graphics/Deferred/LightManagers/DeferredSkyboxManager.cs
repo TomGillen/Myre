@@ -11,10 +11,11 @@ using Microsoft.Xna.Framework;
 namespace Myre.Graphics.Deferred.LightManagers
 {
     public class DeferredSkyboxManager
-            : BehaviourManager<Skybox>, IIndirectLight
+            : BehaviourManager<Skybox>, IDirectLight
     {
         Model model;
         Effect skyboxEffect;
+        Quad quad;
 
         public DeferredSkyboxManager(
             GraphicsDevice device,
@@ -22,6 +23,8 @@ namespace Myre.Graphics.Deferred.LightManagers
         {
             skyboxEffect = content.Load<Effect>("Skybox");
             model = content.Load<Model>("SkyboxModel");
+            quad = new Quad(device);
+            quad.SetPosition(depth: 1);
         }
 
         public void Prepare(Renderer renderer)
@@ -32,41 +35,46 @@ namespace Myre.Graphics.Deferred.LightManagers
         {
             var device = renderer.Device;
 
-            //var previousDepthState = device.DepthStencilState;
-            //device.DepthStencilState = LightingComponent.CullGeometry;
-            ////device.DepthStencilState = DepthStencilState.None;
+            var previousDepthState = device.DepthStencilState;
+            //device.DepthStencilState = DepthStencilState.DepthRead;
+            device.DepthStencilState = new DepthStencilState()
+            {
+                DepthBufferEnable = true,
+                DepthBufferWriteEnable = false,
+                DepthBufferFunction = CompareFunction.LessEqual
+            };
 
-            //var previousRasterState = device.RasterizerState;
-            //device.RasterizerState = RasterizerState.CullNone;
+            var previousRasterState = device.RasterizerState;
+            device.RasterizerState = RasterizerState.CullCounterClockwise;
 
-            ////device.SetVertexBuffer(vertices);
-            ////device.Indices = indices;
+            //device.SetVertexBuffer(vertices);
+            //device.Indices = indices;
 
-            //var part = model.Meshes[0].MeshParts[0];
-            //device.SetVertexBuffer(part.VertexBuffer);
-            //device.Indices = part.IndexBuffer;
+            var part = model.Meshes[0].MeshParts[0];
+            device.SetVertexBuffer(part.VertexBuffer);
+            device.Indices = part.IndexBuffer;
 
-            //skyboxEffect.Parameters["View"].SetValue(renderer.Data.Get<Matrix>("view").Value);
-            //skyboxEffect.Parameters["Projection"].SetValue(renderer.Data.Get<Matrix>("projection").Value);
+            skyboxEffect.Parameters["View"].SetValue(renderer.Data.Get<Matrix>("view").Value);
+            skyboxEffect.Parameters["Projection"].SetValue(renderer.Data.Get<Matrix>("projection").Value);
 
-            //for (int i = 0; i < Behaviours.Count; i++)
-            //{
-            //    var light = Behaviours[i];
-            //    skyboxEffect.Parameters["EnvironmentMap"].SetValue(light.Texture);
-            //    skyboxEffect.Parameters["Brightness"].SetValue(light.Brightness);
+            for (int i = 0; i < Behaviours.Count; i++)
+            {
+                var light = Behaviours[i];
+                skyboxEffect.Parameters["EnvironmentMap"].SetValue(light.Texture);
+                skyboxEffect.Parameters["Brightness"].SetValue(light.Brightness);
 
-            //    skyboxEffect.CurrentTechnique = light.GammaCorrect ? skyboxEffect.Techniques["SkyboxGammaCorrect"] : skyboxEffect.Techniques["Skybox"];
+                skyboxEffect.CurrentTechnique = light.GammaCorrect ? skyboxEffect.Techniques["SkyboxGammaCorrect"] : skyboxEffect.Techniques["Skybox"];
 
-            //    foreach (var pass in skyboxEffect.CurrentTechnique.Passes)
-            //    {
-            //        pass.Apply();
-            //        //device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, 8, 0, 12);
-            //        device.DrawIndexedPrimitives(PrimitiveType.TriangleList, part.VertexOffset, 0, part.NumVertices, part.StartIndex, part.PrimitiveCount);
-            //    }
-            //}
+                foreach (var pass in skyboxEffect.CurrentTechnique.Passes)
+                {
+                    pass.Apply();
+                    //device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, 8, 0, 12);
+                    device.DrawIndexedPrimitives(PrimitiveType.TriangleList, part.VertexOffset, 0, part.NumVertices, part.StartIndex, part.PrimitiveCount);
+                }
+            }
 
-            //device.DepthStencilState = previousDepthState;
-            //device.RasterizerState = previousRasterState;
+            device.DepthStencilState = previousDepthState;
+            device.RasterizerState = previousRasterState;
         }
     }
 }

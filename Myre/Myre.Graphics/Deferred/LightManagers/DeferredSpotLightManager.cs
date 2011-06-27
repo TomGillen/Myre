@@ -1,3 +1,5 @@
+// todo: replace sphere geometry approximation with cone
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,9 +34,9 @@ namespace Myre.Graphics.Deferred.LightManagers
         private Model geometry;
         private View shadowView;
 
-        private BasicEffect basicEffect;
-        private VertexPositionColor[] debugVertices;
-        private int[] debugIndices;
+        //private BasicEffect basicEffect;
+        //private VertexPositionColor[] debugVertices;
+        //private int[] debugIndices;
 
         private List<LightData> lights;
         private List<LightData> touchesNearPlane;
@@ -59,24 +61,24 @@ namespace Myre.Graphics.Deferred.LightManagers
             effect = content.Load<Effect>("Nothing");
             nothingMaterial = new Material(effect, null);
 
-            basicEffect = new BasicEffect(device);
-            debugVertices = new VertexPositionColor[10];
-            debugIndices = new int[(debugVertices.Length - 1) * 2 * 2];
-            for (int i = 1; i < debugVertices.Length; i++)
-            {
-                debugVertices[i] = new VertexPositionColor(
-                    new Vector3(
-                        (float)Math.Sin(i * (MathHelper.TwoPi / (debugVertices.Length - 1))),
-                        (float)Math.Cos(i * (MathHelper.TwoPi / (debugVertices.Length - 1))),
-                        -1),
-                    Color.White);
+            //basicEffect = new BasicEffect(device);
+            //debugVertices = new VertexPositionColor[10];
+            //debugIndices = new int[(debugVertices.Length - 1) * 2 * 2];
+            //for (int i = 1; i < debugVertices.Length; i++)
+            //{
+            //    debugVertices[i] = new VertexPositionColor(
+            //        new Vector3(
+            //            (float)Math.Sin(i * (MathHelper.TwoPi / (debugVertices.Length - 1))),
+            //            (float)Math.Cos(i * (MathHelper.TwoPi / (debugVertices.Length - 1))),
+            //            -1),
+            //        Color.White);
 
-                var index = (i - 1) * 4;
-                debugIndices[index] = 0;
-                debugIndices[index + 1] = i;
-                debugIndices[index + 2] = i;
-                debugIndices[index + 3] = (i % (debugVertices.Length - 1)) + 1; //i < debugVertices.Length - 1 ? i + 1 : 1;
-            }
+            //    var index = (i - 1) * 4;
+            //    debugIndices[index] = 0;
+            //    debugIndices[index + 1] = i;
+            //    debugIndices[index + 2] = i;
+            //    debugIndices[index + 3] = (i % (debugVertices.Length - 1)) + 1; //i < debugVertices.Length - 1 ? i + 1 : 1;
+            //}
 
             geometry = content.Load<Model>("sphere");
 
