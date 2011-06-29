@@ -37,12 +37,9 @@ namespace Myre.Graphics.Deferred.LightManagers
         private Vector3[] frustumCornersVS;
         private View shadowView;
 
-        public DeferredSunLightManager(
-            IKernel kernel,
-            ContentManager content,
-            GraphicsDevice device)
+        public DeferredSunLightManager(IKernel kernel, GraphicsDevice device)
         {
-            var effect = content.Load<Effect>("DirectionalLight");
+            var effect = Content.Load<Effect>("DirectionalLight");
             material = new Material(effect, null);
 
             quad = new Quad(device);

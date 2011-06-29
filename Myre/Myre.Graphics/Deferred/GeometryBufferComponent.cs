@@ -19,10 +19,10 @@ namespace Myre.Graphics.Deferred
         private Material clear;
         private Quad quad;
 
-        public GeometryBufferComponent(ContentManager content, GraphicsDevice device)
+        public GeometryBufferComponent(GraphicsDevice device)
         {
-            clear = new Material(content.Load<Effect>("ClearGBuffer"));
-            scale = new Resample(device, content);
+            clear = new Material(Content.Load<Effect>("ClearGBuffer"));
+            scale = new Resample(device);
             quad = new Quad(device);
         }
 

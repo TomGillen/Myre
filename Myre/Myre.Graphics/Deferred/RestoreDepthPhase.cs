@@ -17,10 +17,10 @@ namespace Myre.Graphics.Deferred
 
         public bool ClearDepth { get; set; }
 
-        public RestoreDepthPhase(GraphicsDevice device, ContentManager content)
+        public RestoreDepthPhase(GraphicsDevice device)
         {
             this.quad = new Quad(device);
-            this.restoreDepth = new Material(content.Load<Effect>("RestoreDepth").Clone());
+            this.restoreDepth = new Material(Content.Load<Effect>("RestoreDepth").Clone());
             this.ClearDepth = true;
         }
 

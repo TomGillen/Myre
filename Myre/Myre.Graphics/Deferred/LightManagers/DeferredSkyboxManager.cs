@@ -17,12 +17,10 @@ namespace Myre.Graphics.Deferred.LightManagers
         Effect skyboxEffect;
         Quad quad;
 
-        public DeferredSkyboxManager(
-            GraphicsDevice device,
-            ContentManager content)
+        public DeferredSkyboxManager(GraphicsDevice device)
         {
-            skyboxEffect = content.Load<Effect>("Skybox");
-            model = content.Load<Model>("SkyboxModel");
+            skyboxEffect = Content.Load<Effect>("Skybox");
+            model = Content.Load<Model>("SkyboxModel");
             quad = new Quad(device);
             quad.SetPosition(depth: 1);
         }

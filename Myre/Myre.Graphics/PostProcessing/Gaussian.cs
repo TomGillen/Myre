@@ -20,9 +20,9 @@ namespace Myre.Graphics.PostProcessing
         int width;
         float sigma;
 
-        public Gaussian(GraphicsDevice device, ContentManager content)
+        public Gaussian(GraphicsDevice device)
         {
-            this.effect = content.Load<Effect>("Gaussian");
+            this.effect = Content.Load<Effect>("Gaussian");
             this.quad = new Quad(device);
             this.device = device;
 

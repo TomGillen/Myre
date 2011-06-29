@@ -16,7 +16,6 @@ namespace Myre.Graphics.Deferred.LightManagers
     {
         private Material geometryLightingMaterial;
         private Material quadLightingMaterial;
-        private Material nothingMaterial;
         private Quad quad;
         private Model geometry;
 
@@ -30,19 +29,13 @@ namespace Myre.Graphics.Deferred.LightManagers
         private DepthStencilState stencilWritePass;
         private DepthStencilState stencilCheckPass;
 
-        public DeferredPointLightManager(
-            ContentManager content,
-            GraphicsDevice device)
+        public DeferredPointLightManager(GraphicsDevice device)
         {
-            var effect = content.Load<Effect>("PointLight");
+            var effect = Content.Load<Effect>("PointLight");
             geometryLightingMaterial = new Material(effect.Clone(), "Geometry");
             quadLightingMaterial = new Material(effect.Clone(), "Quad");
-
-
-            effect = content.Load<Effect>("Nothing");
-            nothingMaterial = new Material(effect, null);
-
-            geometry = content.Load<Model>("sphere");
+            
+            geometry = Content.Load<Model>("sphere");
 
             quad = new Quad(device);
 

@@ -36,20 +36,18 @@ namespace Myre.Graphics.Deferred
             get { return adaptedLuminance[current]; }
         }
 
-        public ToneMapComponent(
-            GraphicsDevice device,
-            ContentManager content)
+        public ToneMapComponent(GraphicsDevice device)
         {
             quad = new Quad(device);
-            var effect = content.Load<Effect>("CalculateLuminance");
+            var effect = Content.Load<Effect>("CalculateLuminance");
             calculateLuminance = new Material(effect.Clone(), "ExtractLuminance");
             adaptLuminance = new Material(effect.Clone(), "AdaptLuminance");
             readLuminance = new Material(effect.Clone(), "ReadLuminance");
             copyLuminance = new Material(effect.Clone(), "Copy");
-            toneMap = new Material(content.Load<Effect>("ToneMap"), null);
-            bloom = content.Load<Effect>("Bloom");
-            gaussian = new Gaussian(device, content);
-            scale = new Resample(device, content);
+            toneMap = new Material(Content.Load<Effect>("ToneMap"), null);
+            bloom = Content.Load<Effect>("Bloom");
+            gaussian = new Gaussian(device);
+            scale = new Resample(device);
 
             adaptedLuminance = new RenderTarget2D[2];
             adaptedLuminance[0] = new RenderTarget2D(device, 1, 1, false, SurfaceFormat.Single, DepthFormat.None);
@@ -67,7 +65,7 @@ namespace Myre.Graphics.Deferred
             settings.Add("hdr_adaptionrate", "The rate at which the cameras' exposure adapts to changes in the scene luminance.", 1f);
             settings.Add("hdr_bloomthreshold", "The under-exposure applied during bloom thresholding.", 6f);
             settings.Add("hdr_bloommagnitude", "The overall brightness of the bloom effect.", 3f);
-            settings.Add("hdr_bloomblurammount", "The ammount to blur the bloom target.", 2.2f);
+            settings.Add("hdr_bloomblurammount", "The amount to blur the bloom target.", 2.2f);
             settings.Add("hdr_minexposure", "The minimum exposure the camera can adapt to.", -1.1f);
             settings.Add("hdr_maxexposure", "The maximum exposure the camera can adapt to.", 1.1f);
 

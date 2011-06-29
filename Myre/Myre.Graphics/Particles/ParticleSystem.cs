@@ -72,10 +72,10 @@ namespace Myre.Graphics.Particles
         /// Initializes a new instance of the <see cref="ParticleSystem"/> class.
         /// </summary>
         /// <param name="device">The device.</param>
-        public ParticleSystem(GraphicsDevice device, ContentManager content)
+        public ParticleSystem(GraphicsDevice device)
         {
             this.device = device;
-            this.material = new Material(content.Load<Effect>("ParticleSystem").Clone());
+            this.material = new Material(Content.Load<Effect>("ParticleSystem").Clone());
             this.Capacity = 5;
         }
 

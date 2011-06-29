@@ -57,11 +57,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "(360) Myre.Graphics", "Myre
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "(x86) Myre.Serialisation", "Myre.Serialisation\(x86) Myre.Serialisation.csproj", "{73911D37-4250-40BD-8F15-20824D586319}"
 EndProject
+Project("{96E2B04D-8817-42C6-938A-82C39BA4D311}") = "Myre.Graphics.Content", "Myre.Graphics.Content\Myre.Graphics.Content.contentproj", "{EC58850F-3960-426A-BE7D-7DFB67CB00A8}"
+EndProject
 Global
-	GlobalSection(SubversionScc) = preSolution
-		Svn-Managed = True
-		Manager = AnkhSVN - Subversion Support for Visual Studio
-	EndGlobalSection
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = Myre.vsmdi
 	EndGlobalSection
@@ -659,6 +657,21 @@ Global
 		{73911D37-4250-40BD-8F15-20824D586319}.Release|x86.ActiveCfg = Release|x86
 		{73911D37-4250-40BD-8F15-20824D586319}.Release|x86.Build.0 = Release|x86
 		{73911D37-4250-40BD-8F15-20824D586319}.Release|Xbox 360.ActiveCfg = Release|x86
+		{EC58850F-3960-426A-BE7D-7DFB67CB00A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC58850F-3960-426A-BE7D-7DFB67CB00A8}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{EC58850F-3960-426A-BE7D-7DFB67CB00A8}.Debug|Windows Phone.ActiveCfg = Debug|Any CPU
+		{EC58850F-3960-426A-BE7D-7DFB67CB00A8}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{EC58850F-3960-426A-BE7D-7DFB67CB00A8}.Debug|Xbox 360.ActiveCfg = Debug|Any CPU
+		{EC58850F-3960-426A-BE7D-7DFB67CB00A8}.Profile|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC58850F-3960-426A-BE7D-7DFB67CB00A8}.Profile|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{EC58850F-3960-426A-BE7D-7DFB67CB00A8}.Profile|Windows Phone.ActiveCfg = Debug|Any CPU
+		{EC58850F-3960-426A-BE7D-7DFB67CB00A8}.Profile|x86.ActiveCfg = Debug|Any CPU
+		{EC58850F-3960-426A-BE7D-7DFB67CB00A8}.Profile|Xbox 360.ActiveCfg = Debug|Any CPU
+		{EC58850F-3960-426A-BE7D-7DFB67CB00A8}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC58850F-3960-426A-BE7D-7DFB67CB00A8}.Release|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{EC58850F-3960-426A-BE7D-7DFB67CB00A8}.Release|Windows Phone.ActiveCfg = Debug|Any CPU
+		{EC58850F-3960-426A-BE7D-7DFB67CB00A8}.Release|x86.ActiveCfg = Debug|Any CPU
+		{EC58850F-3960-426A-BE7D-7DFB67CB00A8}.Release|Xbox 360.ActiveCfg = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -688,5 +701,9 @@ Global
 		{518A150F-DB32-4106-9A57-D7A2FA2A6F1B} = {4039A3D4-E465-43DD-8FD2-A757A027DD83}
 		{D8692844-58C6-477A-B85F-20A08B6E191B} = {4039A3D4-E465-43DD-8FD2-A757A027DD83}
 		{F40925B3-500A-41C8-ABF8-78D6759C7F4A} = {4039A3D4-E465-43DD-8FD2-A757A027DD83}
+	EndGlobalSection
+	GlobalSection(SubversionScc) = preSolution
+		Svn-Managed = True
+		Manager = AnkhSVN - Subversion Support for Visual Studio
 	EndGlobalSection
 EndGlobal

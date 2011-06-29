@@ -21,14 +21,14 @@ namespace Myre.Graphics.Deferred
         private string inputResource;
 
         [Inject]
-        public AntiAliasComponent(ContentManager content, GraphicsDevice device)
-            : this(content, device, null)
+        public AntiAliasComponent(GraphicsDevice device)
+            : this(device, null)
         {
         }
 
-        public AntiAliasComponent(ContentManager content, GraphicsDevice device, string inputResource)
+        public AntiAliasComponent(GraphicsDevice device, string inputResource)
         {
-            this.edgeBlur = new Material(content.Load<Effect>("EdgeBlur"));
+            this.edgeBlur = new Material(Content.Load<Effect>("EdgeBlur"));
             this.quad = new Quad(device);
             this.inputResource = inputResource;
         }

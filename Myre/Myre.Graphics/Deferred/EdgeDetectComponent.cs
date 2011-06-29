@@ -18,9 +18,9 @@ namespace Myre.Graphics.Deferred
         private Material edgeDetect;
         private Quad quad;
 
-        public EdgeDetectComponent(ContentManager content, GraphicsDevice device)
+        public EdgeDetectComponent(GraphicsDevice device)
         {
-            edgeDetect = new Material(content.Load<Effect>("EdgeDetect"));
+            edgeDetect = new Material(Content.Load<Effect>("EdgeDetect"));
             quad = new Quad(device);
         }
 

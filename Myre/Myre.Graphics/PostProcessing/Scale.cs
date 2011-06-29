@@ -15,10 +15,10 @@ namespace Myre.Graphics.PostProcessing
         Effect effect;
         Quad quad;
 
-        public Resample(GraphicsDevice device, ContentManager content)
+        public Resample(GraphicsDevice device)
         {
             this.device = device;
-            this.effect = content.Load<Effect>("Downsample");
+            this.effect = Content.Load<Effect>("Downsample");
             this.quad = new Quad(device);
         }
 

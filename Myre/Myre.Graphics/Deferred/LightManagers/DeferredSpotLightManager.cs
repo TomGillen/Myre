@@ -49,16 +49,13 @@ namespace Myre.Graphics.Deferred.LightManagers
         private DepthStencilState stencilWritePass;
         private DepthStencilState stencilCheckPass;
         
-        public DeferredSpotLightManager(
-            IKernel kernel,
-            ContentManager content,
-            GraphicsDevice device)
+        public DeferredSpotLightManager(IKernel kernel, GraphicsDevice device)
         {
-            var effect = content.Load<Effect>("SpotLight");
+            var effect = Content.Load<Effect>("SpotLight");
             geometryLightingMaterial = new Material(effect.Clone(), "Geometry");
             quadLightingMaterial = new Material(effect.Clone(), "Quad");
 
-            effect = content.Load<Effect>("Nothing");
+            effect = Content.Load<Effect>("Nothing");
             nothingMaterial = new Material(effect, null);
 
             //basicEffect = new BasicEffect(device);
@@ -80,7 +77,7 @@ namespace Myre.Graphics.Deferred.LightManagers
             //    debugIndices[index + 3] = (i % (debugVertices.Length - 1)) + 1; //i < debugVertices.Length - 1 ? i + 1 : 1;
             //}
 
-            geometry = content.Load<Model>("sphere");
+            geometry = Content.Load<Model>("sphere");
 
             quad = new Quad(device);
 

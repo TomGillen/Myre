@@ -19,14 +19,14 @@ namespace Myre.Graphics.Deferred
         private Gaussian gaussian;
         private Quad quad;
 
-        public Ssao(GraphicsDevice device, ContentManager content)
+        public Ssao(GraphicsDevice device)
         {
-            this.ssaoMaterial = new Material(content.Load<Effect>("SSAO"));
-            this.ssaoBlurMaterial = new Material(content.Load<Effect>("BlurSSAO"));
+            this.ssaoMaterial = new Material(Content.Load<Effect>("SSAO"));
+            this.ssaoBlurMaterial = new Material(Content.Load<Effect>("BlurSSAO"));
             this.ssaoMaterial.Parameters["Random"].SetValue(GenerateRandomNormals(device, 4, 4));//content.Load<Texture2D>("randomnormals"));
             this.ssaoMaterial.Parameters["RandomResolution"].SetValue(4);
             this.ssaoMaterial.Parameters["Samples"].SetValue(GenerateRandomSamplePositions(16));
-            this.gaussian = new Gaussian(device, content);
+            this.gaussian = new Gaussian(device);
             this.quad = new Quad(device);
         }
 

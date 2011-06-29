@@ -8,6 +8,7 @@ using Myre.Entities;
 using Myre.Entities.Services;
 using Myre.Extensions;
 using Ninject;
+using System;
 
 namespace Myre.Graphics
 {
@@ -27,7 +28,6 @@ namespace Myre.Graphics
         private IKernel kernel;
         private GraphicsDevice device;
         private Quad quad;
-        //private Effect colourCorrection;
         private SpriteBatch spriteBatch;
 
         private RenderPlan plan;
@@ -61,7 +61,7 @@ namespace Myre.Graphics
             set { plan = value; }
         }
 
-        public Renderer(IKernel kernel, GraphicsDevice device, ContentManager content)
+        public Renderer(IKernel kernel, GraphicsDevice device, IServiceProvider services)
         {
             this.kernel = kernel;
             this.device = device;
@@ -69,8 +69,9 @@ namespace Myre.Graphics
             this.settings = new RendererSettings(this);
             this.viewResults = new Queue<RenderPlan.Output>();
             this.quad = new Quad(device);
-            //this.colourCorrection = content.Load<Effect>("Gamma");
             this.spriteBatch = new SpriteBatch(device);
+
+            Content.Initialise(services);
         }
 
         public override void Initialise(Scene scene)

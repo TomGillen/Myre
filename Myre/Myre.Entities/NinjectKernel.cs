@@ -39,24 +39,37 @@ namespace Myre.Entities
         /// <param name="bindServiceContainer">if set to <c>true</c> binds game.Services.</param>
         public static void BindGame(Game game, bool bindGraphicsDevice = true, bool bindContentManager = true, bool bindServiceContainer = true)
         {
+            BindGame(game, Instance, bindGraphicsDevice, bindContentManager, bindServiceContainer);
+        }
+
+        /// <summary>
+        /// Binds the game into the kernel.
+        /// </summary>
+        /// <param name="game">The game.</param>
+        /// <param name="kernel">The kernel to bind into.</param>
+        /// <param name="bindGraphicsDevice">if set to <c>true</c> binds game.GraphicsDevice.</param>
+        /// <param name="bindContentManager">if set to <c>true</c> binds game.Content.</param>
+        /// <param name="bindServiceContainer">if set to <c>true</c> binds game.Services.</param>
+        public static void BindGame(Game game, IKernel kernel, bool bindGraphicsDevice = true, bool bindContentManager = true, bool bindServiceContainer = true)
+        {
             // bind the game to a singleton instance
             var thisType = game.GetType();
-            Instance.Bind(thisType).ToConstant(game);
-            Instance.Bind<Game>().ToConstant(game);
+            kernel.Bind(thisType).ToConstant(game);
+            kernel.Bind<Game>().ToConstant(game);
 
             // bind the graphics device
             if (bindGraphicsDevice)
-                Instance.Bind<GraphicsDevice>().ToMethod(c => game.GraphicsDevice);
+                kernel.Bind<GraphicsDevice>().ToMethod(c => game.GraphicsDevice);
 
             // bind the content manager
             if (bindContentManager)
-                Instance.Bind<ContentManager>().ToMethod(c => game.Content);
+                kernel.Bind<ContentManager>().ToMethod(c => game.Content);
 
             // bind services
             if (bindServiceContainer)
             {
-                Instance.Bind<GameServiceContainer>().ToMethod(c => game.Services);
-                Instance.Bind<IServiceProvider>().ToMethod(c => game.Services);
+                kernel.Bind<GameServiceContainer>().ToMethod(c => game.Services);
+                kernel.Bind<IServiceProvider>().ToMethod(c => game.Services);
             }
         }
     }

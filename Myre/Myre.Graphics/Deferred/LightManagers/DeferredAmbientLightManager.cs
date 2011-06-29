@@ -17,11 +17,9 @@ namespace Myre.Graphics.Deferred.LightManagers
         private Material lightingMaterial;
         private Quad quad;
 
-        public DeferredAmbientLightManager(
-            ContentManager content,
-            GraphicsDevice device)
+        public DeferredAmbientLightManager(GraphicsDevice device)
         {
-            lightingMaterial = new Material(content.Load<Effect>("AmbientLight"));
+            lightingMaterial = new Material(Content.Load<Effect>("AmbientLight"));
             quad = new Quad(device);
         }
 

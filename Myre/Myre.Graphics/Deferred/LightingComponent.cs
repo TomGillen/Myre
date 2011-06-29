@@ -25,15 +25,13 @@ namespace Myre.Graphics.Deferred
         RenderTarget2D directLightBuffer;
         RenderTarget2D indirectLightBuffer;
 
-        public LightingComponent(
-            GraphicsDevice device,
-            ContentManager content)
+        public LightingComponent(GraphicsDevice device)
         {
             quad = new Quad(device);
             quad.SetPosition(depth: 0.99999f);
 
-            restoreDepth = new Material(content.Load<Effect>("RestoreDepth"));
-            copyTexture =  new Material(content.Load<Effect>("CopyTexture"));
+            restoreDepth = new Material(Content.Load<Effect>("RestoreDepth"));
+            copyTexture = new Material(Content.Load<Effect>("CopyTexture"));
         }
 
         public override void Initialise(Renderer renderer, ResourceContext context)

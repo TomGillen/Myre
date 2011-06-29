@@ -28,7 +28,7 @@
     <NoStdLib>true</NoStdLib>
     <UseVSHostingProcess>false</UseVSHostingProcess>
     <PlatformTarget>x86</PlatformTarget>
-    <XnaCompressContent>false</XnaCompressContent>
+    <XnaCompressContent>True</XnaCompressContent>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <DebugType>pdbonly</DebugType>
@@ -40,7 +40,7 @@
     <NoStdLib>true</NoStdLib>
     <UseVSHostingProcess>false</UseVSHostingProcess>
     <PlatformTarget>x86</PlatformTarget>
-    <XnaCompressContent>true</XnaCompressContent>
+    <XnaCompressContent>True</XnaCompressContent>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Profile|x86'">
     <OutputPath>bin\x86\Profile\</OutputPath>
@@ -54,6 +54,7 @@
     <CodeAnalysisIgnoreBuiltInRuleSets>false</CodeAnalysisIgnoreBuiltInRuleSets>
     <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
     <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
+    <XnaCompressContent>True</XnaCompressContent>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Xna.Framework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
@@ -89,6 +90,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Camera.cs" />
+    <Compile Include="Content.cs" />
     <Compile Include="CreateTargetComponent.cs" />
     <Compile Include="Deferred\AntiAliasComponent.cs" />
     <Compile Include="Deferred\EdgeDetectComponent.cs" />
@@ -141,6 +143,16 @@
     <Compile Include="RenderPlan.cs" />
     <Compile Include="RenderTargetManager.cs" />
     <Compile Include="View.cs" />
+    <Compile Include="x86Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>x86Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="XboxResources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>XboxResources.resx</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Myre.Debugging\%28x86%29 Myre.Debugging.csproj">
@@ -151,10 +163,51 @@
       <Project>{5CDABE8C-7C9C-4163-8C85-FEA731088239}</Project>
       <Name>%28x86%29 Myre.Entities</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Myre.Graphics.Content\Myre.Graphics.Content.contentproj">
+      <Project>{EC58850F-3960-426A-BE7D-7DFB67CB00A8}</Project>
+      <Name>Myre.Graphics.Content</Name>
+      <XnaReferenceType>Content</XnaReferenceType>
+    </ProjectReference>
     <ProjectReference Include="..\Myre\%28x86%29 Myre.csproj">
       <Project>{FDB5A9D8-9266-4F7B-BDE7-D4E720F5B45F}</Project>
       <Name>%28x86%29 Myre</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="x86Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>x86Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="XboxResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>XboxResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="bin\x86\Debug\Myre.Graphics.Content\AmbientLight.xnb" />
+    <None Include="bin\x86\Debug\Myre.Graphics.Content\Bloom.xnb" />
+    <None Include="bin\x86\Debug\Myre.Graphics.Content\BlurSSAO.xnb" />
+    <None Include="bin\x86\Debug\Myre.Graphics.Content\CalculateLuminance.xnb" />
+    <None Include="bin\x86\Debug\Myre.Graphics.Content\ClearGBuffer.xnb" />
+    <None Include="bin\x86\Debug\Myre.Graphics.Content\CopyTexture.xnb" />
+    <None Include="bin\x86\Debug\Myre.Graphics.Content\DirectionalLight.xnb" />
+    <None Include="bin\x86\Debug\Myre.Graphics.Content\Downsample.xnb" />
+    <None Include="bin\x86\Debug\Myre.Graphics.Content\EdgeBlur.xnb" />
+    <None Include="bin\x86\Debug\Myre.Graphics.Content\EdgeDetect.xnb" />
+    <None Include="bin\x86\Debug\Myre.Graphics.Content\Gamma.xnb" />
+    <None Include="bin\x86\Debug\Myre.Graphics.Content\Gaussian.xnb" />
+    <None Include="bin\x86\Debug\Myre.Graphics.Content\MarkGeometry.xnb" />
+    <None Include="bin\x86\Debug\Myre.Graphics.Content\Nothing.xnb" />
+    <None Include="bin\x86\Debug\Myre.Graphics.Content\ParticleSystem.xnb" />
+    <None Include="bin\x86\Debug\Myre.Graphics.Content\PointLight.xnb" />
+    <None Include="bin\x86\Debug\Myre.Graphics.Content\randomnormals.xnb" />
+    <None Include="bin\x86\Debug\Myre.Graphics.Content\RestoreDepth.xnb" />
+    <None Include="bin\x86\Debug\Myre.Graphics.Content\Skybox.xnb" />
+    <None Include="bin\x86\Debug\Myre.Graphics.Content\SkyboxModel.xnb" />
+    <None Include="bin\x86\Debug\Myre.Graphics.Content\sphere.xnb" />
+    <None Include="bin\x86\Debug\Myre.Graphics.Content\SpotLight.xnb" />
+    <None Include="bin\x86\Debug\Myre.Graphics.Content\SSAO.xnb" />
+    <None Include="bin\x86\Debug\Myre.Graphics.Content\ToneMap.xnb" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\XNA Game Studio\Microsoft.Xna.GameStudio.targets" />

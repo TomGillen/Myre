@@ -64,10 +64,7 @@
     <Compile Include="Events\Event.cs" />
     <Compile Include="Events\EventService.cs" />
     <Compile Include="Events\IEventListener.cs" />
-    <Compile Include="Ninject\ConditionalBindingResolver.cs" />
-    <Compile Include="Ninject\EntityNinjectModule.cs" />
-    <Compile Include="Ninject\NameAttribute.cs" />
-    <Compile Include="Ninject\SceneServiceAttribute.cs" />
+    <Compile Include="NinjectKernel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Property.cs" />
     <Compile Include="Scene.cs">
@@ -87,6 +84,7 @@
     <Reference Include="Microsoft.Xna.Framework.Game">
       <Private>False</Private>
     </Reference>
+    <Reference Include="Microsoft.Xna.Framework.Graphics, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=MSIL" />
     <Reference Include="mscorlib">
       <Private>False</Private>
     </Reference>

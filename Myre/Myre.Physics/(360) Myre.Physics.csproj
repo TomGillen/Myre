@@ -58,9 +58,12 @@
   <ItemGroup>
     <Compile Include="Collisions\Circle.cs" />
     <Compile Include="Collisions\Collision.cs" />
+    <Compile Include="Collisions\CollisionDetector.cs" />
     <Compile Include="Collisions\Contact.cs" />
     <Compile Include="Collisions\ContactTester.cs" />
+    <Compile Include="Collisions\Damping.cs" />
     <Compile Include="Collisions\Geometry.cs" />
+    <Compile Include="Collisions\GeometryManager.cs" />
     <Compile Include="Collisions\Polygon.cs" />
     <Compile Include="Collisions\Projection.cs" />
     <Compile Include="Collisions\SatResult.cs" />

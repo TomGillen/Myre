@@ -56,6 +56,7 @@ namespace GraphicsTests
                 testKernel.Bind<Game>().ToConstant(game);
                 testKernel.Bind<TestGame>().ToConstant(game);
                 testKernel.Bind<CommandConsole>().ToConstant(console);
+                testKernel.Bind<IServiceProvider>().ToConstant(game.Services);
                 //testKernel.Bind<InputActor>().ToConstant(player);
 
                 var instance = testKernel.Get(test) as TestScreen;
