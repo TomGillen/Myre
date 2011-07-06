@@ -90,8 +90,7 @@ namespace Myre.Graphics.Geometry
             private BoundingVolume bounds;
             private Octree octree;
 
-            public Manager(
-                GraphicsDevice device)
+            public Manager(GraphicsDevice device)
             {
                 this.device = device;
                 this.meshInstancePool = new Pool<MeshInstance>();

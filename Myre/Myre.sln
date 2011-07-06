@@ -57,7 +57,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "(360) Myre.Graphics", "Myre
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "(x86) Myre.Serialisation", "Myre.Serialisation\(x86) Myre.Serialisation.csproj", "{73911D37-4250-40BD-8F15-20824D586319}"
 EndProject
-Project("{96E2B04D-8817-42C6-938A-82C39BA4D311}") = "Myre.Graphics.Content", "Myre.Graphics.Content\Myre.Graphics.Content.contentproj", "{EC58850F-3960-426A-BE7D-7DFB67CB00A8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Myre.Graphics.Content", "Myre.Graphics.Content\Myre.Graphics.Content.contentproj", "{EC58850F-3960-426A-BE7D-7DFB67CB00A8}"
 EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution

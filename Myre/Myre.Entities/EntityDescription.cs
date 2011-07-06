@@ -101,6 +101,14 @@ namespace Myre.Entities
         /// <summary>
         /// Initializes a new instance of the <see cref="EntityDescription"/> class.
         /// </summary>
+        public EntityDescription()
+            : this(NinjectKernel.Instance)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EntityDescription"/> class.
+        /// </summary>
         /// <param name="kernel">The kernel.</param>
         public EntityDescription(IKernel kernel)
         {

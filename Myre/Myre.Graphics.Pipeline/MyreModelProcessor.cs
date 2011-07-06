@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework.Content.Pipeline.Processors;
 using System.IO;
 using System.Diagnostics;
 using System.ComponentModel;
+using System.Reflection;
 
 namespace Myre.Graphics.Pipeline
 {
@@ -237,15 +238,18 @@ namespace Myre.Graphics.Pipeline
 
         private void CreateShadowMaterial(MaterialContent material)
         {
+            string libraryLocation = Path.GetDirectoryName((new Uri(Assembly.GetExecutingAssembly().CodeBase)).AbsolutePath);
+            var shaderLocation = Path.GetFullPath(Path.Combine(libraryLocation, "DefaultShadows.fx"));
+
             var materialData = new MyreMaterialData();
-            materialData.EffectName = Path.GetFullPath("DefaultShadows.fx");
+            materialData.EffectName = shaderLocation;
             materialData.Technique = "ViewLength";
 
             var shadowMaterial = context.Convert<MyreMaterialData, MyreMaterialContent>(materialData, "MyreMaterialProcessor");
             processedMaterials[material].Add("shadows_viewlength", shadowMaterial);
 
             materialData = new MyreMaterialData();
-            materialData.EffectName = Path.GetFullPath("DefaultShadows.fx");
+            materialData.EffectName = shaderLocation;
             materialData.Technique = "ViewZ";
 
             shadowMaterial = context.Convert<MyreMaterialData, MyreMaterialContent>(materialData, "MyreMaterialProcessor");
@@ -254,6 +258,8 @@ namespace Myre.Graphics.Pipeline
 
         private void CreateGBufferMaterial(MaterialContent material, MeshContent mesh)
         {
+            string libraryLocation = Path.GetDirectoryName((new Uri(Assembly.GetExecutingAssembly().CodeBase)).AbsolutePath);
+
             //System.Diagnostics.Debugger.Launch();
             var diffuseTexture = FindDiffuseTexture(mesh, material);
             var normalTexture = FindNormalTexture(mesh, material);
@@ -263,7 +269,7 @@ namespace Myre.Graphics.Pipeline
                 return;
 
             var materialData = new MyreMaterialData();
-            materialData.EffectName = Path.GetFullPath("DefaultGBuffer.fx");
+            materialData.EffectName = Path.GetFullPath(Path.Combine(libraryLocation, "DefaultGBuffer.fx"));
             materialData.Technique = "ClipAlpha";//IsOpaque(diffuseTexture) ? "Default" : "ClipAlpha";
             materialData.Textures.Add("DiffuseMap", diffuseTexture);
             materialData.Textures.Add("NormalMap", normalTexture);

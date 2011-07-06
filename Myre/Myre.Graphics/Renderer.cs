@@ -97,7 +97,9 @@ namespace Myre.Graphics
             Statistic.Get("Graphics.Primitives").Value = 0;
             Statistic.Get("Graphics.Draws").Value = 0;
 #endif
-
+            var bindings = device.GetRenderTargets();
+            var target = bindings.Length > 0 ? bindings[0].RenderTarget as RenderTarget2D : null;
+            
             foreach (var view in views)
             {
                 view.SetMetadata(data);
@@ -106,7 +108,7 @@ namespace Myre.Graphics
                 viewResults.Enqueue(output);
             }
 
-            device.SetRenderTarget(null);
+            device.SetRenderTarget(target);
 
             spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
             foreach (var view in views)
