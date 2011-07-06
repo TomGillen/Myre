@@ -14,6 +14,7 @@
   DataContext="{Binding Source={x:Static vm:ViewModelLocatorTemplate.ViewModelNameStatic}}"
 */
 
+using Ninject;
 namespace Myre.Graphics.ModelViewer.ViewModel
 {
     /// <summary>
@@ -55,8 +56,8 @@ namespace Myre.Graphics.ModelViewer.ViewModel
     /// </summary>
     public class ViewModelLocator
     {
-        private static MainViewModel _main;
-
+        private static IKernel kernel = new StandardKernel(new DependancyModule());
+        
         /// <summary>
         /// Initializes a new instance of the ViewModelLocator class.
         /// </summary>
@@ -75,18 +76,88 @@ namespace Myre.Graphics.ModelViewer.ViewModel
         }
 
         /// <summary>
+        /// Cleans up all the resources.
+        /// </summary>
+        public static void Cleanup()
+        {
+            ClearMain();
+            ClearStatus();
+            ClearPreview();
+        }
+
+        #region status
+        private static StatusViewModel status;
+
+        /// <summary>
+        /// Gets the Status property.
+        /// </summary>
+        public static StatusViewModel StatusStatic
+        {
+            get
+            {
+                if (status == null)
+                {
+                    CreateStatus();
+                }
+
+                return status;
+            }
+        }
+
+        /// <summary>
+        /// Gets the Status property.
+        /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance",
+            "CA1822:MarkMembersAsStatic",
+            Justification = "This non-static member is needed for data binding purposes.")]
+        public StatusViewModel Status
+        {
+            get
+            {
+                return StatusStatic;
+            }
+        }
+
+        /// <summary>
+        /// Provides a deterministic way to delete the Status property.
+        /// </summary>
+        public static void ClearStatus()
+        {
+            if (status != null)
+            {
+                status.Cleanup();
+                status = null;
+            }
+        }
+
+        /// <summary>
+        /// Provides a deterministic way to create the Status property.
+        /// </summary>
+        public static void CreateStatus()
+        {
+            if (status == null)
+            {
+                status = kernel.Get<StatusViewModel>();
+            }
+        }
+        #endregion
+
+        #region main
+        private static MainViewModel main;
+
+        /// <summary>
         /// Gets the Main property.
         /// </summary>
         public static MainViewModel MainStatic
         {
             get
             {
-                if (_main == null)
+                if (main == null)
                 {
                     CreateMain();
                 }
 
-                return _main;
+                return main;
             }
         }
 
@@ -109,8 +180,11 @@ namespace Myre.Graphics.ModelViewer.ViewModel
         /// </summary>
         public static void ClearMain()
         {
-            _main.Cleanup();
-            _main = null;
+            if (main != null)
+            {
+                main.Cleanup();
+                main = null;
+            }
         }
 
         /// <summary>
@@ -118,18 +192,68 @@ namespace Myre.Graphics.ModelViewer.ViewModel
         /// </summary>
         public static void CreateMain()
         {
-            if (_main == null)
+            if (main == null)
             {
-                _main = new MainViewModel();
+                main = kernel.Get<MainViewModel>();
+            }
+        }
+        #endregion
+
+        #region preview
+        private static ModelPreviewViewModel preview;
+
+        /// <summary>
+        /// Gets the Preview property.
+        /// </summary>
+        public static ModelPreviewViewModel PreviewStatic
+        {
+            get
+            {
+                if (preview == null)
+                {
+                    CreatePreview();
+                }
+
+                return preview;
             }
         }
 
         /// <summary>
-        /// Cleans up all the resources.
+        /// Gets the Preview property.
         /// </summary>
-        public static void Cleanup()
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance",
+            "CA1822:MarkMembersAsStatic",
+            Justification = "This non-static member is needed for data binding purposes.")]
+        public ModelPreviewViewModel Preview
         {
-            ClearMain();
+            get
+            {
+                return PreviewStatic;
+            }
         }
+
+        /// <summary>
+        /// Provides a deterministic way to delete the Preview property.
+        /// </summary>
+        public static void ClearPreview()
+        {
+            if (preview != null)
+            {
+                preview.Cleanup();
+                preview = null;
+            }
+        }
+
+        /// <summary>
+        /// Provides a deterministic way to create the Preview property.
+        /// </summary>
+        public static void CreatePreview()
+        {
+            if (preview == null)
+            {
+                preview = kernel.Get<ModelPreviewViewModel>();
+            }
+        }
+        #endregion
     }
 }

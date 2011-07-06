@@ -29,8 +29,7 @@ using System.Windows;
 // in your source files, set the <UICulture> to en-US.  Then uncomment
 // the NeutralResourceLanguage attribute below.  Update the "en-US" in
 // the line below to match the UICulture setting in the project file.
-[assembly: NeutralResourcesLanguage("en-US",
-    UltimateResourceFallbackLocation.MainAssembly)]
+[assembly: NeutralResourcesLanguage("en-GB")]
 
 // ResourceDictionaryLocation.None, where theme specific resource dictionaries are located
 // (used if a resource is not found in the page, 

@@ -1,6 +1,12 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WP7", "WP7", "{2539B782-1AF0-44D2-9D91-5FB05D61ACB7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "x86", "x86", "{51639AEF-1947-441F-AF85-62E9FE1C5F63}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "360", "360", "{4039A3D4-E465-43DD-8FD2-A757A027DD83}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "(x86) Myre", "Myre\(x86) Myre.csproj", "{FDB5A9D8-9266-4F7B-BDE7-D4E720F5B45F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "(x86) Myre.StateManagement", "Myre.StateManagement\(x86) Myre.StateManagement.csproj", "{630AEBBC-AF42-4700-A24F-F4B6FF8172F1}"
@@ -29,10 +35,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "(WP7) Myre.Physics", "Myre.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "(WP7) Myre.StateManagement", "Myre.StateManagement\(WP7) Myre.StateManagement.csproj", "{A8EEC51C-81A8-4863-BBA2-42E1F7A01203}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WP7", "WP7", "{2539B782-1AF0-44D2-9D91-5FB05D61ACB7}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "x86", "x86", "{51639AEF-1947-441F-AF85-62E9FE1C5F63}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "(360) Myre", "Myre\(360) Myre.csproj", "{D8692844-58C6-477A-B85F-20A08B6E191B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "(360) Myre.Debugging", "Myre.Debugging\(360) Myre.Debugging.csproj", "{28588CF1-B67A-40D6-B084-90A40E986220}"
@@ -50,8 +52,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "(x86) Myre.Graphics", "Myre.Graphics\(x86) Myre.Graphics.csproj", "{FC3D8E34-3333-42FB-9B47-3A273B1B50D8}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Myre.Graphics.Pipeline", "Myre.Graphics.Pipeline\Myre.Graphics.Pipeline.csproj", "{65716E12-A629-449B-91A3-BF1A1ABEB56A}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "360", "360", "{4039A3D4-E465-43DD-8FD2-A757A027DD83}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "(360) Myre.Graphics", "Myre.Graphics\(360) Myre.Graphics.csproj", "{F40925B3-500A-41C8-ABF8-78D6759C7F4A}"
 EndProject
@@ -674,13 +674,15 @@ Global
 		{EC58850F-3960-426A-BE7D-7DFB67CB00A8}.Release|Windows Phone.ActiveCfg = Debug|Any CPU
 		{EC58850F-3960-426A-BE7D-7DFB67CB00A8}.Release|x86.ActiveCfg = Debug|Any CPU
 		{EC58850F-3960-426A-BE7D-7DFB67CB00A8}.Release|Xbox 360.ActiveCfg = Debug|Any CPU
-		{8B8179FB-343A-4B84-A4D1-3A5D945411F6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8B8179FB-343A-4B84-A4D1-3A5D945411F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8B8179FB-343A-4B84-A4D1-3A5D945411F6}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{8B8179FB-343A-4B84-A4D1-3A5D945411F6}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{8B8179FB-343A-4B84-A4D1-3A5D945411F6}.Debug|Windows Phone.ActiveCfg = Debug|Any CPU
-		{8B8179FB-343A-4B84-A4D1-3A5D945411F6}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{8B8179FB-343A-4B84-A4D1-3A5D945411F6}.Debug|Xbox 360.ActiveCfg = Debug|Any CPU
+		{8B8179FB-343A-4B84-A4D1-3A5D945411F6}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{8B8179FB-343A-4B84-A4D1-3A5D945411F6}.Debug|Any CPU.Build.0 = Debug|x86
+		{8B8179FB-343A-4B84-A4D1-3A5D945411F6}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{8B8179FB-343A-4B84-A4D1-3A5D945411F6}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{8B8179FB-343A-4B84-A4D1-3A5D945411F6}.Debug|Windows Phone.ActiveCfg = Debug|x86
+		{8B8179FB-343A-4B84-A4D1-3A5D945411F6}.Debug|Windows Phone.Build.0 = Debug|x86
+		{8B8179FB-343A-4B84-A4D1-3A5D945411F6}.Debug|x86.ActiveCfg = Debug|x86
+		{8B8179FB-343A-4B84-A4D1-3A5D945411F6}.Debug|x86.Build.0 = Debug|x86
+		{8B8179FB-343A-4B84-A4D1-3A5D945411F6}.Debug|Xbox 360.ActiveCfg = Debug|x86
 		{8B8179FB-343A-4B84-A4D1-3A5D945411F6}.Profile|Any CPU.ActiveCfg = Release|Any CPU
 		{8B8179FB-343A-4B84-A4D1-3A5D945411F6}.Profile|Any CPU.Build.0 = Release|Any CPU
 		{8B8179FB-343A-4B84-A4D1-3A5D945411F6}.Profile|Mixed Platforms.ActiveCfg = Release|Any CPU
